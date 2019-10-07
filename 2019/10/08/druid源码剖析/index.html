@@ -79,14 +79,17 @@
 
 
 
+<meta name="description" content="近期服务端偶发几起close_wait问题，搞得人心慌慌，按照之前的经验是由于服务端生成的数据量太大，导致服务端在请求频繁调用之后服务端老年代gc频繁出现的问题，查看代码发现数据库配置的最大连接数是100，而最小的连接数是50，怀着踹踹不安的心情区看了一下日志，发现数据库在连接为50的时候就已经无法创建新的连接了，而后查了一下数据库支持的最大连接数是5000，也就是说物理连接的数量既没有超过后台的">
 <meta property="og:type" content="article">
 <meta property="og:title" content="druid源码剖析">
 <meta property="og:url" content="http://yoursite.com/2019/10/08/druid源码剖析/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="近期服务端偶发几起close_wait问题，搞得人心慌慌，按照之前的经验是由于服务端生成的数据量太大，导致服务端在请求频繁调用之后服务端老年代gc频繁出现的问题，查看代码发现数据库配置的最大连接数是100，而最小的连接数是50，怀着踹踹不安的心情区看了一下日志，发现数据库在连接为50的时候就已经无法创建新的连接了，而后查了一下数据库支持的最大连接数是5000，也就是说物理连接的数量既没有超过后台的">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-10-07T18:08:45.139Z">
+<meta property="og:updated_time" content="2019-10-07T18:23:36.732Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="druid源码剖析">
+<meta name="twitter:description" content="近期服务端偶发几起close_wait问题，搞得人心慌慌，按照之前的经验是由于服务端生成的数据量太大，导致服务端在请求频繁调用之后服务端老年代gc频繁出现的问题，查看代码发现数据库配置的最大连接数是100，而最小的连接数是50，怀着踹踹不安的心情区看了一下日志，发现数据库在连接为50的时候就已经无法创建新的连接了，而后查了一下数据库支持的最大连接数是5000，也就是说物理连接的数量既没有超过后台的">
 
 
 
@@ -296,7 +299,8 @@
       
 
       
-        
+        <p>近期服务端偶发几起close_wait问题，搞得人心慌慌，按照之前的经验是由于服务端生成的数据量太大，导致<br>服务端在请求频繁调用之后服务端老年代gc频繁出现的问题，查看代码发现数据库配置的最大连接数是100，<br>而最小的连接数是50，怀着踹踹不安的心情区看了一下日志，发现数据库在连接为50的时候就已经无法创建新的连接了，<br>而后查了一下数据库支持的最大连接数是5000，也就是说物理连接的数量既没有超过后台的限制，也没有超过数据库中的限制，因此怀疑数据库<br>连接没有能够释放，进行了一次druid相关源码的剖析。</p>
+<h1 id><a href="#" class="headerlink" title></a></h1>
       
     </div>
     
@@ -329,6 +333,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/10/08/redission分布式锁的二三事/" rel="prev" title="redission分布式锁的二三事">
+                redission分布式锁的二三事 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -380,8 +388,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -396,7 +413,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-count">23</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -432,6 +449,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#null"><span class="nav-number">1.</span> <span class="nav-text"></span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
