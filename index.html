@@ -300,7 +300,8 @@
       
         
           
-            <p>作为一个有着4年helloworld的小白同志，今天终于怀着激动的心情开始阅读源码了，千里之行，始于足下，希望能够坚持下来</p>
+            <h1 id="整体流程"><a href="#整体流程" class="headerlink" title="整体流程"></a>整体流程</h1><p>Xmlconfigbuilder负责读取mybatis的配置文件并转换为configuration对象<br>在构建configuration的过程中会使用xmlmapperbuilder读取xmlmapper对象，完成namespace的注册，将需要注册的资源加载进来。<br>接下来需要创建sqlsession，在创建的时候会生成executor，通过jdk动态代理的方式对executor进行增强（plugin）<br>最后在执行方法调用的时候会为被执行的接口通过动态代理的方式生成相应的对象。</p>
+<h1 id="核心知识点记录"><a href="#核心知识点记录" class="headerlink" title="核心知识点记录"></a>核心知识点记录</h1><p>作为一个有着4年helloworld的小白同志，今天终于怀着激动的心情开始阅读源码了，千里之行，始于足下，希望能够坚持下来。今日特此一记</p>
 
           
         

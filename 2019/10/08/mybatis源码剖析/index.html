@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="作为一个有着4年helloworld的小白同志，今天终于怀着激动的心情开始阅读源码了，千里之行，始于足下，希望能够坚持下来">
+<meta name="description" content="整体流程Xmlconfigbuilder负责读取mybatis的配置文件并转换为configuration对象在构建configuration的过程中会使用xmlmapperbuilder读取xmlmapper对象，完成namespace的注册，将需要注册的资源加载进来。接下来需要创建sqlsession，在创建的时候会生成executor，通过jdk动态代理的方式对executor进行增强（pl">
 <meta property="og:type" content="article">
 <meta property="og:title" content="mybatis源码剖析">
 <meta property="og:url" content="http://yoursite.com/2019/10/08/mybatis源码剖析/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="作为一个有着4年helloworld的小白同志，今天终于怀着激动的心情开始阅读源码了，千里之行，始于足下，希望能够坚持下来">
+<meta property="og:description" content="整体流程Xmlconfigbuilder负责读取mybatis的配置文件并转换为configuration对象在构建configuration的过程中会使用xmlmapperbuilder读取xmlmapper对象，完成namespace的注册，将需要注册的资源加载进来。接下来需要创建sqlsession，在创建的时候会生成executor，通过jdk动态代理的方式对executor进行增强（pl">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-10-07T17:45:31.678Z">
+<meta property="og:updated_time" content="2019-10-07T17:52:44.837Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mybatis源码剖析">
-<meta name="twitter:description" content="作为一个有着4年helloworld的小白同志，今天终于怀着激动的心情开始阅读源码了，千里之行，始于足下，希望能够坚持下来">
+<meta name="twitter:description" content="整体流程Xmlconfigbuilder负责读取mybatis的配置文件并转换为configuration对象在构建configuration的过程中会使用xmlmapperbuilder读取xmlmapper对象，完成namespace的注册，将需要注册的资源加载进来。接下来需要创建sqlsession，在创建的时候会生成executor，通过jdk动态代理的方式对executor进行增强（pl">
 
 
 
@@ -299,7 +299,8 @@
       
 
       
-        <p>作为一个有着4年helloworld的小白同志，今天终于怀着激动的心情开始阅读源码了，千里之行，始于足下，希望能够坚持下来</p>
+        <h1 id="整体流程"><a href="#整体流程" class="headerlink" title="整体流程"></a>整体流程</h1><p>Xmlconfigbuilder负责读取mybatis的配置文件并转换为configuration对象<br>在构建configuration的过程中会使用xmlmapperbuilder读取xmlmapper对象，完成namespace的注册，将需要注册的资源加载进来。<br>接下来需要创建sqlsession，在创建的时候会生成executor，通过jdk动态代理的方式对executor进行增强（plugin）<br>最后在执行方法调用的时候会为被执行的接口通过动态代理的方式生成相应的对象。</p>
+<h1 id="核心知识点记录"><a href="#核心知识点记录" class="headerlink" title="核心知识点记录"></a>核心知识点记录</h1><p>作为一个有着4年helloworld的小白同志，今天终于怀着激动的心情开始阅读源码了，千里之行，始于足下，希望能够坚持下来。今日特此一记</p>
 
       
     </div>
@@ -384,8 +385,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -427,6 +437,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#整体流程"><span class="nav-number">1.</span> <span class="nav-text">整体流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#核心知识点记录"><span class="nav-number">2.</span> <span class="nav-text">核心知识点记录</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
