@@ -82,7 +82,7 @@
 <meta name="description" content="近期服务端偶发几起close_wait问题，搞得人心慌慌，按照之前的经验是由于服务端生成的数据量太大，导致服务端在请求频繁调用之后服务端老年代gc频繁出现的问题，查看代码发现数据库配置的最大连接数是100，而最小的连接数是50，怀着踹踹不安的心情区看了一下日志，发现数据库在连接为50的时候就已经无法创建新的连接了，而后查了一下数据库支持的最大连接数是5000，也就是说物理连接的数量既没有超过后台的">
 <meta property="og:type" content="article">
 <meta property="og:title" content="druid源码剖析">
-<meta property="og:url" content="http://yoursite.com/2019/10/08/druid源码剖析/index.html">
+<meta property="og:url" content="http://southrivers.github.io/2019/10/08/druid源码剖析/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="近期服务端偶发几起close_wait问题，搞得人心慌慌，按照之前的经验是由于服务端生成的数据量太大，导致服务端在请求频繁调用之后服务端老年代gc频繁出现的问题，查看代码发现数据库配置的最大连接数是100，而最小的连接数是50，怀着踹踹不安的心情区看了一下日志，发现数据库在连接为50的时候就已经无法创建新的连接了，而后查了一下数据库支持的最大连接数是5000，也就是说物理连接的数量既没有超过后台的">
 <meta property="og:locale" content="zh-Hans">
@@ -119,7 +119,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/10/08/druid源码剖析/">
+  <link rel="canonical" href="http://southrivers.github.io/2019/10/08/druid源码剖析/">
 
 
 
@@ -232,7 +232,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/10/08/druid源码剖析/">
+    <link itemprop="mainEntityOfPage" href="http://southrivers.github.io/2019/10/08/druid源码剖析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="John Doe">
