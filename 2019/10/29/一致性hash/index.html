@@ -83,12 +83,12 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="一致性hash">
 <meta property="og:url" content="http://southrivers.github.io/2019/10/29/一致性hash/index.html">
-<meta property="og:site_name" content="虽楚有材，晋实用之">
+<meta property="og:site_name" content="南飞雁">
 <meta property="og:description" content="应用场景我们的业务通常会使用缓存来提高系统的吞吐，不过单节点缓存存在明显的缺陷：单节点的缓存大小有明显的限制，当业务体量达到一定的规模时候，无法通过 增加机器的数量来解除这种限制。 为了解决上面这种问题，我们可以增加节点并将缓存在这些节点上均匀的打散，一般的，均匀的打散的方式可以采用hash(key) % n，这里的key为对应的缓存 的key，n为缓存节点的数量。不过这种方案也存在明显的缺陷：如">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://southrivers.github.io/2019/10/29/一致性hash/hash1.png">
 <meta property="og:image" content="http://southrivers.github.io/2019/10/29/一致性hash/hash.png">
-<meta property="og:updated_time" content="2019-11-02T08:29:05.450Z">
+<meta property="og:updated_time" content="2019-11-02T08:45:07.600Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="一致性hash">
 <meta name="twitter:description" content="应用场景我们的业务通常会使用缓存来提高系统的吞吐，不过单节点缓存存在明显的缺陷：单节点的缓存大小有明显的限制，当业务体量达到一定的规模时候，无法通过 增加机器的数量来解除这种限制。 为了解决上面这种问题，我们可以增加节点并将缓存在这些节点上均匀的打散，一般的，均匀的打散的方式可以采用hash(key) % n，这里的key为对应的缓存 的key，n为缓存节点的数量。不过这种方案也存在明显的缺陷：如">
@@ -128,7 +128,7 @@
 
 
 
-  <title>一致性hash | 虽楚有材，晋实用之</title>
+  <title>一致性hash | 南飞雁</title>
   
 
 
@@ -158,7 +158,7 @@
     <div class="custom-logo-site-title">
       <a href="/" class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">虽楚有材，晋实用之</span>
+        <span class="site-title">南飞雁</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -244,7 +244,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="虽楚有材，晋实用之">
+      <meta itemprop="name" content="南飞雁">
     </span>
 
     
@@ -303,12 +303,11 @@
 
       
         <h1 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h1><p>我们的业务通常会使用缓存来提高系统的吞吐，不过单节点缓存存在明显的缺陷：单节点的缓存大小有明显的限制，当业务体量达到一定的规模时候，无法通过
-增加机器的数量来解除这种限制。
-为了解决上面这种问题，我们可以增加节点并将缓存在这些节点上均匀的打散，一般的，均匀的打散的方式可以采用hash(key) % n，这里的key为对应的缓存
+增加机器的数量来解除这种限制。</p>
+<p>为了解决上面这种问题，我们可以增加节点并将缓存在这些节点上均匀的打散，一般的，均匀的打散的方式可以采用hash(key) % n，这里的key为对应的缓存
 的key，n为缓存节点的数量。不过这种方案也存在明显的缺陷：<strong>如果缓存节点掉电或者由于业务的扩展需要增加新的缓存节点，这种情况下将会使得已有的
-缓存的数据重新hash找到新的存放的节点，这将会使得缓存失效</strong>，缓存的失效会使得大量的请求直奔数据库而去，最终可能会压垮数据库，导致整个服务不可用。
-缓存的雪崩、击穿概念：
-为了解决由于缓存服务器数量的改变导致缓存数据重新分配的问题，歪果仁发明了一种神奇的算法：一致性hash。提到一致性hash通常都会提到hash环，听着
+缓存的数据重新hash找到新的存放的节点，这将会使得缓存失效</strong>，缓存的失效会使得大量的请求直奔数据库而去，最终可能会压垮数据库，导致整个服务不可用。</p>
+<p>为了解决由于缓存服务器数量的改变导致缓存数据重新分配的问题，歪果仁发明了一种神奇的算法：一致性hash。提到一致性hash通常都会提到hash环，听着
 名字很拽的样子，简单点来说就是一个环状的hash空间，之所以是环状的，和其缓存对象寻找缓存节点的策略是相关的；一般hash环大小为2^32，之所以是这个
 值而不是其他的值，猜测应该是IP4的空间相关的，环中一个槽位代表一个缓存节点。</p>
 <h1 id="一致性hash流程"><a href="#一致性hash流程" class="headerlink" title="一致性hash流程"></a>一致性hash流程</h1><h2 id="构建hash环"><a href="#构建hash环" class="headerlink" title="构建hash环"></a>构建hash环</h2><p>构建一个大小为2^32的数组，并将该数组当作一个环来对待</p>
