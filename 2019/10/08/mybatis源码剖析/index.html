@@ -89,7 +89,9 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://southrivers.github.io/2019/10/08/mybatis源码剖析/%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B%E5%9B%BE.png">
 <meta property="og:image" content="http://southrivers.github.io/2019/10/08/mybatis源码剖析/%E6%8B%A6%E6%88%AA%E5%99%A8%E9%80%BB%E8%BE%91.png">
-<meta property="og:updated_time" content="2019-10-14T16:55:27.896Z">
+<meta property="og:image" content="http://southrivers.github.io/2019/10/08/mybatis源码剖析/lru.png">
+<meta property="og:image" content="http://southrivers.github.io/2019/10/08/mybatis源码剖析/blockingcache.png">
+<meta property="og:updated_time" content="2019-10-18T15:18:59.741Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mybatis源码剖析">
 <meta name="twitter:description" content="整体流程本节主要对mybatis的整个流程进行分析，在分析之前有必要先说明：如果从配置文件以及映射文件的加载到解析去分析整个流程的话，流程复杂且不说，而且舍本逐末。因此本小结先从使用者的角度去阅读代码：如下是用户使用mybatis的代码，我们就从入口开始进入分析 12345678910111213141516//mybatis的配置文件String resource = &quot;mybatis-conf">
@@ -319,7 +321,13 @@
 
 <p>代码调用流程如下：</p>
 <h2 id="mybatis插件"><a href="#mybatis插件" class="headerlink" title="mybatis插件"></a>mybatis插件</h2><p>mybatis的插件功能使得mybatis具备可扩展的功能，插件的加载是在实例化executor的过程中，实例化executor是在创建sqlsession的时候。<br>插件实现的功能是对executor的增强，增强的实现需要我们实现Interceptor接口，具体的实现逻辑需要借助于Plugin类的wrap方法，<br>wrap的方法最终会调用Proxy的newInstance生成代理实例，每一个代理实例都是对当前代理的增强，因此，executor最终是会包含<br>所有的interceptor的增强的逻辑的，在通过executor执行代码的调用的逻辑的时候，这种增强会通过plugin的invoke方法回到interceptor中的<br>intercept方法中，我们的增强逻辑实现在Interceptor的intercept方法中即可。<br>将增强的功能单独放到插件中去实现，并将插件注入到实现invocationhandler的类中，这样在实现invocationhandler的类中的invoke方法调用增强逻<br>辑据可以了，拦截器的注入可以通过构造器注入，也可以通过setter方法注入。（interceptor有接口、有实现，把这种实现织入到已有的类中，对已有的类<br>进行增强！而不是对interceptor做增强的操作，角色有点反转，这样可以使得插件的实现更清爽）<br>接下来我们依然画一下流程图：<br><img src="//southrivers.github.io/2019/10/08/mybatis源码剖析/%E6%8B%A6%E6%88%AA%E5%99%A8%E9%80%BB%E8%BE%91.png" alt><br>Plugin实现了InvocationHandler接口<br>代理应该是把invocationhandler接口的功能合并到被代理的对象中，合入的过程是可以做相应的控制的 –</p>
-<h2 id="mybatis缓存"><a href="#mybatis缓存" class="headerlink" title="mybatis缓存"></a>mybatis缓存</h2><p>Xmlconfigbuilder负责读取mybatis的配置文件并转换为configuration对象<br>在构建configuration的过程中会使用xmlmapperbuilder读取xmlmapper对象，完成namespace的注册，将需要注册的资源加载进来。<br>接下来需要创建sqlsession，在创建的时候会生成executor，通过jdk动态代理的方式对executor进行增强（plugin）<br>最后在执行方法调用的时候会为被执行的接口通过动态代理的方式生成相应的对象。</p>
+<h2 id="mybatis缓存"><a href="#mybatis缓存" class="headerlink" title="mybatis缓存"></a>mybatis缓存</h2><p>作为web应用，一般都会使用缓存技术来拦截大量奔向数据库的请求，来减轻数据库的压力。mybatis提供了一级缓存和二级缓存这两种缓存的机制，这两级缓<br>存均是使用cache接口的实现类。<br>mybatis提供了丰富的缓存实现，具有基本功能的perpetualcache（一个封装了hashmap的类），mybatis使用了装饰的模式来实现缓存（装饰和代理很像<br>代理更多的是权限的控制，装饰更多的是功能的丰富，二者都会持有被装饰的或者被代理的对象）。</p>
+<p>perpetualCache仅仅封装了hashmap，其所有的操作也是针对hashmap而言，LRUcache封装了perpetualcache，并通过将查询的key缓存的到一个keymap（一个重写了<br>removeEldestentry方法的hashmap）中，或者缓存中存在数据的时候，将最近的一次查询对应的key移动到keymap的队首，从而实现LRU的策略，如果keymap的尺寸大于<br>要求就将最旧的值给去掉<br>其流程图如下：<br><img src="//southrivers.github.io/2019/10/08/mybatis源码剖析/lru.png" alt></p>
+<p>blockcache 实现了阻塞的特性，该特性是基于java的重入锁实现的，同一个时刻下blockcache仅允许一个线程访问指定key的缓存项，其他的线程将会被阻塞<br>其锁的阻塞关系图如下：<br><img src="//southrivers.github.io/2019/10/08/mybatis源码剖析/blockingcache.png" alt><br>大致的逻辑是当有多个线程同时查询某一个key对应的value的时候，如果每个线程都去查询一次数据库，这显然不合理，因此让第一个查询该key所对应的线程<br>通过生成一个锁并<strong>尝试</strong>加锁阻塞其他线程（如果加锁失败则该线程就会被阻塞），如果从缓存中查出数据，直接返回，否则获取锁的线程直接查询数据库并<br>写入缓存<br>以上是缓存的实现，下面是使用上面的实现来构建复杂的缓存体系</p>
+<h3 id="一级缓存"><a href="#一级缓存" class="headerlink" title="一级缓存"></a>一级缓存</h3><p>一级缓存是在创建BaseExecutor的时候通过构造器的方式来进行创建的，在查询的时候会根据查询的条件进行构建key<br>然后通过该key获取缓存中对应的value，如果获取不到就直接查询数据库，一级缓存是数据库的最后一道防线，并且默认是开启的，<br>而且所使用cache就是perpetralcache，由于以及缓存是在baseExecutor中创建的，因此其是和sqlsession绑定的</p>
+<h3 id="二级缓存"><a href="#二级缓存" class="headerlink" title="二级缓存"></a>二级缓存</h3><p>二级缓存是构建在一级缓存的基础之上，查询请求会先落到二级缓存中，然后才是一级缓存，<strong>二级缓存和具体的空间绑定</strong>，并且默认是不开启的，只有用户做了<br>相关的配置之后才会生效，具体的配置可以参见网上的相关文档。<strong>一级缓存是和sqlsession绑定的</strong>，因此不存在并发的问题（哪个线程查询结果返回的晚就使<br>用哪个查询结果做缓存），二级缓存是在mappedstatement中获取的（一级缓存是在创建executor中获取的），而mappedstatement存在于全局的配置中，<br>因此可以被多个executor获取。<br>这种共享缓存引起的问题主要有一下两点：<br><code>1、多个线程访问共享内存引发的线程安全问题</code><br><code>2、多个事务访问共享内存引发的脏读的问题</code><br>对于共享内存引发的安全问题可以通过synchroinzedcache来解决，这个装饰类会在构造二级缓存的时候被默认给加上，至于多个事务引发的脏读的问题，需要<br>借助于tcm（transactionalcachemanager）来解决</p>
+<p>这样就会因为共享数据的访问而引发线程安全的问题。多个事务共享一个缓存实例也会导致<br>具体如下：</p>
+<p>Xmlconfigbuilder负责读取mybatis的配置文件并转换为configuration对象<br>在构建configuration的过程中会使用xmlmapperbuilder读取xmlmapper对象，完成namespace的注册，将需要注册的资源加载进来。<br>接下来需要创建sqlsession，在创建的时候会生成executor，通过jdk动态代理的方式对executor进行增强（plugin）<br>最后在执行方法调用的时候会为被执行的接口通过动态代理的方式生成相应的对象。</p>
 <h1 id="核心知识点记录"><a href="#核心知识点记录" class="headerlink" title="核心知识点记录"></a>核心知识点记录</h1><p>作为一个有着4年helloworld的小白同志，今天终于怀着激动的心情开始阅读源码了，千里之行，始于足下，希望能够坚持下来。今日特此一记</p>
 
       
@@ -440,7 +448,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-count">29</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -486,7 +494,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#整体流程"><span class="nav-number">1.</span> <span class="nav-text">整体流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#接下来是用生成的代理去执行对应的方法操作数据库"><span class="nav-number">1.1.</span> <span class="nav-text">接下来是用生成的代理去执行对应的方法操作数据库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mybatis插件"><span class="nav-number">1.2.</span> <span class="nav-text">mybatis插件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mybatis缓存"><span class="nav-number">1.3.</span> <span class="nav-text">mybatis缓存</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#核心知识点记录"><span class="nav-number">2.</span> <span class="nav-text">核心知识点记录</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#整体流程"><span class="nav-number">1.</span> <span class="nav-text">整体流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#接下来是用生成的代理去执行对应的方法操作数据库"><span class="nav-number">1.1.</span> <span class="nav-text">接下来是用生成的代理去执行对应的方法操作数据库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mybatis插件"><span class="nav-number">1.2.</span> <span class="nav-text">mybatis插件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mybatis缓存"><span class="nav-number">1.3.</span> <span class="nav-text">mybatis缓存</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#一级缓存"><span class="nav-number">1.3.1.</span> <span class="nav-text">一级缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二级缓存"><span class="nav-number">1.3.2.</span> <span class="nav-text">二级缓存</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#核心知识点记录"><span class="nav-number">2.</span> <span class="nav-text">核心知识点记录</span></a></li></ol></div>
             
 
           </div>
