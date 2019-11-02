@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="最近在做业务监控的相关事情，有用到apache druid（不是阿里巴巴的用于数据库连接资源管理的druid），我们当前所用的版本是0.14.2版本，抽时间把相关的源代码下载下来看一下，由于网上相关的资料相对来说比较少，因此看起来还是比较费力的，先把工程的maven依赖整理出来，方便后续能有一个鸟瞰的视图，这样后面再读相关的代码应该会比较顺利：由于工程中大量使用了guice作为依赖注入的管理工具，">
+<meta name="description" content="最近在做业务监控的相关事情，有用到apache druid（不是阿里巴巴的用于数据库连接资源管理的druid），我们当前所用的版本是0.14.2版本，抽时间 把相关的源代码下载下来看一下，由于网上相关的资料相对来说比较少，因此看起来还是比较费力的，先把工程的maven依赖整理出来，方便后续能有一个鸟瞰的 视图，这样后面再读相关的代码应该会比较顺利：  由于工程中大量使用了guice作为依赖注入的管">
 <meta property="og:type" content="article">
 <meta property="og:title" content="apache druid 源码剖析">
 <meta property="og:url" content="http://southrivers.github.io/2019/10/19/apache-druid-源码剖析/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="最近在做业务监控的相关事情，有用到apache druid（不是阿里巴巴的用于数据库连接资源管理的druid），我们当前所用的版本是0.14.2版本，抽时间把相关的源代码下载下来看一下，由于网上相关的资料相对来说比较少，因此看起来还是比较费力的，先把工程的maven依赖整理出来，方便后续能有一个鸟瞰的视图，这样后面再读相关的代码应该会比较顺利：由于工程中大量使用了guice作为依赖注入的管理工具，">
+<meta property="og:description" content="最近在做业务监控的相关事情，有用到apache druid（不是阿里巴巴的用于数据库连接资源管理的druid），我们当前所用的版本是0.14.2版本，抽时间 把相关的源代码下载下来看一下，由于网上相关的资料相对来说比较少，因此看起来还是比较费力的，先把工程的maven依赖整理出来，方便后续能有一个鸟瞰的 视图，这样后面再读相关的代码应该会比较顺利：  由于工程中大量使用了guice作为依赖注入的管">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://southrivers.github.io/2019/10/19/apache-druid-源码剖析/druid.png">
 <meta property="og:updated_time" content="2019-10-23T14:09:45.355Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="apache druid 源码剖析">
-<meta name="twitter:description" content="最近在做业务监控的相关事情，有用到apache druid（不是阿里巴巴的用于数据库连接资源管理的druid），我们当前所用的版本是0.14.2版本，抽时间把相关的源代码下载下来看一下，由于网上相关的资料相对来说比较少，因此看起来还是比较费力的，先把工程的maven依赖整理出来，方便后续能有一个鸟瞰的视图，这样后面再读相关的代码应该会比较顺利：由于工程中大量使用了guice作为依赖注入的管理工具，">
+<meta name="twitter:description" content="最近在做业务监控的相关事情，有用到apache druid（不是阿里巴巴的用于数据库连接资源管理的druid），我们当前所用的版本是0.14.2版本，抽时间 把相关的源代码下载下来看一下，由于网上相关的资料相对来说比较少，因此看起来还是比较费力的，先把工程的maven依赖整理出来，方便后续能有一个鸟瞰的 视图，这样后面再读相关的代码应该会比较顺利：  由于工程中大量使用了guice作为依赖注入的管">
 <meta name="twitter:image" content="http://southrivers.github.io/2019/10/19/apache-druid-源码剖析/druid.png">
 
 
@@ -301,7 +301,15 @@
       
 
       
-        <p>最近在做业务监控的相关事情，有用到apache druid（<strong>不是阿里巴巴的用于数据库连接资源管理的druid</strong>），我们当前所用的版本是0.14.2版本，抽时间<br>把相关的源代码下载下来看一下，由于网上相关的资料相对来说比较少，因此看起来还是比较费力的，先把工程的maven依赖整理出来，方便后续能有一个鸟瞰的<br>视图，这样后面再读相关的代码应该会比较顺利：<br><img src="//southrivers.github.io/2019/10/19/apache-druid-源码剖析/druid.png" alt><br>由于工程中大量使用了guice作为依赖注入的管理工具，因此抽时间快速过了一下guice，整理内容如下：<br>guice是一款和spring类似的IOC的框架。IOC这种设计模式的出现主要是希望在业务上进行解耦合，通常可以使用工厂方法进行解耦合，但是这样的方式有点太硬，<br>因为静态工厂会存在状态（也即是静态的字段用来记录实例），最终在使用静态工厂之前和之后会做大量的处理。<br>Guice可以认为是抽象工厂，初步查看wiki，发现guice存在三个模块：<br><code>1、Module：用来将接口和该接口对应的实现绑定
+        <p>最近在做业务监控的相关事情，有用到apache druid（<strong>不是阿里巴巴的用于数据库连接资源管理的druid</strong>），我们当前所用的版本是0.14.2版本，抽时间
+把相关的源代码下载下来看一下，由于网上相关的资料相对来说比较少，因此看起来还是比较费力的，先把工程的maven依赖整理出来，方便后续能有一个鸟瞰的
+视图，这样后面再读相关的代码应该会比较顺利：
+<img src="//southrivers.github.io/2019/10/19/apache-druid-源码剖析/druid.png" alt>
+由于工程中大量使用了guice作为依赖注入的管理工具，因此抽时间快速过了一下guice，整理内容如下：
+guice是一款和spring类似的IOC的框架。IOC这种设计模式的出现主要是希望在业务上进行解耦合，通常可以使用工厂方法进行解耦合，但是这样的方式有点太硬，
+因为静态工厂会存在状态（也即是静态的字段用来记录实例），最终在使用静态工厂之前和之后会做大量的处理。
+Guice可以认为是抽象工厂，初步查看wiki，发现guice存在三个模块：
+<code>1、Module：用来将接口和该接口对应的实现绑定
 2、注解模块：用来将Module中指定的实现通过构造函数或者其他的方式进行绑定
 3、Injector模块：可以认为是抽象工厂，可以获取该工厂中的各种各样的实例</code></p>
 
