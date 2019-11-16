@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="南飞雁">
 <meta property="og:description" content="近期服务端偶发几起close_wait问题，搞得人心慌慌，按照之前的经验是由于服务端生成的数据量太大，导致 服务端在请求频繁调用之后服务端老年代gc频繁出现的问题，查看代码发现数据库配置的最大连接数是100， 而最小的连接数是50，怀着踹踹不安的心情区看了一下日志，发现数据库在连接为50的时候就已经无法创建新的连接了， 而后查了一下数据库支持的最大连接数是5000，也就是说物理连接的数量既没有超过">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-10-23T16:09:55.282Z">
+<meta property="og:updated_time" content="2019-11-04T16:55:21.708Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="druid源码剖析">
 <meta name="twitter:description" content="近期服务端偶发几起close_wait问题，搞得人心慌慌，按照之前的经验是由于服务端生成的数据量太大，导致 服务端在请求频繁调用之后服务端老年代gc频繁出现的问题，查看代码发现数据库配置的最大连接数是100， 而最小的连接数是50，怀着踹踹不安的心情区看了一下日志，发现数据库在连接为50的时候就已经无法创建新的连接了， 而后查了一下数据库支持的最大连接数是5000，也就是说物理连接的数量既没有超过">
@@ -312,8 +312,18 @@ poolingPeak:峰值</p>
 2、可以通过池子有效的控制池化资源的数量，这样也可以避免较大的开销</p>
 <p>druid号称是为监控而生，既然要做到监控，必然会使用代理：操作的具体行为都是使用代理来完成，在完成的过程中产生监控的数据</p>
 <p>druid按照功能可以划分为一下几点</p>
-<h1 id="数据库连接池管理"><a href="#数据库连接池管理" class="headerlink" title="数据库连接池管理"></a>数据库连接池管理</h1><p>数据库连接池管理的话是基于一个数组来实现的</p>
-<h1 id="统计监控"><a href="#统计监控" class="headerlink" title="统计监控"></a>统计监控</h1><h1 id><a href="#" class="headerlink" title></a></h1><p>附：里面大量用到了holder这种命名的规范，这种命名的化可以推测出来其作用：某种资源的持有者</p>
+<h1 id="代理"><a href="#代理" class="headerlink" title="代理"></a>代理</h1><p>首先要提到的就是代理，既然要做监控，那么肯定是要制造监控的机会，这里的大量使用了代理的设计模式：使用代理类来完成功能的调用
+在代理类和实现类中间加入需要监控的事件。对于sql查询，可以监控的对象有：datasource、connection、statement、result，我们可以从一个监控
+对象入手来分析，就以statement入手来分析：</p>
+<h1 id="数据库连接池管理"><a href="#数据库连接池管理" class="headerlink" title="数据库连接池管理"></a>数据库连接池管理</h1><p>数据库连接池管理的话是基于一个数组来实现的，该对象拥有一个池子（数组），一个用于控制生产和消费线程的锁，以及用于创建和消费连接的线程，其流程图如下：</p>
+<h1 id="过滤器链"><a href="#过滤器链" class="headerlink" title="过滤器链"></a>过滤器链</h1><p>过滤器链是一种设计模式，这种模式将数据的处理抽象到一系列的对象中，并在这些对象中传递事件处理的请求，责任链参与的对象有</p>
+<ul>
+<li>事件请求</li>
+<li>请求处理对象
+简述一下这种设计模式，如下：</li>
+</ul>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>druid源码远不止这么些，以上是我自己比较关心的业务的部分，感谢druid的作者温少，让我们可以有膜拜的机会</p>
+<p>附：里面大量用到了holder这种命名的规范，这种命名的化可以推测出来其作用：某种资源的持有者</p>
 
       
     </div>
@@ -427,7 +437,7 @@ poolingPeak:峰值</p>
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">29</span>
+                  <span class="site-state-item-count">31</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -473,7 +483,7 @@ poolingPeak:峰值</p>
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#数据库连接池管理"><span class="nav-number">1.</span> <span class="nav-text">数据库连接池管理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#统计监控"><span class="nav-number">2.</span> <span class="nav-text">统计监控</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#null"><span class="nav-number">3.</span> <span class="nav-text"></span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#代理"><span class="nav-number">1.</span> <span class="nav-text">代理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数据库连接池管理"><span class="nav-number">2.</span> <span class="nav-text">数据库连接池管理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#过滤器链"><span class="nav-number">3.</span> <span class="nav-text">过滤器链</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#小结"><span class="nav-number">4.</span> <span class="nav-text">小结</span></a></li></ol></div>
             
 
           </div>
