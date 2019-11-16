@@ -363,7 +363,13 @@
 这样我们势必要破坏这种双亲委托：由子类加载器完成类的加载，不再委托父类完成类的加载（重写类加载器的loadClass方法，在类加载的时候不去寻找
 parent的类加载器即可）。上述实现思路可行，但是我们总要找到一种设置我们自定义类加载器的方式，这种方式就是<strong>线程上下文类加载器</strong>，也即是Thread
 的setContextClassLoader、getContextClassLoader。通过线程上下文类加载器，我们就完成了子类加载器的委托。</p>
+<p>发散思维：假设存在一种情况，接口的类加载器和实现的类加载器不一致，如下
+<img src="//southrivers.github.io/2019/11/10/Java-类加载机制/diff.png" alt></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HelloService helloService = (HelloService)<span class="keyword">new</span> HelloServiceImpl()</span><br></pre></td></tr></table></figure>
 
+<p>上述代码会报ClassNotFoundException，这是因为JVM是通过类的全限定名和类加载器来确定一个类的，因此尽管实现了接口，但类加载器不同，因此没有办
+法相互转换，如果要解决这种问题可以通过JDK动态代理来实现（有指定对应的classLoader）</p>
+<!--  https://www.wisedream.net/2017/01/17/programming/type-cast-across-classloader/ -->
           
         
       
