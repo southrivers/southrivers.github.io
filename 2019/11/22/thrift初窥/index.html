@@ -90,7 +90,7 @@
 <meta property="og:image" content="http://southrivers.github.io/2019/11/22/thrift初窥/%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B">
 <meta property="og:image" content="http://southrivers.github.io/2019/11/22/thrift初窥/%E4%BB%A3%E7%A0%81%E5%B1%95%E7%A4%BA">
 <meta property="og:image" content="http://southrivers.github.io/2019/11/22/thrift初窥/%E5%AE%A2%E6%88%B7%E4%BB%A3%E7%A0%81%E5%B1%95%E7%A4%BA">
-<meta property="og:updated_time" content="2019-11-26T14:49:25.494Z">
+<meta property="og:updated_time" content="2019-11-26T15:53:47.991Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="thrift初窥">
 <meta name="twitter:description" content="最近转到了大数据项目组，在研究sentry组件，其中client和server的通信大量使用到了thrift，因此花了点时间研究一下thrift相关的东西。 现整理内容如下。 概述Thrift 是一种接口描述语言，主要用于实现异构服务的调用，底层的数据传输采用二进制的方式，相较于传统的json或者XML，体积更小、效率更高， thrift是RPC的一种实现。 整体架构 Thrift 包含了一个完整">
@@ -311,22 +311,31 @@ thrift是RPC的一种实现。</p>
 <h1 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h1><p><img src="//southrivers.github.io/2019/11/22/thrift初窥/%E6%9E%B6%E6%9E%84" alt>
 Thrift 包含了一个完整的堆栈结构来实现客户端和服务端的交互，如下图所示：
 <img src="//southrivers.github.io/2019/11/22/thrift初窥/%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B" alt></p>
-<h1 id="流程演示"><a href="#流程演示" class="headerlink" title="流程演示"></a>流程演示</h1><p>使用thrift约定的规范编写一个thrift的脚本文件:
-namespace java com.h3c
-service Hello{
- string helloString(1:string para)
- i32 helloInt(1:i32 para)
- bool helloBoolean(1:bool para)
- void helloVoid()
- string helloNull()
-}
-接下来使用thrift的编译器生成对应语言的对应文件，该文件包含了对应的接口，以java为例：class.Iface、class.Client（客户端调用逻辑）、class.Processor（服务端处理逻辑），我们只需要实现对应的接口即可：
+<h1 id="流程演示"><a href="#流程演示" class="headerlink" title="流程演示"></a>流程演示</h1><p>使用thrift约定的规范编写一个thrift的脚本文件:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">namespace java com.h3c</span><br><span class="line">service Hello&#123;</span><br><span class="line"> string helloString(1:string para)</span><br><span class="line"> i32 helloInt(1:i32 para)</span><br><span class="line"> bool helloBoolean(1:bool para)</span><br><span class="line"> void helloVoid()</span><br><span class="line"> string helloNull()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接下来使用thrift的编译器生成对应语言的对应文件，该文件包含了对应的接口，以java为例：class.Iface、class.Client（客户端调用逻辑）、class.Processor（服务端处理逻辑），我们只需要实现对应的接口即可：
 <img src="//southrivers.github.io/2019/11/22/thrift初窥/%E4%BB%A3%E7%A0%81%E5%B1%95%E7%A4%BA" alt></p>
 <p><img src="//southrivers.github.io/2019/11/22/thrift初窥/%E5%AE%A2%E6%88%B7%E4%BB%A3%E7%A0%81%E5%B1%95%E7%A4%BA" alt>
 除此之外还可以构建其他的服务类型。</p>
 <h1 id="RPC和动态代理"><a href="#RPC和动态代理" class="headerlink" title="RPC和动态代理"></a>RPC和动态代理</h1><p>上面的客户端代码和服务端代码通过接口的方式做了解耦合，也即是客户端调用的是接口中的方法，最终执行的
 是我们自己服务端实现的业务逻辑，因此大致可以猜测应该是使用了动态代理的技术完成的，事实上，一般的RPC也基本上都是通过
-动态代理机制来完成的。好奇心驱使之下，我搜了一下网上的一些实现，然后根据理解自己实现了一下。代码如下：</p>
+动态代理机制来完成的。未完待续。。。。。</p>
+<!-- 好奇心驱使之下，我搜了一下网上的一些实现，然后根据理解自己实现了一下。代码如下：-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       
     </div>
