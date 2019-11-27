@@ -319,9 +319,8 @@
 <li>服务端将最后的数据处理并发送完之后，就会向客户端发送一个FIN包，此时服务端进入LAST_ACK的状态，同时客户端结束FIN_WAIT_2状态进入TIME_WAIT状态</li>
 <li>客户端在收到服务端的报文之后，会立即回一个ACK的报文，用于确定已经收到服务端要求结束的报文，同时进入TIME_WAIT状态</li>
 <li>服务端收到ACK的报文之后会立即终止，客户端在等待2MSL之后也会终止（之所以等待2MSL，是因为断开连接之后可能会收到迟到的报文）
-&lt;!–# 拥塞控制<h2 id="拥塞控制方式"><a href="#拥塞控制方式" class="headerlink" title="拥塞控制方式"></a>拥塞控制方式</h2></li>
-<li></li>
-<li><h2 id="拥塞控制详解–-gt"><a href="#拥塞控制详解–-gt" class="headerlink" title="拥塞控制详解–&gt;"></a>拥塞控制详解–&gt;</h2><h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1></li>
+&lt;!– <h1 id="拥塞控制"><a href="#拥塞控制" class="headerlink" title="拥塞控制"></a>拥塞控制</h1><h2 id="拥塞控制方式"><a href="#拥塞控制方式" class="headerlink" title="拥塞控制方式"></a>拥塞控制方式</h2><h2 id="拥塞控制详解"><a href="#拥塞控制详解" class="headerlink" title="拥塞控制详解"></a>拥塞控制详解</h2></li>
+<li>-&gt;<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1></li>
 </ul>
 <p><strong>上面的状态可以反过来进行记忆：SYN_SENT 可以极为SENT_SYN，CLOSE_WAIT可以记为WAIT_CLOSE等等，这样会比较方便</strong></p>
 
