@@ -88,7 +88,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://southrivers.github.io/2019/10/08/TCP-IP详解/%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B.png">
 <meta property="og:image" content="http://southrivers.github.io/2019/10/08/TCP-IP详解/%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B.png">
-<meta property="og:updated_time" content="2019-11-27T16:26:33.859Z">
+<meta property="og:updated_time" content="2019-11-27T16:28:37.423Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="TCP&#x2F;IP详解">
 <meta name="twitter:description" content="前言最近服务端总是会出现一些CLOSE_WAIT的问题，因此抽时间了解并整理了TCP相关的知识点，说是详解其实也并不是， 仅仅把一些关键的东西列出来吧。 TCP详解概述TCP属于传输层的协议，提供面向连接的、端到端可靠的包传输。   三次握手  客户端发送一个SYN（n）包到服务端，同时客户端进入SYN_SENT状态，等待服务端的应答 服务端收到客户端的SYN包之后，必须确认ACK（n+1），并发">
@@ -320,9 +320,10 @@
 <li>客户端收到服务端确认的报文之后，会立即进入FIN_WAIT_2的状态，由于服务端可能还有没有处理完的数据，因此客户端并不会立即回复客户端（这也是为什么需要4次挥手的原因）</li>
 <li>服务端将最后的数据处理并发送完之后，就会向客户端发送一个FIN包，此时服务端进入LAST_ACK的状态，同时客户端结束FIN_WAIT_2状态进入TIME_WAIT状态</li>
 <li>客户端在收到服务端的报文之后，会立即回一个ACK的报文，用于确定已经收到服务端要求结束的报文，同时进入TIME_WAIT状态</li>
-<li>服务端收到ACK的报文之后会立即终止，客户端在等待2MSL之后也会终止（之所以等待2MSL，是因为断开连接之后可能会收到迟到的报文）
-&lt;!– <h1 id="拥塞控制"><a href="#拥塞控制" class="headerlink" title="拥塞控制"></a>拥塞控制</h1><h2 id="拥塞控制方式"><a href="#拥塞控制方式" class="headerlink" title="拥塞控制方式"></a>拥塞控制方式</h2><h2 id="拥塞控制详解"><a href="#拥塞控制详解" class="headerlink" title="拥塞控制详解"></a>拥塞控制详解</h2></li>
-<li>-&gt;<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1></li>
+<li>服务端收到ACK的报文之后会立即终止，客户端在等待2MSL之后也会终止（之所以等待2MSL，是因为断开连接之后可能会收到迟到的报文）<!-- # 拥塞控制
+## 拥塞控制方式
+## 拥塞控制详解-->
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1></li>
 </ul>
 <p><strong>上面的状态可以反过来进行记忆：SYN_SENT 可以极为SENT_SYN，CLOSE_WAIT可以记为WAIT_CLOSE等等，这样会比较方便</strong></p>
 
@@ -484,7 +485,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TCP详解"><span class="nav-number">2.</span> <span class="nav-text">TCP详解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">2.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三次握手"><span class="nav-number">2.2.</span> <span class="nav-text">三次握手</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四次挥手"><span class="nav-number">2.3.</span> <span class="nav-text">四次挥手</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#拥塞控制"><span class="nav-number">3.</span> <span class="nav-text">拥塞控制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#拥塞控制方式"><span class="nav-number">3.1.</span> <span class="nav-text">拥塞控制方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#拥塞控制详解"><span class="nav-number">3.2.</span> <span class="nav-text">拥塞控制详解</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#小结"><span class="nav-number">4.</span> <span class="nav-text">小结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TCP详解"><span class="nav-number">2.</span> <span class="nav-text">TCP详解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">2.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三次握手"><span class="nav-number">2.2.</span> <span class="nav-text">三次握手</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四次挥手"><span class="nav-number">2.3.</span> <span class="nav-text">四次挥手</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#小结"><span class="nav-number">3.</span> <span class="nav-text">小结</span></a></li></ol></div>
             
 
           </div>
