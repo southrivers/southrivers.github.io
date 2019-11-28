@@ -88,7 +88,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://southrivers.github.io/2019/10/08/java垃圾回收机制/JVM%E5%86%85%E5%AD%98.png">
 <meta property="og:image" content="http://southrivers.github.io/2019/10/08/java垃圾回收机制/%E5%BE%AA%E7%8E%AF%E5%BC%95%E7%94%A8.png">
-<meta property="og:updated_time" content="2019-11-28T16:39:10.361Z">
+<meta property="og:updated_time" content="2019-11-28T16:40:04.705Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="jvm垃圾回收机制">
 <meta name="twitter:description" content="概述Java和C++相比最大的好处就在于自动的进行垃圾回收，不需要程序员手动释放，这大大的方便了我们的开发，不过作为一个合格的Java程序开发人员， 我们还是有必要了解一下内存回收的一些知识 内存结构 JVM内存结构如上图所示，每一部分都有专门的用处  java虚拟机栈：java虚拟机栈是线程私有的，方法在执行的时候都会创建一个栈帧，主要用来方法调用过程中的一些变量，这些变量包括：局部变量表（各种">
@@ -327,7 +327,7 @@ JVM内存结构如上图所示，每一部分都有专门的用处</p>
 </li>
 <li><p>栈（包括java虚拟机栈和本地方法栈）中的局部变量</p>
 </li>
-<li><p>方法类中的类变量、静态常量</p>
+<li><p>方法区中的类变量、静态常量</p>
 <h1 id="垃圾收集的算法"><a href="#垃圾收集的算法" class="headerlink" title="垃圾收集的算法"></a>垃圾收集的算法</h1><h2 id="标记清除"><a href="#标记清除" class="headerlink" title="标记清除"></a>标记清除</h2><p>标记清除会将需要回收的对象进行标记，在标记完之后触发垃圾回收操作，这种垃圾回收算法会产生以下问题：</p>
 </li>
 <li><p>空间问题：会有很多内存碎片</p>
