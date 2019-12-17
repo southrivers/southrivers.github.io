@@ -461,11 +461,11 @@ https://github.com/quanke/design-pattern-java.git -->
 notification进行了记录，下面展示了eventid为空的情况：
 <img src="//southrivers.github.io/2019/11/23/sentry学习总结/id%E4%B8%BA%E7%A9%BA.png" alt>
 关于hive的相关的知识就到这里，下面我们来看一下sentry的整体架构。</p>
-<h1 id="sentry整体架构"><a href="#sentry整体架构" class="headerlink" title="sentry整体架构"></a>sentry整体架构</h1><h2 id="ER关系图"><a href="#ER关系图" class="headerlink" title="ER关系图"></a>ER关系图</h2><p>下图展示了sentry的实体关系图（有些表的作用尚不清楚）
+<h1 id="sentry"><a href="#sentry" class="headerlink" title="sentry"></a>sentry</h1><h2 id="ER关系图"><a href="#ER关系图" class="headerlink" title="ER关系图"></a>ER关系图</h2><p>下图展示了sentry的实体关系图（有些表的作用尚不清楚）
 <img src="//southrivers.github.io/2019/11/23/sentry学习总结/sentryER%E5%85%B3%E7%B3%BB%E5%9B%BE.png" alt>
 上面的关系表可以看到的是权限的控制是通过RBAC的方式，不过这里的角色是和group绑定的，并不是user，可以让用户加入不同的组来完成权限的控制，
 不过用户和组的绑定关系并没有对应的表，而是复用了hadoop中user和group的关系，这一点不论从当前的表中还是代码中都可以得到印证。</p>
-<h2 id="sentry整体架构-1"><a href="#sentry整体架构-1" class="headerlink" title="sentry整体架构"></a>sentry整体架构</h2><p><img src="//southrivers.github.io/2019/11/23/sentry学习总结/sentry%E6%9E%B6%E6%9E%84.png" alt>
+<h2 id="sentry整体架构"><a href="#sentry整体架构" class="headerlink" title="sentry整体架构"></a>sentry整体架构</h2><p><img src="//southrivers.github.io/2019/11/23/sentry学习总结/sentry%E6%9E%B6%E6%9E%84.png" alt>
 如上图所示为sentry整体架构图，其中sentry-binding就是利用了Hive上面的扩展机制，
 分别使用Listener和Hook对数据的DDL、DML操作进行权限的控制，sentry实现的Listener和Hook的主要的作用：</p>
 <ul>
