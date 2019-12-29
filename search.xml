@@ -4,6 +4,25 @@
   
     
     <entry>
+      <title>hdfs 学习总结</title>
+      <link href="/2019/12/29/hdfs-%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/"/>
+      <url>/2019/12/29/hdfs-%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/</url>
+      
+        <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>一入hadoop深似海，从此鸡犬不安宁。最近使用容器做算法训练的项目有用到大数据平台，经常会出现容器示例连接hdfs datanode获取数据超时的问题，因此需要了解并修复或者规避这种问题。</p><h1 id="hdfs-基础"><a href="#hdfs-基础" class="headerlink" title="hdfs 基础"></a>hdfs 基础</h1><h1 id="性能调优"><a href="#性能调优" class="headerlink" title="性能调优"></a>性能调优</h1><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> hadoop </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>java 并发编程工具类</title>
       <link href="/2019/12/24/java-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%B7%A5%E5%85%B7%E7%B1%BB/"/>
       <url>/2019/12/24/java-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%B7%A5%E5%85%B7%E7%B1%BB/</url>
@@ -24,6 +43,12 @@
         <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h1 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h1><h1 id="运维"><a href="#运维" class="headerlink" title="运维"></a>运维</h1><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1>]]></content>
       
       
+      
+        <tags>
+            
+            <tag> hadoop </tag>
+            
+        </tags>
       
     </entry>
     
