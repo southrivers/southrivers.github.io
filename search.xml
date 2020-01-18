@@ -4,6 +4,19 @@
   
     
     <entry>
+      <title>hdfs datanode</title>
+      <link href="/2020/01/19/hdfs-datanode/"/>
+      <url>/2020/01/19/hdfs-datanode/</url>
+      
+        <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>hdfs datanode采用块的方式存放hdfs数据，datanode具有以下特点：</p><ul><li>datanode会通过心跳维持和namenode的联系，心跳的响应同样会携带namenode的指令信息。</li><li>客户端在读写数据的时候，会直接和datanode建立连接完成数据块的读写，并在读写完成之后将相信息汇报给namenode</li></ul><h1 id="详解"><a href="#详解" class="headerlink" title="详解"></a>详解</h1><p>在介绍datanode详细信息之前，我们有必要对当前的hdfs的整体架构有一个清晰的认识</p><h2 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h2><p>hdfs的架构并不是一成不变的，在2.x的时候hdfs的整体架构就发生了重大的变更，笔者所看的包括业务中使用到的是2.6版本的代码，因此讲解也将会使用2.x的架构来进行讲解，不过在讲解2.x的架构之前，还是有必要对旧的版本的架构有一个清晰的认知，这样才可以更好的理解现有的架构所带来的好处。</p><h3 id="hdfs-2-x之前的架构"><a href="#hdfs-2-x之前的架构" class="headerlink" title="hdfs 2.x之前的架构"></a>hdfs 2.x之前的架构</h3><p><img src="//southrivers.github.io/2020/01/19/hdfs-datanode/hdfs-1.x1.png" alt>如上图所示为hdfs 1.x的逻辑示意图，下面对上面的架构进行简单的描述以下：</p><h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>try with resource</title>
       <link href="/2020/01/16/try-with-resource/"/>
       <url>/2020/01/16/try-with-resource/</url>
