@@ -1341,7 +1341,7 @@ body.night-mode,.night-mode .btn,body.night-mode a,.night-mode .nav-user a,#sear
     float:right;
 }
 .markdown-body .highlight .gutter {
-    width: 30px;
+    width: 40px;
 }
 .markdown-body .highlight .code {
     flex: 1;
