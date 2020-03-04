@@ -4,6 +4,19 @@
   
     
     <entry>
+      <title>synchronized原理分析</title>
+      <link href="/2020/03/04/synchronized%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/"/>
+      <url>/2020/03/04/synchronized%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/</url>
+      
+        <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>相较于java中常见的各种锁，synchronized相对来说是比较独立的，因此本小节针对synchronized单独做一个总结。</p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>protobuf学习笔记</title>
       <link href="/2020/01/22/protobuf%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
       <url>/2020/01/22/protobuf%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
@@ -503,7 +516,7 @@
     
     
     <entry>
-      <title>java 并发编程工具类</title>
+      <title>java 并发编程工具类之LockSupport</title>
       <link href="/2019/05/24/java-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%B7%A5%E5%85%B7%E7%B1%BB/"/>
       <url>/2019/05/24/java-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E5%B7%A5%E5%85%B7%E7%B1%BB/</url>
       
@@ -542,7 +555,7 @@
     
     
     <entry>
-      <title>java 线程总结</title>
+      <title>线程小结</title>
       <link href="/2019/05/01/java-%E7%BA%BF%E7%A8%8B/"/>
       <url>/2019/05/01/java-%E7%BA%BF%E7%A8%8B/</url>
       
