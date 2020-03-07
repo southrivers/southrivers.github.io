@@ -196,7 +196,7 @@ markOop 定义在markOop.hpp中，具体代码如下所示：</p>
 重量级锁变为：偏向锁 -&gt; 轻量级锁 -&gt; 重量级锁，该过程也即是锁的升级。为了保障获取锁和释放锁的效率，锁的膨胀过程是不可逆的。</p>
 <h4 id="偏向锁"><a href="#偏向锁" class="headerlink" title="偏向锁"></a>偏向锁</h4><h4 id="轻量级锁"><a href="#轻量级锁" class="headerlink" title="轻量级锁"></a>轻量级锁</h4><h4 id="重量级锁"><a href="#重量级锁" class="headerlink" title="重量级锁"></a>重量级锁</h4><p>具体过程可以参考 <a href="https://www.jianshu.com/p/43bc53c64d91" target="_blank" rel="noopener">https://www.jianshu.com/p/43bc53c64d91</a></p>
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>以上就是synchronized的一些用法及锁升级的过程，相较于传统的锁机制以及一些工具类，synchronized的锁机制是相对独立的，因此单独介绍一下。
-<del>这里升级成重量级锁后对monitor的理解上不透彻，后续查阅相关资料之后再补充</del></p>
+<del>这里升级成重量级锁后对monitor的理解上不透彻，后续查阅相关资料之后再补充，另外源码分析也缺少</del></p>
 
             
                 
