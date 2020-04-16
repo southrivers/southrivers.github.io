@@ -144,7 +144,26 @@
 的结果，如果不需要等待作业的执行结束，而仅仅是触发作业，可以使用executeAsync方法，该方法会返回一个JobClient对象，该对象可以和对应的作业进行交互。
 值得注意的是只有在调用了execute方法之后，作业才真正的执行，其之前的各种操作都是lazy的，主要的作用适用于生成JobGraph（大数据的核心即在于数据不动，
 程序动，这里的程序也就是我们生成的JobGraph，真正的执行过程就是将程序序列化发送到集群中的机器进行执行）。</p>
-<hr>
+<h3 id="DataStream-API"><a href="#DataStream-API" class="headerlink" title="DataStream API"></a>DataStream API</h3><h4 id="Source"><a href="#Source" class="headerlink" title="Source"></a>Source</h4><p>我们从Source中获取原始数据，我们可以通过StreamExecutionEnvironment.addSource(sourceFunction)来添加一个Source，我们通常可以实现一个SourceFunction接口
+来串行的处理数据，也可以实现ParallelSourceFunction或者RichParallelSourceFunction接口来并发的处理数据流。当前已经存在一些定义好的
+source可供我们使用（env#）：</p>
+<ul>
+<li>基于文件：readFile、readTextFile &amp;&amp;</li>
+<li>基于socket：socketTextStream</li>
+<li>基于集合：fromCollection、fromElements、fromParallelCollection、generateSequence（用于生成序列）</li>
+<li>第三方库：可能业务中最常见的数据源就是kafka，flink也为kafka提供了一套sorce：FlinkKafkaConsumer<em>，这里的</em>和kafka版本是对应起来的</li>
+</ul>
+<h4 id="Transform"><a href="#Transform" class="headerlink" title="Transform"></a>Transform</h4><h4 id="Sink"><a href="#Sink" class="headerlink" title="Sink"></a>Sink</h4><p>Sink用于消费DataStream中的数据，并将其推送到文件、socket或者打印出来，Flink提供了大量的依托于DataStream的Sink：</p>
+<ul>
+<li>writeAsText</li>
+<li>writeAsCsv</li>
+<li>print</li>
+<li>writeUsingOutputFormat</li>
+<li>writeToSocket</li>
+<li>addSink</li>
+</ul>
+<p><strong>上面的这些算子中，addSink通常可以结合Flink的checkpoint来实现exactly-once的语义来消费数据。而write*多用于调试操作</strong></p>
+<h4 id="Iterators"><a href="#Iterators" class="headerlink" title="Iterators"></a>Iterators</h4><h4 id="调试及运行"><a href="#调试及运行" class="headerlink" title="调试及运行"></a>调试及运行</h4><hr>
 <p>说明：
 对于上述示例，在windows上可以使用 ncat -lk 9000来打开端口，对于linux平台则可以使用 nc -lk 9000 来完成端口的开启</p>
 <hr>
