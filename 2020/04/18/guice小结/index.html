@@ -160,19 +160,33 @@ Injector则类似于spring中的ApplicationContext，也即是整个容器。还
 <td>map.put(Key.get(Foo.class), module::provideFoo)</td>
 </tr>
 </tbody></table>
-<p>-Scope
+<ul>
+<li>Scope
 在上面的代码中我们并没有看到Scope相关的代码，不过不要紧，这个本身也不难，我们就简单的分析一下吧。
 我们知道在spring 的 web应用中，我们经常使用的就是单例<code>Singleton</code>，在最上面的代码中我们获取Person类型的对象，如果我们再次调用该方法，
 尝试获取person对象的话，那么两个对象是否一致呢？答案是否定的！也就是说上面的代码中我们多次获取对象返回的是多个对象，那么有没有什么办法让我们
-能够复用对象呢？答案就是Scope！<em>这个和spring中的scope也是对应起来的，默认的情况下有5中scope</em></p>
+能够复用对象呢？答案就是Scope！<em>这个和spring中的scope也是对应起来的，默认的情况下有5中scope</em></li>
+</ul>
 <p>常见的指定scope的方式如下：</p>
-<p>– 标注在实现类上面：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Singleton</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">InMemoryTransactionLog</span> <span class="keyword">implements</span> <span class="title">TransactionLog</span> </span>&#123;</span><br><span class="line">  <span class="comment">/* everything here should be threadsafe! */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>– 通过bind代码实现</p>
+<ul>
+<li><ul>
+<li>标注在实现类上面：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Singleton</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">InMemoryTransactionLog</span> <span class="keyword">implements</span> <span class="title">TransactionLog</span> </span>&#123;</span><br><span class="line">  <span class="comment">/* everything here should be threadsafe! */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><ul>
+<li>通过bind代码实现</li>
+</ul>
+</li>
+</ul>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bind(TransactionLog.class).to(InMemoryTransactionLog.class).in(Singleton.class);</span><br></pre></td></tr></table></figure>
 
-<p>– 通过注解@Provides声明方法</p>
+<ul>
+<li><ul>
+<li>通过注解@Provides声明方法</li>
+</ul>
+</li>
+</ul>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Provides</span> <span class="meta">@Singleton</span></span><br><span class="line"> <span class="function">TransactionLog <span class="title">provideTransactionLog</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   ...</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
 
 <p>除了上面的Scope之外还有lazy或者eager的策略供我们使用：</p>
