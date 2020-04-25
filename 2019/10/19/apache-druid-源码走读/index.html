@@ -115,18 +115,18 @@
             <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>监控也做了一段时间了，短短续续接触过一系列的存储与计算相关的组件，机缘巧合接触到了druid（并不是阿里的数据库连接池工具），
 这是一款用于OLAP的存储组件，鉴于其高效的查询效率，在初步了解、使用以及弄清楚整体的架构之后，也对其源码产生了较大的兴趣，
 由于官网上对其使用、介绍也是比较全面的，因此在此略讲这些东西，看后面有时间再补齐。</p>
-<h1 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h1><p>下图是druid数据流图
-<img src="//southrivers.github.io/2019/10/19/apache-druid-源码走读/structure.png" alt>
-对于上图简要的介绍一下：</p>
+<h1 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h1><p>下图是druid数据流图</p>
+<p><img src="//southrivers.github.io/2019/10/19/apache-druid-源码走读/structure.png" alt></p>
+<p>对于上图简要的介绍一下：</p>
 <ul>
 <li>router是用来分发请求的</li>
 <li>broker是用来将查询结果合并的，通常建议可以和router合并在一起</li>
 <li>middlemanager和historical是用来存放未发布的和已经发布的数据的</li>
 <li>overlaod是用来保障高可用的</li>
-<li>coordinator是用来管理segment（数据）的，包括了数据的发布、均衡等操作
-官方推荐的部署架构如下图所示：
-<img src="//southrivers.github.io/2019/10/19/apache-druid-源码走读/bushu.png" alt></li>
+<li>coordinator是用来管理segment（数据）的，包括了数据的发布、均衡等操作</li>
 </ul>
+<p>官方推荐的部署架构如下图所示：</p>
+<p><img src="//southrivers.github.io/2019/10/19/apache-druid-源码走读/bushu.png" alt></p>
 <h1 id="源码走读"><a href="#源码走读" class="headerlink" title="源码走读"></a>源码走读</h1><p>在深入了解每一个模块之前，我们有必要对整个工程的启动、运行流程有一定的了解，不然就是老虎吃天，无从下口。</p>
 <h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><p>万物皆有入口，哈哈哈！那么druid的入口在哪里呢？查看启动的脚本就会发现，入口就在Main类的main方法，多么自然，在程序中万物的运行始于
 main函数。从代码开始看起吧！为了方便理解，我是将代码分成多段进行讲解了，具体的的步骤：</p>
