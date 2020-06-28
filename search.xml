@@ -4,6 +4,19 @@
   
     
     <entry>
+      <title>网络传输curl vs ping</title>
+      <link href="/2020/06/29/%E7%BD%91%E7%BB%9C%E4%BC%A0%E8%BE%93curl-vs-ping/"/>
+      <url>/2020/06/29/%E7%BD%91%E7%BB%9C%E4%BC%A0%E8%BE%93curl-vs-ping/</url>
+      
+        <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>最近在定位网络问题的时候，先是ping了一下目标ip，发现ping不通，然后就以为网络是不通的了。确实，一般情况下我们肯定就认为网络不通了，但是，有个兄弟跟我说服务是可以调用的，然后我就试了一下，通过curl的方式来调用相关的接口，奇迹出现了，居然可以调的通，于是乎开始了各种网络相关知识的搜索，为防止遗忘，特别记录了一下。</p><h1 id="详解"><a href="#详解" class="headerlink" title="详解"></a>详解</h1><p>大多数排查网络故障都是从ping开始的，不过ping默认使用的协议是ICMP的协议，这要求源节点和目标节点之间的所有的中间节点都支持ICMP转发的协议，如果中间的某一个节点通过防火墙禁用了ICMP的协议，那么这就会导致节点之间看起来好像是不通的样子。而curl则是使用的TCP的协议，因此当ping的不通的时候，我们仍然是有可能curl通的。当遇到之中情况的时候，可以使用<code>traceroute 目标Ip</code>的方式来查看连路中哪一个节点出现了问题。</p><h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>看来平时的一些常见到的知识没有深究的情况下，和真实的情况还是存在很大的区别的，这个以后在学习这些问题的时候还是要多看，多学，多想，做到自己可以解释的通原理才可以。</p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>spark streaming 小结</title>
       <link href="/2020/06/22/spark-streaming-%E5%B0%8F%E7%BB%93/"/>
       <url>/2020/06/22/spark-streaming-%E5%B0%8F%E7%BB%93/</url>
