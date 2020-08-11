@@ -4,6 +4,19 @@
   
     
     <entry>
+      <title>ARP小结</title>
+      <link href="/2020/08/12/ARP%E5%B0%8F%E7%BB%93/"/>
+      <url>/2020/08/12/ARP%E5%B0%8F%E7%BB%93/</url>
+      
+        <content type="html"><![CDATA[<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>最近在搞一些网络相关的东西，也有了解到其中的一些协议，因此也抽时间学习总结了一把，就先从ARP协议说起吧。</p><h1 id="详解"><a href="#详解" class="headerlink" title="详解"></a>详解</h1><p>ARP协议是用来实现IP到MAC之间的转换的一种机制，是属于网络层的一种协议（需要强调并不是数据链路层的协议），在OSI或者TCP/IP网络模型中，我们可以知道设备在同一个局域网中通信的时候使用的是MAC地址，不过通常情况下我们只知道目的主机的IP地址（_毕竟MAC地址很难记，即便是记住了，后面如果更换网卡的话，mac地址又会发生改变_）。以ping请求为例，在请求之初，由于原主机不知道目的主机的MAC地址，因此这种情况下就需要使用ARP协议来找到响应IP对应的MAC地址，解析出相应的地址之后，就可以封装二层的报文进行请求的发送了。接下来我们来看一下ARP在不同的网络拓扑中的一些情况：</p><h2 id="同网段ARP的实现"><a href="#同网段ARP的实现" class="headerlink" title="同网段ARP的实现"></a>同网段ARP的实现</h2><p>如下图所示，同网段内HostA向HostB发送数据报文为例：</p><p><img src="//southrivers.github.io/2020/08/12/ARP小结/local-arp.jpg" alt></p><ul><li>HostA查看自己的ARP表项发现找不到HostB的Ip和MAC的对应关系，于是HostA对外发送ARP报文，请求HostB的MAC地址，该报文中源IP和MAC为HostA的IP和MAC，不过目的IP和MAC则分别是目的IP和全0的MAC地址，我们知道全0的MAC地址代表的是广播数据。</li><li>DeviceB在收到HostA的数据报文之后，通过解析发现该报文是广播报文，就会在除了入口之外所有的端口广播该报文</li><li>HostB在收到报文之后，首先会更新自己的ARP表项用于记录HostA的IP和MAC的映射关系，同时向HostA发送ARP应答报文，在该应答报文中源IP和源MAC是HostB的IP以及MAC，目的IP和MAC则是HostA的IP和MAC</li><li>DeviceB收到该ARP响应报文之后会将该请求单播给HostA</li><li>HostA接收到ARP响应之后更新自己的ARP表项，接下来如果在有请求从HostA到B的话就会采用单播的方式发送出去了</li></ul><h2 id="不同网段间ARP的实现"><a href="#不同网段间ARP的实现" class="headerlink" title="不同网段间ARP的实现"></a>不同网段间ARP的实现</h2><p>上面我们分析了同网段的ARP协议，如果两台不同网段之间的设备进行通信的时候，发送的一方需要先将请求发送给默认网关，再由默认网关将数据报文转发给接收方主机的操作。因此不同的网段之间的ARP请求可以以网关作为分界线划分成多个相同网段之间的ARP的请求，如下图以HostA向HostC发送数据为例：</p><p><img src="//southrivers.github.io/2020/08/12/ARP小结/remote-arp.png" alt></p><ul><li>HostA查看自己的ARP表项发现没有到达目的主机HostC的默认网管DeviceA对应接口的IP和MAC地址的映射关系，于是HostA对外发送ARP请求报文，这个时候请求的MAC地址是DeviceA的mac地址（并不是HostC的地址）</li><li>DeviceB在收到该报文的时候发现MAC地址是全0，将会在本网络内广播数据接下来的过程就是DeviceA响应HostA的ARP请求并更新各自的ARP表项了，具体的过程和上面同网段ARP的实现一致，因此不再赘述了</li></ul><p>在接下来的请求知道了DeviceA的MAC地址之后，数据报文走到DeviceA的时候会根据内部的路由表将请求从interface2接口转发出去，这种情况下又变成了同一个局域网的ARP请求和响应了。</p><h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>上面简要的介绍了一下ARP请求的过程，不过可以看的出来这种模式有一个缺陷，那就是如果网络上存在大量的广播的话会占用极大的贷款以及节点计算资源，后面有时间再补齐这些内容吧。</p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>calcite学习总结</title>
       <link href="/2020/08/07/calcite%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/"/>
       <url>/2020/08/07/calcite%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/</url>
