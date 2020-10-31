@@ -24,7 +24,7 @@
 <link rel="shortcut icon" href="/images/favicon.png">
 
 
-<title>string那些事 - 离亭燕</title>
+<title>java集合类之hashset - 离亭燕</title>
 
 <meta name="keywords" content>
 
@@ -104,18 +104,30 @@
                 </a>
                 <p><span class="label">author</span>
                     <a href="http://southrivers.github.io" target="_blank">原站</a>
-                    <span title="last_edited&nbsp;2020-09-22">2020-09-22</span>
+                    <span title="last_edited&nbsp;2019-10-23">2019-10-23</span>
                 </p>
                 <p>码个蛋️️</p>
             </div>
-            <h2 class="post-title">string那些事</h2>
+            <h2 class="post-title">java集合类之HashSet</h2>
 
         </div>
         <div class="post-content markdown-body">
-            <p>intern: <a href="https://www.cnblogs.com/feizhai/p/10196955.html" target="_blank" rel="noopener">https://www.cnblogs.com/feizhai/p/10196955.html</a></p>
-<p>stringformat：<a href="http://irfen.me/java-string-format-performance/" target="_blank" rel="noopener">http://irfen.me/java-string-format-performance/</a></p>
-<p>全面文章：<a href="https://blog.csdn.net/ifwinds/article/details/80849184" target="_blank" rel="noopener">https://blog.csdn.net/ifwinds/article/details/80849184</a></p>
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>工作的过程中有用过HashSet，由于之前对这一块并没有深入到源码研究，因此对于内部的构造一直是不清楚，趁着研究Java其他的集合类型，我也顺便翻了
+一下HashSet的源码，结果发现真是魔幻啊，HashSet底层居然是HashMap实现的，以前还真没有留意。</p>
+<h1 id="详解"><a href="#详解" class="headerlink" title="详解"></a>详解</h1><p>首先还是来看一下HashSet对应的类图：</p>
+<p><img src="//southrivers.github.io/2019/10/23/java集合类之HashSet/hashset.png" alt></p>
+<p>如上为对应的HashSet的类图，同LinkedList以及hashMap类似，其也是大量使用了模板的模式：</p>
+<ul>
+<li>接口定义方法</li>
+<li>抽象类定义公共实现</li>
+<li>具体的类来定义特性的实现</li>
+</ul>
+<p>HashMap的精髓并不在于源码的分析，而在于底层的实现，具体点就是底层采用了HashMap做了相关的实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">transient</span> HashMap&lt;E,Object&gt; map;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Dummy value to associate with an Object in the backing Map</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Object PRESENT = <span class="keyword">new</span> Object();</span><br></pre></td></tr></table></figure>
 
+<p>如上所见，HashSet中定义了一个HashMap，我们使用的是HashMap的key来存放我们需要存放到HashMap中的元素，而对应的value其实是<code>PRESENT</code>。
+至于HashSet如何解决Hash冲突，如何维护底层的元素，则可以通过之前的HashMap的分析来了解，这里就不再赘述了。</p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1>
             
                 
 
