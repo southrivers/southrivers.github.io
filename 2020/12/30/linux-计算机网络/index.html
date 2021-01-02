@@ -1,0 +1,381 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>linux 计算机网络相关 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2020-12-30">2020-12-30</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">linux 计算机网络相关</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>提起网络相关的内容，将其和操作系统进行关联起来是不合适的，不过鉴于我们能研究的网络相关的技术都是linux相关的内核子系统，因此
+姑且称之为linux 计算机网络吧。计算机网络中充斥着各种协议，我曾经试着翻了很多的资料，但给人的感觉都是浩如烟海。
+最近重新看了以下linux相关的书，略有心得，因此特别记录下。</p>
+<h1 id="详解"><a href="#详解" class="headerlink" title="详解"></a>详解</h1><h2 id="网络中的分层"><a href="#网络中的分层" class="headerlink" title="网络中的分层"></a>网络中的分层</h2><p>常见的网络分层的模型是七层模型或者是OSI开放系统互联模型，OSI将网络划分为4层，也是我们最常见的，具体如下：</p>
+<ul>
+<li>数据链路层：该层在收发数据的时候对应了局域网的mac地址，会将传输的数据切分成帧。mac地址可以认为是物理地址。</li>
+<li>互联网络层：也就是IP层，其存在的目的是<strong>找到一条链路</strong>使得计算机彼此之间可以通信。网络层也会将数据切分为分组，并由接收端进行重组，我们可以将IP看作逻辑地址。</li>
+<li>传输层：在两个建立了链路的计算机上，控制应用程序之间的数据传输，传输层的目的是在<strong>客户端和服务端应用程序之间建立链接</strong>，<strong>区别于找到链路</strong>，这里
+建立链接的前提肯定是存在一个链路，也就是IP层面上是通畅的，常用的传输层的控制协议就是TCP或者UDP。传输层使用端口号唯一的区分应用程序，
+服务端的端口号通常是固定的，客户端的端口号通常是动态生成的，并且每个端口对应的套接字缓冲区维护了几个队列。对于TCP协议来说，其还要保证通过这个链接的数据按照指定的顺序到达。</li>
+<li>应用层：负责传输的实际内容</li>
+</ul>
+<p>这里首先强调以下，我们所说的网络分层都是协议层面上的，具体点反映到内核层面上的，即便是应用层，也是内核层面上的，如下图所示：</p>
+<p><img src="//southrivers.github.io/2020/12/30/linux-计算机网络/OSI.png" alt></p>
+<p>对应的结构在内核中反映为：<strong>不同的层次由分离的代码实现，不同层次的代码之间通过明确定义的接口来交换数据或者发送命令</strong>，简单来说可以近似认为
+协议即接口规范。</p>
+<p>有个问题可能是我们比较纠结的，那就是既然有了Mac 地址为什么还需要IP地址，或者反过来，关于这个问题我也查了一下网上的说法，并结合自己的看法，主要原因有以下几点：</p>
+<ul>
+<li>IP地址必须是因为我们需要通过逻辑地址（IP地址）找到一条通往目标计算机的链路，通过MAC很显然无法高效找到对应的主机，除非网络中所有的主机的路由表中都存放了其他机器的mac地址，不过这显然是不可能的</li>
+<li>既然有了IP地址，为什么还要多一个mac地址呢？这是因为局域网的通信是基于mac地址的，这样的说法或许没有什么说服力，试想一下，如果在局域网中存在dhcp的服务使得局域网中的主机ip可以
+动态的变更，那么如果使用IP来进行传输数据的话是不是可能会在某次的传输过程中出现差错呢？</li>
+</ul>
+<h2 id="内核网络子系统"><a href="#内核网络子系统" class="headerlink" title="内核网络子系统"></a>内核网络子系统</h2><p>区别于TCP/IP的分层（协议上的分层），内核网络子系统也是分层的结构，这些分层和TCP/IP的分层是对应起来的，可以认为是协议的具体的实现。</p>
+<p><img src="//southrivers.github.io/2020/12/30/linux-计算机网络/OSI.png" alt></p>
+<p>图中可以知道，我们常说的<strong>各层传输协议都是存在于内核空间的，就应用层来说也是存在于内核空间的，虽然加了个应用</strong>。<strong>和分层相关的还有就是
+数据的传输</strong>。如下图所示：</p>
+<p><img src="//southrivers.github.io/2020/12/30/linux-计算机网络/data.png" alt></p>
+<p>其中在首部包含了描述数据段所使用协议的基本信息，方便数据在接收到之后的解析。</p>
+<h2 id="套接字的由来"><a href="#套接字的由来" class="headerlink" title="套接字的由来"></a>套接字的由来</h2><p>在linux中遵循着一切皆文件的基本原则，正常的读写操作直接访问即可，但是对于网卡会有所例外，原因的话是无法在打开<strong>网卡</strong>的时候指定我们为了传输
+数据而使用的<strong>链接</strong>（<strong>网卡不是链接，网卡可以当作工厂，用来生产链接</strong>），也无法指定链接在各层中所使用的协议。因此内核需要提供一个通用的接口
+（并非网卡，该接口可以屏蔽网卡的差异引入的问题）来供程序访问访问网络，这就引申除了套接字。<strong>套接字用于定义和建立网络连接，屏蔽了底层的协议</strong>，
+套接字完成创建之后会得到一个inode，这样我们接下来就可以通过操作inode来完成网络数据的读写，这样我们又回归到了一切皆文件的主体。当然网卡承载了
+套接字的通信。</p>
+<p><strong>套接字是通过系统调用由内核生成的</strong>，bind用于给当前这个套接字绑定地址。我们通常所说的<strong>阻塞、非阻塞是针对服务端来说的</strong>，并非针对客户端（针对客户端没什么意义的）。
+对于服务端来说建立一个socket需要三个函数：</p>
+<ul>
+<li>bind将套接字绑定到一个地址</li>
+<li>listen通知套接字等待客户端连接请求的到来，该函数会创建一个队列，将所有希望建立链接的客户端放到这里，这里的队列以TCP队列为例，可以分为<ul>
+<li>半链接队列：<a href="https://www.cnblogs.com/xiaolincoding/p/12995358.html" target="_blank" rel="noopener">TCP队列资料参考</a></li>
+<li>全连接队列：</li>
+</ul>
+</li>
+<li>accept用来接收等待队列上的第一个客户端的链接请求，队列为空的时候将处于阻塞的状态，直到有想要进行连接的客户端的到来（由listen将客户端放进来）</li>
+</ul>
+<p><strong>该过程中我们看到了队列，看到了等待，不过这并不是阻塞IO中的阻塞的含义，因为这个阶段还处于建立链接的过程，并没有发生文件的读写操作</strong>。
+上面的过程中最终会返回一个socket，该socket对应了一个文件描述符，接下来的通信就可以通过read或者write来操作这个文件描述符来完成了。
+而read或者write的才是阻塞IO中的阻塞的真正的含义。该socket是由监听的服务器fork出来的，并会注册到内核中（关于socket及其中的队列后文会进行描述）。</p>
+<p>对于客户端主动关闭链接的情况，服务端会返回一个长度为0的数据流，这样服务端就可以终止数据的处理了。</p>
+<h2 id="套接字缓冲区"><a href="#套接字缓冲区" class="headerlink" title="套接字缓冲区"></a>套接字缓冲区</h2><p>内核在收发数据的时候需要使用套接字缓冲区（socket buffer）来提升网络中收发数据的性能。其主要用来在网络实现的<strong>各个层次之间交换数据</strong>，这种
+数据的交换并不是基于复制而是基于指针引用的。其对应的结构如下：</p>
+<p><strong>sk_buff是内核空间和用户空间公用的一个结构体，但是数据则涉及到拷贝，也就是内核空间和数据空间数据是存在拷贝的，内核的各层之间则不存在数据的拷贝，而是
+通过结构体中的指针</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">struct  sk_buff</span><br><span class="line">&#123;</span><br><span class="line">     struct  sk_buff *next;</span><br><span class="line">     struct  sk_buff *prev;</span><br><span class="line">     struct  sock *sock ; //struct sock是socket在网络层的表示，其中存放了网络层的信息</span><br><span class="line">     </span><br><span class="line">     unsigned  int  len; //下面有介绍</span><br><span class="line">     unsigned  int  data_len;  //下面有介绍</span><br><span class="line">     __u16   mac_len ;  //数路链路层的头长度</span><br><span class="line">     __u16   hdr_len ;  //writable header length of cloned skb</span><br><span class="line">     unsigned  int  truesize ;  //socket buffer(套接字缓存区的大小)</span><br><span class="line">     atomic_t users ;  //对当前的struct sk_buff结构体的引用次数；</span><br><span class="line">     __u32   priority ;  //这个struct sk_buff结构体的优先级</span><br><span class="line">     </span><br><span class="line">     sk_buff_data_t transport_header ;  //传输层头部的偏移量</span><br><span class="line">     sk_buff_data_t network_header ;    //网络层头部的偏移量</span><br><span class="line">     sk_buff_data_t mac_header ;        //数据链路层头部的偏移量</span><br><span class="line">     </span><br><span class="line">     char  *data ;  //socket buffer中数据的起始位置；</span><br><span class="line">     sk_buff_data_t tail ;  //socket buffer中数据的结束位置；</span><br><span class="line">     char  *head ;  //socket buffer缓存区的起始位置；</span><br><span class="line">     sk_buffer_data_t end ;  //socket buffer缓存区的终止位置；</span><br><span class="line">     </span><br><span class="line">     struct  net_device *dev;  //将要发送struct sk_buff结构体的网络设备或struct sk_buff的接收</span><br><span class="line">                             //网络设备</span><br><span class="line">     int  iif;   //网络设备的接口索引号；</span><br><span class="line">     </span><br><span class="line">     </span><br><span class="line">     struct  timeval tstamp ;  //用于存放接受的数据包的到达时间；</span><br><span class="line">     </span><br><span class="line">     __u8  local_df : 1 ,   //allow local fragmentaion;</span><br><span class="line">           cloned   : 1 ,  // head may be cloned</span><br><span class="line">           ;</span><br><span class="line">     </span><br><span class="line">     __u8  pkt_type : 3 ,  //数据包的类型；</span><br><span class="line">           fclone   : 2,   // struct sk_buff clone status</span><br><span class="line">     </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如上结构所示套接字缓冲区通过其中包含的各种指针与一个内存区域相关联，如下图所示：</p>
+<p><img src="//southrivers.github.io/2020/12/30/linux-计算机网络/sk_buff.png" alt></p>
+<p>这里可以看到套接字缓冲区并不是真正的数据空间，其也是通过指针与一个内存空间相关联，该内存空间存在于内核之中。另外也可以知道sk_buff指向的内存空间对应了数据链路层面上的帧（
+毕竟对应的内存空间包含了各种协议头）。</p>
+<p>套接字缓冲区的基本思想是通过指针的移动来增删协议首部，这样就避免了在各层中拷贝传递数据。接下来对上述结构体中的字段进行详细的描述：</p>
+<ul>
+<li>head、end指向数据在内存中的起始和截止的位置，这个区域可能大于实际的长度，因为在产生分组的时候并不能确定分组的长度，多长合适应该是和传输协议相关的（生产数据的时候会在意长度）。</li>
+<li>data、tail指向协议数据区域的起始和结束位置</li>
+<li>mac_header等各种header分别指向对应协议的首部</li>
+</ul>
+<p>基于如上的结构体可以看的出来，套接字缓冲区可以用于所有的协议类型，毕竟指针只一下协议头就完事了。对应协议相关的数据的提取则可以使用xxx_header函数完成，如tcp报文的提取
+可以使用tcp_header，这些函数都需要一个sk_buff的参数，并返回重新解释的数据。
+除了上述套接字基本成员外，还包含了用于处理相关数据以及管理套接字缓冲区自身的其他成员,如prev、next指针，这个是套接字缓冲区队列，
+分组数据放置在等待队列中（队列中的每一项似一个完整的数据）。其结构如下所示：</p>
+<p><img src="//southrivers.github.io/2020/12/30/linux-计算机网络/sk_buff_queue.png" alt></p>
+<h2 id="报文发送案例学习"><a href="#报文发送案例学习" class="headerlink" title="报文发送案例学习"></a>报文发送案例学习</h2><h3 id="数据结构概述"><a href="#数据结构概述" class="headerlink" title="数据结构概述"></a>数据结构概述</h3><p>内核和用户空间套接字之间的接口实现在c标准库中，使用了socketcall系统调用，对于<strong>程序使用的每个套接字</strong>而言，都对应了一个socket结构和一个sock结构，
+其中socket充当了到用户空间的接口，面向的是用户的应用程序，而sock充当了到内核空间的接口，面向的是内核进程（每个socket都包含了sock结构），其中对应的数据结构分别如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">struct socket</span><br><span class="line">&#123;</span><br><span class="line">     socket_state  state; // socket state</span><br><span class="line">      </span><br><span class="line">     short   type ; // socket type</span><br><span class="line">      </span><br><span class="line">     unsigned long  flags; // socket flags</span><br><span class="line">      </span><br><span class="line">     struct fasync_struct  *fasync_list;</span><br><span class="line">      </span><br><span class="line">     wait_queue_head_t wait;</span><br><span class="line">      </span><br><span class="line">     struct file *file;</span><br><span class="line">      </span><br><span class="line">     struct sock *sock;  // socket在网络层的表示；这个结构在套接字缓冲区中也有看到，其本质上就是套接字在内核空间的表示，放到这个结构中更多的是一种映射关系</span><br><span class="line">      </span><br><span class="line">     const struct proto_ops *ops;</span><br><span class="line">           </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>type：指定所用协议类型的数字标识</li>
+<li>state：表示套接字链接的状态，不过<strong>不同于TCP建联过程中的全联接、半连接</strong>，个人感觉意义不大，可以忽略</li>
+<li>file：指向一个伪的文件实例，用于要接字通信</li>
+</ul>
+<p>上述套接字并未绑定任何的协议，而是通过proto_ops指针指向一个数据结构，该结构中包含了协议以及用于处理特定协议的函数，这也是linux中常见的模式了：
+（通过指针化将具体的实现交由特定的业务来实现，从而使得业务更通用）。</p>
+<p>上述结构体中的sock字段对应了内核层面上的套接字，其结构对应如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line">struct sock &#123;</span><br><span class="line">    struct sock_common  __sk_common;</span><br><span class="line">    #define sk_family       __sk_common.skc_family</span><br><span class="line">    #define sk_state        __sk_common.skc_state</span><br><span class="line">    #define sk_reuse        __sk_common.skc_reuse</span><br><span class="line">    #define sk_bound_dev_if     __sk_common.skc_bound_dev_if</span><br><span class="line">    #define sk_node         __sk_common.skc_node</span><br><span class="line">    #define sk_bind_node        __sk_common.skc_bind_node</span><br><span class="line">    #define sk_refcnt       __sk_common.skc_refcnt</span><br><span class="line">    unsigned char       sk_shutdown : 2,</span><br><span class="line">                        sk_no_check : 2,</span><br><span class="line">                        sk_userlocks : 4;</span><br><span class="line">    unsigned char       sk_protocol;</span><br><span class="line">    unsigned short      sk_type;</span><br><span class="line">    int         sk_rcvbuf;</span><br><span class="line">    socket_lock_t       sk_lock;</span><br><span class="line">    wait_queue_head_t   *sk_sleep;</span><br><span class="line">    struct dst_entry    *sk_dst_cache;</span><br><span class="line">    struct xfrm_policy  *sk_policy[2];</span><br><span class="line">    rwlock_t        sk_dst_lock;</span><br><span class="line">    atomic_t        sk_rmem_alloc;</span><br><span class="line">    atomic_t        sk_wmem_alloc;</span><br><span class="line">    atomic_t        sk_omem_alloc;</span><br><span class="line">    struct sk_buff_head sk_receive_queue;</span><br><span class="line">    struct sk_buff_head sk_write_queue;</span><br><span class="line">    int         sk_wmem_queued;</span><br><span class="line">    int         sk_forward_alloc;</span><br><span class="line">    unsigned int        sk_allocation;</span><br><span class="line">    int         sk_sndbuf;</span><br><span class="line">    int         sk_route_caps;</span><br><span class="line">    int         sk_hashent;</span><br><span class="line">    unsigned long       sk_flags;</span><br><span class="line">    unsigned long           sk_lingertime;</span><br><span class="line"></span><br><span class="line">    struct &#123;</span><br><span class="line">        struct sk_buff *head;</span><br><span class="line">        struct sk_buff *tail;</span><br><span class="line">    &#125; sk_backlog;</span><br><span class="line">    struct sk_buff_head sk_error_queue;</span><br><span class="line">    struct proto        *sk_prot;</span><br><span class="line">    struct proto        *sk_prot_creator;</span><br><span class="line">    rwlock_t        sk_callback_lock;</span><br><span class="line">    int         sk_err,</span><br><span class="line">                sk_err_soft;</span><br><span class="line">    unsigned short      sk_ack_backlog;</span><br><span class="line">    unsigned short      sk_max_ack_backlog;</span><br><span class="line">    __u32           sk_priority;</span><br><span class="line">    struct ucred        sk_peercred;</span><br><span class="line">    int         sk_rcvlowat;</span><br><span class="line">    long            sk_rcvtimeo;</span><br><span class="line">    long            sk_sndtimeo;</span><br><span class="line">    struct sk_filter        *sk_filter;</span><br><span class="line">    void            *sk_protinfo;</span><br><span class="line">    struct timer_list   sk_timer;</span><br><span class="line">    struct timeval      sk_stamp;</span><br><span class="line">    struct socket       *sk_socket;</span><br><span class="line">    void            *sk_user_data;</span><br><span class="line">    struct page     *sk_sndmsg_page;</span><br><span class="line">    struct sk_buff      *sk_send_head;</span><br><span class="line">    __u32           sk_sndmsg_off;</span><br><span class="line">    int         sk_write_pending;</span><br><span class="line">    void            *sk_security;</span><br><span class="line">    void            (*sk_state_change)(struct sock *sk);</span><br><span class="line">    void            (*sk_data_ready)(struct sock *sk, int bytes);</span><br><span class="line">    void            (*sk_write_space)(struct sock *sk);</span><br><span class="line">    void            (*sk_error_report)(struct sock *sk);</span><br><span class="line">    int             (*sk_backlog_rcv)(struct sock *sk,</span><br><span class="line">                    struct sk_buff *skb);</span><br><span class="line">    void            (*sk_destruct)(struct sock *sk);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>上述结构体中的__sk_common字段是套接字在网络层的最小的表示（可以认为是身份标识，不携带数据的那种，分组数据到来之后寻找数据对应的socket的时候会用到），其他的字段对应如下：</p>
+<ul>
+<li>sk_shutdown是一组标志位，SEND_SHUTDOWN and/or RCV_SHUTDOWN。</li>
+<li>sk_userlocks， SO_SNDBUF and SO_RCVBUF。</li>
+<li>sk_rcvbuf表示接收缓冲区的字节长度。</li>
+<li>sk_rmem_alloc表示接收队列已提交的字节数。</li>
+<li>sk_receive_queue<strong>表示接收的数据包的队列</strong>。</li>
+<li>sk_wmem_alloc表示发送队列已提交的字节数。</li>
+<li>sk_write_queue<strong>表示发送数据包的队列</strong>。</li>
+<li>sk_sndbuf表示发送缓冲区的字节长度。</li>
+<li>sk_flags，SO_LINGER (l_onoff)，SO_BROADCAST，SO_KEEPALIVE，SO_OOBINLINE。</li>
+<li>sk_prot是指定的域内部的协议处理函数集，它是套接口层跟传输层之间的一个接口，提供诸如bind, accept, close等操作。</li>
+<li>sk_ack_backlog表示当前的侦听队列。</li>
+<li>sk_max_ack_backlog表示最大的侦听队列。</li>
+<li>sk_type表示套接字的类型，如SOCK_STREAM。</li>
+<li>sk_protocol表示在当前域中套接字所属的协议。</li>
+</ul>
+<p>由上面的结构体可知，每一个sock都对应了多个队列，不同的sock对应的队列也不同。除了上述字段之外，还有一些字段代表的是函数，
+这些函数将会在特定事件发生的时候被回调，具体可以根据名称来判断。</p>
+<p><strong>三者之间的关系：socket—-&gt; sock —–&gt; queue（多个） ——&gt;sk_buff</strong>。
+<strong>其中socket是系统调用返回给用户的一个用来和网络打交道的句柄，存在于内核空间，sock则包含了多个队列，队列中的每一个元素都是sk_buff，sock用于实现和网络层面上
+的数据的交换。也存在于内核空间</strong> 以上结构体都是存在于内核空间，因此这里其实并不涉及数据的拷贝（未涉及到用户的应用程序）</p>
+<h3 id="系统调用"><a href="#系统调用" class="headerlink" title="系统调用"></a>系统调用</h3><p><img src="//southrivers.github.io/2020/12/30/linux-计算机网络/syscall.png" alt></p>
+<p>socketcall系统调用可以通过虚拟文件系统进入内核，其最终会根据返回的inode像操作文件一样读写网络数据，这里我们提到的inode和上面的socket的映射关系是
+在这个系统调用的时候触发的sock_alloc系统调用完成绑定的，最终inode就像一层代理一样，真正的读写操作通过底层的socket所支持的操作来完成：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">static struct socket *sock_alloc(void)</span><br><span class="line">&#123;</span><br><span class="line">    struct inode *inode;</span><br><span class="line">    struct socket *sock;</span><br><span class="line"></span><br><span class="line">    inode = new_inode_pseudo(sock_mnt-&gt;mnt_sb);//创建一个inode，用于将sock和文件系统相关联</span><br><span class="line">    if (!inode)</span><br><span class="line">        return NULL;</span><br><span class="line"></span><br><span class="line">    sock = SOCKET_I(inode);//根据inode获取socket_alloc结构体中socket成员</span><br><span class="line">...</span><br><span class="line">    return sock;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在真正的像操作文件一样来操作socket还需要一些准备工作，如bind、listen、创建套接字等，这些所有的套接字相关的操作都是通过sys_socketcall来进行分发处理的，对应的函数见上图。</p>
+<p>socket创建流程图：</p>
+<p><img src="//southrivers.github.io/2020/12/30/linux-计算机网络/socket_create.png" alt></p>
+<p>前面也已经提到sock_alloc是用来将socket和inode进行绑定的，而最后一步sock_map_fd则为套接字创建一个伪文件，并为其分配一个文件描述符，将其作为系统调用的结果返回。</p>
+<h4 id="接收数据"><a href="#接收数据" class="headerlink" title="接收数据"></a>接收数据</h4><p>如下：</p>
+<p><img src="//southrivers.github.io/2020/12/30/linux-计算机网络/recv.png" alt></p>
+<p>将用于确定目标套接字的文件描述符传递到该系统调用，fget_light根据task_struct的描述符数组查找对应的file实例。sock_from_file则用来确定与之关联的inode，并通过SOCKET_I找到最终
+对应的套接字。接下来sock_recvmsg调用特定于协议的接收程序（通过指针指向的方式来指定接收程序）来完成数据的接收：</p>
+<ul>
+<li>如果接收队列（socket-&gt;sock-&gt;receive_queue）上有至少一个分组，则移除并返回该分组</li>
+<li>如果接收队列为空，进程则使用wait_for_packet使自身进入随眠，直到有数据到达。数据到达之后回调函数就会被唤醒（<strong>通过中断来完成</strong>），接下来会使用move_addr_to_user
+将数据拷贝到用户空间</li>
+</ul>
+<p>上述过程中我们看到了阻塞的过程，这也是传统的BIO的模式</p>
+<h4 id="发送数据"><a href="#发送数据" class="headerlink" title="发送数据"></a>发送数据</h4><p><img src="//southrivers.github.io/2020/12/30/linux-计算机网络/send.png" alt></p>
+<p>如上所示，fget_light和sock_from_file根据文件描述符查找相关的套接字。发送数据则使用move_addr_to_kernel将数据从用户空间拷贝到内核空间，然后sock_sendmsg使用特定协议
+来生成一个分组数据转发到更低的协议层。（<strong>需要说明一下转发到更低的协议层则是通过head指针的移动来生成更低层级的报文，从而避免了多次拷贝</strong>）。</p>
+<h3 id="传输层（将接收到的报文按照socket进行分组）"><a href="#传输层（将接收到的报文按照socket进行分组）" class="headerlink" title="传输层（将接收到的报文按照socket进行分组）"></a>传输层（将接收到的报文按照socket进行分组）</h3><p>两个基于IP的主要传输协议分别是UDP和TCP，我们来看一下UDP数据报文接收的过程：</p>
+<p><img src="//southrivers.github.io/2020/12/30/linux-计算机网络/udp_sock.png" alt></p>
+<p>如上演示了IP数据包在传输到UDP层面后报文的处理，简单的分析一下：</p>
+<ul>
+<li>__udp4_lib_lookup用于查找与目标匹配的内核内部的套接字sock（非socket，socket是面向应用层的），如果找不到这样的套接字，则会直接丢弃该报文。如果找到对应的套接字
+则将对应的报文放置到读经的队列，这个过程具体分为以下几个步骤：<ul>
+<li>等待套接字交付数据的进程，一致在sk_sleep队列上睡眠（这个是数据交付前的一直存在的状态）</li>
+<li>调用skb_queue_tail将包含数据的套接字缓冲区插入链表的末端</li>
+<li>启用回调函数sk_data_ready通知等待在sk_sleep队列上休眠的进程，有数据到了</li>
+</ul>
+</li>
+</ul>
+<p>TCP数据报文的处理过程稍显复杂，具体可以分为：</p>
+<ul>
+<li>三次握手建立连接</li>
+<li>数据流按序传输</li>
+<li>四次挥手断开链接</li>
+</ul>
+<p>三次握手、四次挥手的过程已经在其他的章节有介绍过，因此这里不打算花篇幅来介绍了，数据传输的过程参考UDP的数据传输。</p>
+<h3 id="网络层（接收报文，并未分组）"><a href="#网络层（接收报文，并未分组）" class="headerlink" title="网络层（接收报文，并未分组）"></a>网络层（接收报文，并未分组）</h3><p>网络层除负责接收和发送数据外，还负责在不直连的系统之间<strong>转发和路由分组</strong>，<strong>查找最佳的路由，并选择适当的网络设备来发送分组</strong>。鉴于每一种传输协议（UDP、TCP等）
+所支持的分组的长度不尽相同，IP协议也会将较大的分组切分成较小的单位，供接收方进行组合。
+接收分组数据的整体处理流程图如下：</p>
+<p><img src="//southrivers.github.io/2020/12/30/linux-计算机网络/ip_dev.png" alt></p>
+<ul>
+<li>分组到达ip_rev之后，首先会做一些校验的工作</li>
+<li>接着会调用一个netfilter，这个filter的功能是个切面的功能，提供了扩展的能力，我们常见的防火墙的功能就是基于此处实现的。</li>
+<li>判断分组的目的地是本地还是远端计算机，是本地则直接传到传输层，否则转到互联网的输出路径上。<ul>
+<li>交付到本地的传输层：<ul>
+<li>分片组合：由于IP分组可能是分片的，因此这里需要将分片重新合并，对应的处理过程如下：
+<img src="//southrivers.github.io/2020/12/30/linux-计算机网络/ip_combine.png" alt>
+内核在一个独立的缓存中管理原本属于一个分组的各个分片，该缓存称之为分片缓存（fragment cache）。在缓存中，属于同一个分组中的各个分片保存在
+同一个队列中，直到所有的数据都到来，这里的缓存区别于sk_buff，此时还没有足以形成sk_buff的数据量（要分组数据到期之后才可以）。上面的过程中ip_find
+用于根据分片ID、原地址、目标地址等头参数找到一个分组，如果找不到就会新建一个分组，接下来就是使用ip_frag_queue将分组置于队列上。最后使用ip_frag_reasm将分片重新组合，并
+释放申请的分片缓存区域。</li>
+<li>交付到本地传输层</li>
+</ul>
+</li>
+<li>分组转发：大致可以分为以下三个过程<ul>
+<li>寻找路由表</li>
+<li>分组分片</li>
+<li>路由准发<h3 id="网络访问层"><a href="#网络访问层" class="headerlink" title="网络访问层"></a>网络访问层</h3>最后这里介绍一下网络访问层，前面都是在内核子系统内部处理数据，并没有涉及到真正的网络设备，网络访问层通过与网卡的驱动程序协作完成计算机之间信息的传输。
+在内核的层面上，每一个网络设备都标示为net_device的结构体的实例。在分配并填充该结构的实例之后会将设备注册到内核。net_device结构包含了与特定设备相关的
+所有的信息，对应结构体如下：</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line">struct net_device</span><br><span class="line">   &#123;</span><br><span class="line">       //用于存放网络设备的设备名称；</span><br><span class="line">       char name[IFNAMSIZ];</span><br><span class="line"></span><br><span class="line">       //网络设备的别名；</span><br><span class="line">       char *ifalias;</span><br><span class="line"></span><br><span class="line">       //网络设备的接口索引值，独一无二的网络设备标识符；</span><br><span class="line">       int ifindex;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        //这个字段用于构建网络设备名的哈希散列表，而struct net中的</span><br><span class="line">      //name_hlist就指向每个哈希散列表的链表头；</span><br><span class="line">      struct hlist_node name_hlist;</span><br><span class="line"></span><br><span class="line">        //用于构建网络设备的接口索引值哈希散列表，在struct net中的</span><br><span class="line">      //index_hlist用于指向接口索引值哈希散列表的链表头；</span><br><span class="line">      struct hlist_node index_hlist;</span><br><span class="line"></span><br><span class="line">      //用于将每一个网络设备加入到一个网络命名空间中的网络设备双链表中</span><br><span class="line">      struct list_head dev_list;</span><br><span class="line"></span><br><span class="line">      //网络设备接口的标识符,其状态类型被定义在&lt;linux/if.h&gt;之中；</span><br><span class="line">      unsigned int flags;</span><br><span class="line"></span><br><span class="line">      //网络设备接口的标识符，但对用户空间不可见；</span><br><span class="line">      unsigned short  priv_flags;</span><br><span class="line"></span><br><span class="line">      //接口硬件类型，在&lt;if_arp.h&gt;中定义了每一个接口硬件类型；</span><br><span class="line">      unsigned short type；</span><br><span class="line"></span><br><span class="line">      //网络设备接口的最大传输单元；</span><br><span class="line">      unsigned mtu;</span><br><span class="line"></span><br><span class="line">      //硬件接口头长度；</span><br><span class="line">      unsigned short hard_header_len;</span><br><span class="line"></span><br><span class="line">      //网络设备接口的MAC地址；</span><br><span class="line">      unsigned char *dev_addr;</span><br><span class="line"></span><br><span class="line">      //网络设备接口的单播模式</span><br><span class="line">      int uc_promisc;</span><br><span class="line"></span><br><span class="line">      //网络设备接口的混杂模式；</span><br><span class="line">      unsigned int promiscuity;</span><br><span class="line"></span><br><span class="line">      //网络设备接口的全组播模式；</span><br><span class="line">      unsigend int allmulti;</span><br><span class="line"></span><br><span class="line">      //secondary unicast mac address</span><br><span class="line">      struct netdev_hw_addr_list uc;</span><br><span class="line"></span><br><span class="line">      //list of device hw address;</span><br><span class="line">      struct netdev_hw_addr_list dev_addrs;</span><br><span class="line"></span><br><span class="line">      //hw broadcast address;</span><br><span class="line">      unsigned char broadcast[MAX_ADDR_LEN];</span><br><span class="line"></span><br><span class="line">      //multicast mac address;</span><br><span class="line">      struct dev_addr_list *mac_list;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        //网络设备接口的数据包接收队列；</span><br><span class="line">      struct netdev_queue rx_queue;</span><br><span class="line"></span><br><span class="line">      //网络设备接口的数据包发送队列；</span><br><span class="line">      struct netdev_queue *tx;</span><br><span class="line"></span><br><span class="line">      //Number of TX queues allocated at alloc_netdev_mq() time</span><br><span class="line">      unsigned int num_tx_queues;</span><br><span class="line"></span><br><span class="line">      //Number of TX queues currently active in device;</span><br><span class="line">      unsigned int real_num_tx_queues;</span><br><span class="line"></span><br><span class="line">      //Max frame per queue allowned;</span><br><span class="line">      unsigned long tx_queue_len;</span><br><span class="line"></span><br><span class="line">        //网络设备接口的状态；</span><br><span class="line">      unsigned long state;</span><br><span class="line"></span><br><span class="line">      //网络设备接口的统计情况；</span><br><span class="line">      struct net_device_state states;</span><br><span class="line"></span><br><span class="line">      //用于执行网络设备所在的命名空间；</span><br><span class="line">      struct net *nd_net;     </span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p>net_device结构中大多数成员都是函数指针，执行与网卡相关的典型任务，这些函数是在网络设备注册的时候指定的，这在某种意义上有点类似于VFS，内核层面上提供接口，真正的交互则交给
+具体的网卡驱动来实现。</p>
+<h4 id="接收分组"><a href="#接收分组" class="headerlink" title="接收分组"></a>接收分组</h4><p>分组数据到达的时间是不可以确定的，因此现代设备都使用中断来知会内核数据到了，网络驱动程序（特定于网卡的程序）对特定于设备的中断设置了相关的处理程序，每当数据到了之后就会回调
+该函数完成分组数据的处理。不过数据的具体处理出现两种策略：</p>
+<ul>
+<li>传统方法：中断实时处理，这种方式的缺陷是每当有数据过来的时候都会触发中断，进而可能会导致cpu忙于处理中断而无法真正有效的处理数据了</li>
+<li>NAPI：第一个分组数据到来之后，驱动程序关闭中断请求通知，内核一直对数据进行处理，当没有数据到来之后再次开启中断请求，让内核接受中断。</li>
+</ul>
+<h4 id="发送分组"><a href="#发送分组" class="headerlink" title="发送分组"></a>发送分组</h4><p>在分组数据发送到目标计算机之前，首先会使用ARP的协议确定目标计算机的物理地址。由网卡的驱动程序来确定将要发送的分组放置到
+哪一个队列上。</p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>关于计算机网络的总结到此为止！来日方长，后面看有什么没有整理的再进行补充吧</p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>
