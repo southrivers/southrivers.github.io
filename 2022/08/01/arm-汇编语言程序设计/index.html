@@ -123,11 +123,11 @@
 <li>lr叫做link register，这个通常和函数是结合在一起的，lr存放的是函数的地址，当函数执行结束之后，需要继续在lr标记的位置继续往下执行</li>
 <li>pc叫做program counter，也就是程序计数器，用来指向下一条将要执行的代码</li>
 <li>cpsr用来存放运算溢出的信息，比如两个数相减，有可能大于0、也有可能小于0，对于小于0 的数，其在寄存器中表征的数也有可能是一个很大的数，因此需要表征其符号，另外对于两个求和运算的整数，其可能会产生进位，这里的进位也需要一个单独的寄存器来存储，这里就是cpsr</li>
-<li>spsr 用来保存cpsr的状态信息，当有异常的时候可以用来恢复cpsr，不过在实际应用的过程中用的并不多<h1 id="汇编语言语法"><a href="#汇编语言语法" class="headerlink" title="汇编语言语法"></a>汇编语言语法</h1></li>
+<li>spsr 用来保存cpsr的状态信息，当有异常的时候可以用来恢复cpsr，不过在实际应用的过程中用的并不多</li>
 </ul>
 </li>
 </ul>
-<h2 id="快速开始："><a href="#快速开始：" class="headerlink" title="快速开始："></a>快速开始：</h2><p>接下来通过一个示例来快速的演示一下汇编程序的hello world：</p>
+<h1 id="汇编语言语法"><a href="#汇编语言语法" class="headerlink" title="汇编语言语法"></a>汇编语言语法</h1><h2 id="快速开始"><a href="#快速开始" class="headerlink" title="快速开始"></a>快速开始</h2><p>接下来通过一个示例来快速的演示一下汇编程序的hello world：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.global _start</span><br><span class="line">_start:</span><br><span class="line">	mov r0, #30</span><br><span class="line">	</span><br><span class="line">	mov r7, #1</span><br><span class="line">	swi 0</span><br></pre></td></tr></table></figure>
 
 <p>上述代码中.global相当于是将当前文件的代码给export出去了，同时也指示了当前代码开始的位置即 _start，也就是传统编程里面的main函数，对于一般的编程来说，这里的label更多的像是一个函数名称，并且对于一个函数来说比较重要的是要return（void的除外，不过也可以return），这里的return在汇编语言层面上要通过中断产生，也就是这里的swi 0（soft ware interrupt 软中断或者内中断），前面我们知道系统调用的时候会检测r7寄存器的值，由于我们在r7中设置了1，通过查找中断向量表我们知道这是要推出程序的执行，并且是正常退出。 <strong>中断向量表是一个枚举的类型，对于不同架构的cpu来说其枚举值必定不同</strong></p>
@@ -151,8 +151,7 @@
 我们可以看到寄存器中的值，并根据寄存器中的值查看stack对应的内存区域的数据，如下：
 <img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/amem.png" alt>
 上面我们就见识到了寄存器、栈内存的状态，此时如果我们想要获得对应的值就需要使用间接寻址获得</p>
-<h2 id="数学运算"><a href="#数学运算" class="headerlink" title="数学运算"></a>数学运算</h2><p>hexo bug fix</p>
-<h2 id="逻辑运算"><a href="#逻辑运算" class="headerlink" title="逻辑运算"></a>逻辑运算</h2><h2 id="移位操作"><a href="#移位操作" class="headerlink" title="移位操作"></a>移位操作</h2><h2 id="条件分支"><a href="#条件分支" class="headerlink" title="条件分支"></a>条件分支</h2><h2 id="循环"><a href="#循环" class="headerlink" title="循环"></a>循环</h2><h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><h2 id="硬件交互"><a href="#硬件交互" class="headerlink" title="硬件交互"></a>硬件交互</h2><h1 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h1><h1 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h1><h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>参考网站：</p>
+<h2 id="数学运算"><a href="#数学运算" class="headerlink" title="数学运算"></a>数学运算</h2><h2 id="逻辑运算"><a href="#逻辑运算" class="headerlink" title="逻辑运算"></a>逻辑运算</h2><h2 id="移位操作"><a href="#移位操作" class="headerlink" title="移位操作"></a>移位操作</h2><h2 id="条件分支"><a href="#条件分支" class="headerlink" title="条件分支"></a>条件分支</h2><h2 id="循环"><a href="#循环" class="headerlink" title="循环"></a>循环</h2><h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><h2 id="硬件交互"><a href="#硬件交互" class="headerlink" title="硬件交互"></a>硬件交互</h2><h1 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h1><h1 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h1><h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>参考网站：</p>
 <p><a href="https://www.youtube.com/watch?v=gfmRrPjnEw4" target="_blank" rel="noopener">youtube</a></p>
 <p><a href="https://cpulator.01xz.net/" target="_blank" rel="noopener">在线code网址</a></p>
 
