@@ -1,0 +1,273 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>quartz 源码剖析 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2019-10-16">2019-10-16</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">quartz 源码剖析</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>工作的过程中有使用过quartz进行作业的调度，通常情况下我们是可以使用jdk自带的调度来实现一些简单的调度，不过
+当需要使用比较高级的调度功能的时候，jdk自带的调度功能就没有办法满足了，比如我们希望只有周末或者月末不进行调度，节假日
+不进行调度等。使用之余自然也对其调度的原理比较感兴趣，因此花了点时间来进行学习源码。</p>
+<h1 id="详解"><a href="#详解" class="headerlink" title="详解"></a>详解</h1><h2 id="quickstart"><a href="#quickstart" class="headerlink" title="quickstart"></a>quickstart</h2><p>我们首先通过一个示例来演示一下quartz如何实现作业的调度，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.hw;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.quartz.*;</span><br><span class="line"><span class="keyword">import</span> org.quartz.impl.StdSchedulerFactory;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuickStart</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">        Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();</span><br><span class="line">        JobDetail jobDetail = JobBuilder.newJob(StartJob.class).withIdentity("quick start", "wes").build();</span><br><span class="line">        Trigger trigger = TriggerBuilder.newTrigger().withSchedule(SimpleScheduleBuilder.repeatSecondlyForever(<span class="number">10</span>)).startNow().build();</span><br><span class="line">        scheduler.start();</span><br><span class="line">        scheduler.scheduleJob(jobDetail, trigger);</span><br><span class="line">        Thread.currentThread().join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">StartJob</span> <span class="keyword">implements</span> <span class="title">Job</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">(JobExecutionContext jobExecutionContext)</span> <span class="keyword">throws</span> JobExecutionException </span>&#123;</span><br><span class="line">            System.out.println(<span class="string">"quick start!"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码最终是以10s中执行一次StartJob，具体输出如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">quick start!</span><br><span class="line">quick start!</span><br><span class="line">quick start!</span><br><span class="line">quick start!</span><br><span class="line">quick start!</span><br></pre></td></tr></table></figure>
+
+<h2 id="框架下的实体，及实体之间的关系"><a href="#框架下的实体，及实体之间的关系" class="headerlink" title="框架下的实体，及实体之间的关系"></a>框架下的实体，及实体之间的关系</h2><p>在介绍quartz之前我们先来看一下其中存在的一些实体概念：</p>
+<ul>
+<li>JobDetail表示一个具体的可执行的调度程序，Job 是这个可执行程调度程序所要执行的内容，另外 JobDetail 还包含了这个任务调度的方案和策略。</li>
+<li>Trigger代表一个调度参数的配置，什么时候去调。</li>
+<li>Scheduler代表一个调度容器，一个调度容器中可以注册多个 JobDetail 和 Trigger。当 Trigger 与 JobDetail 组合，就可以被 Scheduler 容器调度了。</li>
+</ul>
+<p>下面我们用一张图来演示一下这些实体之间的关系(此图来源于网上)，如下：</p>
+<p><img src="//southrivers.github.io/2019/10/16/quartz-源码剖析/quartz.png" alt></p>
+<p>上图中最核心的应该就是scheduler了，这是整个调度的核心，触发调度的核心就是<code>scheduler.start()</code>，接下来的分析就从这里开始。</p>
+<h2 id="quartz调度的实现"><a href="#quartz调度的实现" class="headerlink" title="quartz调度的实现"></a>quartz调度的实现</h2><p><code>scheduler.start()</code>方法执行会进入如下代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> QuartzScheduler sched;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> SchedulerException </span>&#123;</span><br><span class="line">    sched.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码我们看到stdScheduler会调用QuartzScheduler的start方法，这可以说明我们的StdScheduler其实是QuartzScheduler的一个代理。
+接下来我们看一下QuartzScheduler的start方法执行了什么操作吧：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> SchedulerException </span>&#123;</span><br><span class="line"></span><br><span class="line">    ....</span><br><span class="line">    <span class="comment">// 在启动QuartzScheduler之前，通知到当前调度器的listener</span></span><br><span class="line">    notifySchedulerListenersStarting();</span><br><span class="line"></span><br><span class="line">    ....</span><br><span class="line">    <span class="comment">// 将pause标志位改为false</span></span><br><span class="line">    schedThread.togglePause(<span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 通知listener，scheduler完成启动</span></span><br><span class="line">    notifySchedulerListenersStarted();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码我省略了部分不必要的代码，将流程大致分为三个步骤，分别是：</p>
+<ul>
+<li>通知当前scheduler的listener该scheduler开始启动</li>
+<li>将调度线程的pause标志位改为false</li>
+<li>最后在完成启动的之后再次通知对应的listener已经完成调度器的启动</li>
+</ul>
+<p>这里的listener和tomcat的listener机制很相似，其为框架提供了一种可扩展的机制。上面代码中的核心步骤就是
+<code>schedThread.togglePause(false)</code>这一行，接下来我们跟进一下，看这一步究竟做了什么工作吧：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">togglePause</span><span class="params">(<span class="keyword">boolean</span> pause)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (sigLock) &#123;</span><br><span class="line">        paused = pause;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (paused) &#123;</span><br><span class="line">            signalSchedulingChange(<span class="number">0</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            sigLock.notifyAll();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码中我们首先会获取当前对象的一个锁，然后<code>sigLock</code>来实现多线程的同步操作。在初始阶段，代码的执行会走到下面<code>sigLock.notifyAll();</code>
+，这一步的操作就是通知所有等待在该对象上的线程进行一些操作，我们接下来看一下在该对象上等待的线程在被唤醒前和唤醒后分别执行了什么操作吧，
+接下来我们就不绕弯子了，直接进入正题QuartzScheduler的run方法，代码有点长：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> acquiresFailed = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 等待scheduler将pause置为false，这个是通过scheduler.start方法来设定的</span></span><br><span class="line">    <span class="keyword">while</span> (!halted.get()) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// check if we're supposed to pause...</span></span><br><span class="line">            <span class="keyword">synchronized</span> (sigLock) &#123;</span><br><span class="line">                <span class="keyword">while</span> (paused &amp;&amp; !halted.get()) &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        <span class="comment">// wait until togglePause(false) is called...</span></span><br><span class="line">                        sigLock.wait(<span class="number">1000L</span>);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException ignore) &#123;</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                    <span class="comment">// reset failure counter when paused, so that we don't</span></span><br><span class="line">                    <span class="comment">// wait again after unpausing</span></span><br><span class="line">                    acquiresFailed = <span class="number">0</span>;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (halted.get()) &#123;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            .....</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 阻塞的方式获取当前可用的线程的数量，如果获取不到则会一直阻塞</span></span><br><span class="line">            <span class="keyword">int</span> availThreadCount = qsRsrcs.getThreadPool().blockForAvailableThreads();</span><br><span class="line">            <span class="keyword">if</span>(availThreadCount &gt; <span class="number">0</span>) &#123; <span class="comment">// will always be true, due to semantics of blockForAvailableThreads...</span></span><br><span class="line"></span><br><span class="line">                List&lt;OperableTrigger&gt; triggers;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">long</span> now = System.currentTimeMillis();</span><br><span class="line"></span><br><span class="line">                clearSignaledSchedulingChange();</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    triggers = qsRsrcs.getJobStore().acquireNextTriggers(</span><br><span class="line">                            now + idleWaitTime, Math.min(availThreadCount, qsRsrcs.getMaxBatchSize()), qsRsrcs.getBatchTimeWindow());</span><br><span class="line">                    acquiresFailed = <span class="number">0</span>;</span><br><span class="line">                    <span class="keyword">if</span> (log.isDebugEnabled())</span><br><span class="line">                        log.debug(<span class="string">"batch acquisition of "</span> + (triggers == <span class="keyword">null</span> ? <span class="number">0</span> : triggers.size()) + <span class="string">" triggers"</span>);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (triggers != <span class="keyword">null</span> &amp;&amp; !triggers.isEmpty()) &#123;</span><br><span class="line"></span><br><span class="line">                    .....</span><br><span class="line"></span><br><span class="line">                    <span class="comment">// set triggers to 'executing'</span></span><br><span class="line">                    List&lt;TriggerFiredResult&gt; bndles = <span class="keyword">new</span> ArrayList&lt;TriggerFiredResult&gt;();</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">boolean</span> goAhead = <span class="keyword">true</span>;</span><br><span class="line">                    <span class="keyword">synchronized</span>(sigLock) &#123;</span><br><span class="line">                        goAhead = !halted.get();</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="comment">// 获取当前trigers对应的作业的详细信息</span></span><br><span class="line">                    <span class="keyword">if</span>(goAhead) &#123;</span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">                            List&lt;TriggerFiredResult&gt; res = qsRsrcs.getJobStore().triggersFired(triggers);</span><br><span class="line">                            <span class="keyword">if</span>(res != <span class="keyword">null</span>)</span><br><span class="line">                                bndles = res;</span><br><span class="line">                        &#125;</span><br><span class="line">                        ......</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; bndles.size(); i++) &#123;</span><br><span class="line">                        TriggerFiredResult result =  bndles.get(i);</span><br><span class="line">                        TriggerFiredBundle bndle =  result.getTriggerFiredBundle();</span><br><span class="line">                        Exception exception = result.getException();</span><br><span class="line">                        </span><br><span class="line">                        .....</span><br><span class="line">                        </span><br><span class="line">                        <span class="comment">// it's possible to get 'null' if the triggers was paused,</span></span><br><span class="line">                        <span class="comment">// blocked, or other similar occurrences that prevent it being</span></span><br><span class="line">                        <span class="comment">// fired at this time...  or if the scheduler was shutdown (halted)</span></span><br><span class="line">                        <span class="keyword">if</span> (bndle == <span class="keyword">null</span>) &#123;</span><br><span class="line">                            qsRsrcs.getJobStore().releaseAcquiredTrigger(triggers.get(i));</span><br><span class="line">                            <span class="keyword">continue</span>;</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="comment">// 使用JobShell封装代执行的作业</span></span><br><span class="line">                        JobRunShell shell = <span class="keyword">null</span>;</span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">                            shell = qsRsrcs.getJobRunShellFactory().createJobRunShell(bndle);</span><br><span class="line">                            shell.initialize(qs);</span><br><span class="line">                        &#125; <span class="keyword">catch</span> (SchedulerException se) &#123;</span><br><span class="line">                            qsRsrcs.getJobStore().triggeredJobComplete(triggers.get(i), bndle.getJobDetail(), CompletedExecutionInstruction.SET_ALL_JOB_TRIGGERS_ERROR);</span><br><span class="line">                            <span class="keyword">continue</span>;</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="comment">// 将作业丢到线程池中执行并返回，注意这里并不是阻塞调用，有返回值主要是为了判断将作业提交到线程池的时候是否有异常</span></span><br><span class="line">                        <span class="keyword">if</span> (qsRsrcs.getThreadPool().runInThread(shell) == <span class="keyword">false</span>) &#123;</span><br><span class="line">                            <span class="comment">// this case should never happen, as it is indicative of the</span></span><br><span class="line">                            <span class="comment">// scheduler being shutdown or a bug in the thread pool or</span></span><br><span class="line">                            <span class="comment">// a thread pool being used concurrently - which the docs</span></span><br><span class="line">                            <span class="comment">// say not to do...</span></span><br><span class="line">                            getLog().error(<span class="string">"ThreadPool.runInThread() return false!"</span>);</span><br><span class="line">                            qsRsrcs.getJobStore().triggeredJobComplete(triggers.get(i), bndle.getJobDetail(), CompletedExecutionInstruction.SET_ALL_JOB_TRIGGERS_ERROR);</span><br><span class="line">                        &#125;</span><br><span class="line"></span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">continue</span>; <span class="comment">// while (!halted)</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            .....</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面代码整体有点长，这里我删除了不算太重要的内容，从流程上来看的话也还算比较简单，代码中已经备注了相关的信息：</p>
+<ul>
+<li>等待scheduler将pause置为false，这个是通过scheduler.start方法来设定的</li>
+<li>阻塞的方式获取当前可用的线程的数量，如果获取不到则会一直阻塞</li>
+<li>获取当前triggers，以及其对应的作业的详细信息</li>
+<li>使用JobShell封装待执行的作业，并将该作业丢到线程之中执行</li>
+</ul>
+<p>上面分析了scheduler启动的过程，在上面这个过程中的最后是将作业提交到线程池中进行执行，具体作业是怎么执行的我们还没有看到，
+接下来我们继续跟进代码来分析一下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">runInThread</span><span class="params">(Runnable runnable)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (runnable == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">synchronized</span> (nextRunnableLock) &#123;</span><br><span class="line">        .....</span><br><span class="line">        <span class="comment">// 从availWorkers获取对应的资源用于执行任务</span></span><br><span class="line">        <span class="keyword">if</span> (!isShutdown) &#123;</span><br><span class="line">            WorkerThread wt = (WorkerThread)availWorkers.removeFirst();</span><br><span class="line">            busyWorkers.add(wt);</span><br><span class="line">            wt.run(runnable);</span><br><span class="line">        &#125;</span><br><span class="line">        nextRunnableLock.notifyAll();</span><br><span class="line">        handoffPending = <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码中我们可以看到有availWorkers和busyWorkers两个列表，这种模式在池化资源的时候非常有用，总结其目的无非就是
+实现线程的复用和线程体量的控制，作业的具体执行还在于提交的Runnable的run方法中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    qs.addInternalSchedulerListener(<span class="keyword">this</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        OperableTrigger trigger = (OperableTrigger) jec.getTrigger();</span><br><span class="line">        JobDetail jobDetail = jec.getJobDetail();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">do</span> &#123;</span><br><span class="line"></span><br><span class="line">            JobExecutionException jobExEx = <span class="keyword">null</span>;</span><br><span class="line">            Job job = jec.getJobInstance();</span><br><span class="line"></span><br><span class="line">            ......</span><br><span class="line">            <span class="comment">// execute the job</span></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                log.debug(<span class="string">"Calling execute on job "</span> + jobDetail.getKey());</span><br><span class="line">                job.execute(jec);</span><br><span class="line">                endTime = System.currentTimeMillis();</span><br><span class="line">            &#125; </span><br><span class="line"></span><br><span class="line">            jec.setJobRunTime(endTime - startTime);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// notify all job listeners</span></span><br><span class="line">            <span class="keyword">if</span> (!notifyJobListenersComplete(jec, jobExEx)) &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            ....</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                complete(<span class="keyword">true</span>);</span><br><span class="line">            &#125; ....</span><br><span class="line"></span><br><span class="line">            qs.notifyJobStoreJobComplete(trigger, jobDetail, instCode);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125; <span class="keyword">while</span> (<span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        qs.removeInternalSchedulerListener(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在上面的代码中具体的流程可以大致分为几个步骤：</p>
+<ul>
+<li>使用jobFactory通过反射的方式获取job实例</li>
+<li>执行job对象的execute方法</li>
+<li>通知作业监听器当前作业完成情况</li>
+</ul>
+<p>到此整个作业调度的流程我们大致看完了，不过quartz实现的作业调度的方式远不止这么简单，其本身是具备分布式调度的能力，至于如何实现分布式
+调度，那肯定是需要协调者存在的，通常可以使用数据库，另外作业相关的信息也是可以持久化到数据库中的，不过这些暂时没有用到，因此也就不整理了。
+另外分布式的调度也有基于quartz基础之上实现的，业内使用的比较广泛的应该就是elastic-job了，其中协调者使用的是zookeeper来完成的。接下来
+我们来演示一个稍微复杂的例子，通过quartz来构建一个DAG（列表简化版的DAG）</p>
+<h2 id="DAG的实现"><a href="#DAG的实现" class="headerlink" title="DAG的实现"></a>DAG的实现</h2><p>基于quartz实现时间层面上的调度显然是没有问题的，不过如果job之间有依赖关系的话应该如何实现呢？这个在具体的实施方案上有两种，
+一种是将作业的dag存放在jobDataMap上，通过构建起始节点并将DAG传入起始节点，并通过JobExecutionContext在作业之间传播DAG即可，
+如下：</p>
+<h3 id="JobDataMap实现DAG"><a href="#JobDataMap实现DAG" class="headerlink" title="JobDataMap实现DAG"></a>JobDataMap实现DAG</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.hw;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.quartz.*;</span><br><span class="line"><span class="keyword">import</span> org.quartz.impl.StdSchedulerFactory;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * 基于jobDataMap 实现作业之间有依赖关系的调度</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JobDataMapDAG</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">        Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 这一步是模拟一个作业转换图，当前是job之间的关系的绑定，还可以使用触发trigger的方式，使用trigger来完成多个作业的触发</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        JobDataMap jobDataMap = <span class="keyword">new</span> JobDataMap();</span><br><span class="line">        jobDataMap.put(StartJob<span class="class">.<span class="keyword">class</span>.<span class="title">getName</span>(), <span class="title">TransformJob</span>.<span class="title">class</span>.<span class="title">getName</span>())</span>;</span><br><span class="line">        jobDataMap.put(TransformJob<span class="class">.<span class="keyword">class</span>.<span class="title">getName</span>(), <span class="title">EndJob</span>.<span class="title">class</span>.<span class="title">getName</span>())</span>;</span><br><span class="line"></span><br><span class="line">        JobDetail startJob = JobBuilder.newJob(StartJob<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line">                .withDescription("this is description")</span><br><span class="line">                .withIdentity(<span class="string">"hello"</span>, <span class="string">"wes"</span>)</span><br><span class="line">                .usingJobData(jobDataMap)</span><br><span class="line">                .build();</span><br><span class="line"></span><br><span class="line">        Trigger trigger = TriggerBuilder.newTrigger()</span><br><span class="line">                .withDescription(<span class="string">"this is trigger"</span>)</span><br><span class="line">                .withIdentity(<span class="string">"trigger"</span>, <span class="string">"wes"</span>)</span><br><span class="line">                .withSchedule(SimpleScheduleBuilder.repeatSecondlyForever(<span class="number">20</span>))</span><br><span class="line">                .startNow()</span><br><span class="line">                .build();</span><br><span class="line"></span><br><span class="line">        scheduler.scheduleJob(startJob, trigger);</span><br><span class="line">        scheduler.start();</span><br><span class="line"></span><br><span class="line">        Thread.currentThread().join();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">StartJob</span> <span class="keyword">implements</span> <span class="title">Job</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">(JobExecutionContext jobExecutionContext)</span> <span class="keyword">throws</span> JobExecutionException </span>&#123;</span><br><span class="line"></span><br><span class="line">            System.out.print(<span class="string">"start ---------------&gt; "</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 完成start job之后调度到下面一个作业中</span></span><br><span class="line">            String nextJob = jobExecutionContext.getJobDetail().getJobDataMap().getString(<span class="keyword">this</span>.getClass().getName());</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                ((Job)(Class.forName(nextJob).newInstance())).execute(jobExecutionContext);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">TransformJob</span> <span class="keyword">implements</span> <span class="title">Job</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">(JobExecutionContext jobExecutionContext)</span> <span class="keyword">throws</span> JobExecutionException </span>&#123;</span><br><span class="line">            System.out.print(<span class="string">"transform ---------------&gt; "</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 完成transform job之后调度到下面一个作业中</span></span><br><span class="line">            String nextJob = jobExecutionContext.getJobDetail().getJobDataMap().getString(<span class="keyword">this</span>.getClass().getName());</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                ((Job)(Class.forName(nextJob).newInstance())).execute(jobExecutionContext);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">EndJob</span> <span class="keyword">implements</span> <span class="title">Job</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">(JobExecutionContext jobExecutionContext)</span> <span class="keyword">throws</span> JobExecutionException </span>&#123;</span><br><span class="line"></span><br><span class="line">            System.out.println(<span class="string">"end"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>程序的最终输出如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">SLF4J: Defaulting to no-operation (NOP) logger implementation</span><br><span class="line">SLF4J: See http:<span class="comment">//www.slf4j.org/codes.html#StaticLoggerBinder for further details.</span></span><br><span class="line">start ---------------&gt; transform ---------------&gt; end</span><br><span class="line">start ---------------&gt; transform ---------------&gt; end</span><br><span class="line">start ---------------&gt; transform ---------------&gt; end</span><br><span class="line">start ---------------&gt; transform ---------------&gt; end</span><br><span class="line">start ---------------&gt; transform ---------------&gt; end</span><br><span class="line">start ---------------&gt; transform ---------------&gt; end</span><br></pre></td></tr></table></figure>
+
+<p>上面这种方式会存在一个问题，那就是一个父节点对应多个子节点的情况下这种方式的调度是串行的的，无法同时执行多个后继节点的作业调度，
+不过这个问题是可以通过开启多个线程来实现子节点任务的并发执行。一种更好的方式是job执行完之后，触发后继节点的trigger，由trigger
+对后继节点进行点火操作，这样可以复用框架层面上给我们提供的线程池的能力。另外，如果我们要kill一个作业，是不是也会考虑大量的善后工作呢？
+既然如此，我们最好还是通过框架层面上给我们提供的工具来实现这种作业的调度为好。这里由于时间关系暂时不深究了，另外，构建DAG也可以使用
+listener来实现。</p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>quartz作为业内一款优秀的定时调度框架，应用范围很广，因此阅读一下源码还是很有必要的，上面的构建DAG的例子就真真的是我们工程的一个需求，
+当时是要实现ETL工具的开发，由于时间关系，这里不再赘述，后面看工作需要有时间再补齐吧。</p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>

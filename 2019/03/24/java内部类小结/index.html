@@ -1,0 +1,282 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>java内部类小结 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2019-03-24">2019-03-24</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">java内部类小结</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>工作过程中很少使用内部类，不过倒是经常在一些代码里面又看到内部类的身影，因此特意抽时间学习了一下，顺便总结一下方便日后查看。
+内部类分为以下几种：</p>
+<ul>
+<li>成员内部类<ul>
+<li>静态成员内部类</li>
+<li>非静态成员内部类</li>
+</ul>
+</li>
+<li>匿名内部类</li>
+<li>局部内部类</li>
+</ul>
+<p>现就以上内部类分别进行探讨，值得一提的是，我们在谈到这几种类的时候，需要时时刻刻在大脑中想象以下这几个类以及其对应的对象在内存中的布局，这样再理解起来
+就很简单了，不然总靠死记是没有办法很好的应用的。</p>
+<h1 id="成员内部类"><a href="#成员内部类" class="headerlink" title="成员内部类"></a>成员内部类</h1><p>首先强调一下，既然是成员内部类，那么其特点就是成员化，也即是内部类是作为一个外部类的成员进行看待的，既然是作为成员看待的，那么
+可以<strong>修饰成员的修饰符就可以拿来修饰这种内部类</strong>。而对于静态和非静态的理解则将其同变量进行比较就可以知道，<strong>静态的那必然是属于类的，
+而非静态的则是属于对象的</strong></p>
+<h2 id="非静态成员内部类"><a href="#非静态成员内部类" class="headerlink" title="非静态成员内部类"></a>非静态成员内部类</h2><p>我们首先来看一下非静态内部类的定义，然后演示以下其用法，并探讨一些特性。非静态内部类的形式如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Outter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">Inner</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其在内存中的布局如下：
+<img src="//southrivers.github.io/2019/03/24/java内部类小结/nstatic-class.png" alt>
+如上，由于是非静态的内部类，因此<strong>该内部类是只存在于外部对象上（并非类上）的，这种特性会导致内部类只有在外部类被实例化之后才会被加载到内存中</strong>（图中实线所示），
+也因此我们不能在非静态内部类定义静态变量，因为静态变量本身就是类级别的，要求类在虚拟机启动的时候就应该加载到永久带的内存中，
+而非静态内部类在外部类没有生成对象的时候是不存在的，所以内部类的字段和方法都不能是静态的。
+下面我们来演示一下具体的用法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestOutter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Outter.Inner inner = <span class="keyword">new</span> Outter(<span class="number">1</span>).<span class="keyword">new</span> Inner(<span class="number">2</span>);</span><br><span class="line">        inner.test();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Outter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> i;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Outter</span><span class="params">(<span class="keyword">int</span> i)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.i = i;</span><br><span class="line">        System.out.println(<span class="string">"this is outter cons, i = "</span> + i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">Inner</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> x;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Inner</span><span class="params">(<span class="keyword">int</span> x)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.x = x;</span><br><span class="line">            System.out.println(<span class="string">"this is inner cons, x = "</span> + x);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            System.out.println(i);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到内部类可以正常的访问外部类的静态的或者非静态的变量，不过需要注意的是，对于两个不同的外部对象，
+由于其外部对象不同，因此每一个外部对象所持有的内部对象也正如上图中的虚线所示，我们可以通过反编译相关的字节码来验证这种猜想：
+上面的类编译后会生成如下文件：
+<img src="//southrivers.github.io/2019/03/24/java内部类小结/javacnstatic-class.png" alt>
+从上面的文件我们看到外部类以及对应的内部类在编译完之后会分别存放到不同的文件，我们查看一下内部类反编译后的文件，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">Compiled from &quot;TestOutter.java&quot;</span><br><span class="line">class com.h3c.Outter$Inner &#123;</span><br><span class="line">  int x;</span><br><span class="line"></span><br><span class="line">  final com.h3c.Outter this$0;</span><br><span class="line"></span><br><span class="line">  public com.h3c.Outter$Inner(com.h3c.Outter, int);</span><br><span class="line">    Code:</span><br><span class="line">       0: aload_0</span><br><span class="line">       1: aload_1</span><br><span class="line">       2: putfield      #1                  // Field this$0:Lcom/h3c/Outter;</span><br><span class="line">       5: aload_0</span><br><span class="line">       6: invokespecial #2                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       9: aload_0</span><br><span class="line">      10: iload_2</span><br><span class="line">      11: putfield      #3                  // Field x:I</span><br><span class="line">      14: getstatic     #4                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">      17: new           #5                  // class java/lang/StringBuilder</span><br><span class="line">      20: dup</span><br><span class="line">      21: invokespecial #6                  // Method java/lang/StringBuilder.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">      24: ldc           #7                  // String this is inner cons, x =</span><br><span class="line">      26: invokevirtual #8                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">      29: iload_2</span><br><span class="line">      30: invokevirtual #9                  // Method java/lang/StringBuilder.append:(I)Ljava/lang/StringBuilder;</span><br><span class="line">      33: invokevirtual #10                 // Method java/lang/StringBuilder.toString:()Ljava/lang/String;</span><br><span class="line">      36: invokevirtual #11                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">      39: return</span><br><span class="line"></span><br><span class="line">  public void test();</span><br><span class="line">    Code:</span><br><span class="line">       0: getstatic     #4                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       3: getstatic     #12                 // Field com/h3c/Outter.i:I</span><br><span class="line">       6: invokevirtual #13                 // Method java/io/PrintStream.println:(I)V</span><br><span class="line">       9: return</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在上面反编译之后的字节码中我们可以看到多了一个成员变量：<figure class="highlight plain"><figcaption><span>com.h3c.Outter this$0;```，并且在内部类的构造函数中会传入一个**外部类对象的引用**</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">，也因此我们可以确定内部类在外部类在生成对应对象的时候要求传入外部类的引用。</span><br><span class="line">使用非静态的内部类还需要注意的是序列化，由于序列化要求所有的成员都实现了序列化的接口（**除非是使用transient修饰的变量**），而从上面反编译后的字节码我们</span><br><span class="line">看到编译器给内部类自动添加了一个外部类的成员变量，因此如果我们仅仅使内部类实现了Serializable接口的化，在序列化内部对象到文件的时候将得到一个无法序列化的错误，</span><br><span class="line">这正是由于外部类没有实现序列化的接口，程序演示如下：</span><br><span class="line"></span><br><span class="line">```java</span><br><span class="line">public class TestOutter &#123;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws IOException &#123;</span><br><span class="line">        Outter.Inner inner = new Outter(1).new Inner(2);</span><br><span class="line">        inner.test();</span><br><span class="line">        File file = new File(&quot;test&quot;);</span><br><span class="line">        new ObjectOutputStream(new FileOutputStream(file)).writeObject(inner);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class Outter &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    static int i;</span><br><span class="line"></span><br><span class="line">    public Outter(int i) &#123;</span><br><span class="line">        this.i = i;</span><br><span class="line">        System.out.println(&quot;this is outter cons, i = &quot; + i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void test() &#123;</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line">    class Inner implements Serializable &#123;</span><br><span class="line">        int x;</span><br><span class="line"></span><br><span class="line">        public Inner(int x) &#123;</span><br><span class="line">            this.x = x;</span><br><span class="line">            System.out.println(&quot;this is inner cons, x = &quot; + x);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        public void test() &#123;</span><br><span class="line">            System.out.println(i);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>对应的执行结果如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">this is outter cons, i = 1</span><br><span class="line">this is inner cons, x = 2</span><br><span class="line">1</span><br><span class="line">Exception in thread &quot;main&quot; java.io.NotSerializableException: com.h3c.Outter</span><br><span class="line">	at java.io.ObjectOutputStream.writeObject0(ObjectOutputStream.java:1184)</span><br><span class="line">	at java.io.ObjectOutputStream.defaultWriteFields(ObjectOutputStream.java:1548)</span><br><span class="line">	at java.io.ObjectOutputStream.writeSerialData(ObjectOutputStream.java:1509)</span><br><span class="line">	at java.io.ObjectOutputStream.writeOrdinaryObject(ObjectOutputStream.java:1432)</span><br><span class="line">	at java.io.ObjectOutputStream.writeObject0(ObjectOutputStream.java:1178)</span><br><span class="line">	at java.io.ObjectOutputStream.writeObject(ObjectOutputStream.java:348)</span><br><span class="line">	at com.h3c.TestOutter.main(TestOutter.java:11)</span><br></pre></td></tr></table></figure>
+
+<p>上面我们也已经分析这种问题的原因了，那么想要解决这种问题也就很简单了，那就是将外部类也实现Serializable即可，代码不再演示，有兴趣的可以下来自己尝试。</p>
+<h2 id="静态成员内部类"><a href="#静态成员内部类" class="headerlink" title="静态成员内部类"></a>静态成员内部类</h2><p>静态成员内部类和普通的类并没有什么区别，既然和普通类没有什么区别，那么静态成员内部类对象的创建就不需要依赖外部对象，
+当然这种内部类也就没有办法访问外部类的非静态变量或者方法，不过这种内部类也因此可以定义自己的静态成员或者变量。同时也因为这种内部类不再持有外部类的
+对象，因此序列化也就不受外部类的影响了，如下简单演示一下：
+代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestOutter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        Outter.Inner inner = <span class="keyword">new</span> Outter.Inner(<span class="number">2</span>);</span><br><span class="line">        inner.test();</span><br><span class="line">        File file = <span class="keyword">new</span> File(<span class="string">"test"</span>);</span><br><span class="line">        <span class="keyword">new</span> ObjectOutputStream(<span class="keyword">new</span> FileOutputStream(file)).writeObject(inner);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Outter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> i;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Outter</span><span class="params">(<span class="keyword">int</span> i)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.i = i;</span><br><span class="line">        System.out.println(<span class="string">"this is outter cons, i = "</span> + i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Inner</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">        <span class="keyword">static</span> <span class="keyword">int</span> x;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Inner</span><span class="params">(<span class="keyword">int</span> x)</span> </span>&#123;</span><br><span class="line">            x = x;</span><br><span class="line">            System.out.println(<span class="string">"this is inner cons, x = "</span> + x);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            System.out.println(i);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>反编译内部类结果如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">Compiled from &quot;TestOutter.java&quot;</span><br><span class="line">class com.h3c.Outter$Inner implements java.io.Serializable &#123;</span><br><span class="line">  static int x;</span><br><span class="line"></span><br><span class="line">  public com.h3c.Outter$Inner(int);</span><br><span class="line">    Code:</span><br><span class="line">       0: aload_0</span><br><span class="line">       1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       4: iload_1</span><br><span class="line">       5: istore_1</span><br><span class="line">       6: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       9: new           #3                  // class java/lang/StringBuilder</span><br><span class="line">      12: dup</span><br><span class="line">      13: invokespecial #4                  // Method java/lang/StringBuilder.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">      16: ldc           #5                  // String this is inner cons, x =</span><br><span class="line">      18: invokevirtual #6                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">      21: iload_1</span><br><span class="line">      22: invokevirtual #7                  // Method java/lang/StringBuilder.append:(I)Ljava/lang/StringBuilder;</span><br><span class="line">      25: invokevirtual #8                  // Method java/lang/StringBuilder.toString:()Ljava/lang/String;</span><br><span class="line">      28: invokevirtual #9                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">      31: return</span><br><span class="line"></span><br><span class="line">  public void test();</span><br><span class="line">    Code:</span><br><span class="line">       0: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       3: getstatic     #10                 // Field com/h3c/Outter.i:I</span><br><span class="line">       6: invokevirtual #11                 // Method java/io/PrintStream.println:(I)V</span><br><span class="line">       9: return</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="局部内部类"><a href="#局部内部类" class="headerlink" title="局部内部类"></a>局部内部类</h1><p>在方法中定义的内部类叫做局部类，由于是在方法中定义的，因此其和方法内定义的普通变量并不会有太大的区别，所以这种内部类不能够使用private等修饰符来修饰
+，代码演示如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PartTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        POutter pOutter = <span class="keyword">new</span> POutter();</span><br><span class="line">        Object x = pOutter.test(<span class="number">12</span>);</span><br><span class="line">        System.out.println(x);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">POutter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> px;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">test</span><span class="params">(<span class="keyword">final</span> <span class="keyword">int</span> j)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span> k = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="class"><span class="keyword">class</span> <span class="title">PInner</span> </span>&#123;</span><br><span class="line">            <span class="keyword">int</span> x;</span><br><span class="line"></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="title">PInner</span><span class="params">(<span class="keyword">int</span> x)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">this</span>.x = x;</span><br><span class="line">                System.out.println(<span class="string">"pinner cons x= "</span> + x);</span><br><span class="line">                System.out.println(<span class="string">"poutter cons px= "</span> + px);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="function"><span class="keyword">public</span> PInner <span class="title">say</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(<span class="string">"hello pinner k = "</span> + k);</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        PInner inner = <span class="keyword">new</span> PInner(<span class="number">12</span>);</span><br><span class="line">        inner.say();</span><br><span class="line">        <span class="keyword">return</span> inner;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同样我们编译之后可以看到会存在以下几个文件：
+<img src="//southrivers.github.io/2019/03/24/java内部类小结/partinner-class.png" alt>
+我们再次使用javap将内部类反编译成字节码，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">Compiled from &quot;PartTest.java&quot;</span><br><span class="line">class com.h3c.POutter$1PInner &#123;</span><br><span class="line">  int x;</span><br><span class="line"></span><br><span class="line">  final com.h3c.POutter this$0;</span><br><span class="line"></span><br><span class="line">  public com.h3c.POutter$1PInner(com.h3c.POutter, int);</span><br><span class="line">    Code:</span><br><span class="line">       0: aload_0</span><br><span class="line">       1: aload_1</span><br><span class="line">       2: putfield      #1                  // Field this$0:Lcom/h3c/POutter;</span><br><span class="line">       5: aload_0</span><br><span class="line">       6: invokespecial #2                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       9: aload_0</span><br><span class="line">      10: iload_2</span><br><span class="line">      11: putfield      #3                  // Field x:I</span><br><span class="line">      14: getstatic     #4                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">      17: new           #5                  // class java/lang/StringBuilder</span><br><span class="line">      20: dup</span><br><span class="line">      21: invokespecial #6                  // Method java/lang/StringBuilder.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">      24: ldc           #7                  // String pinner cons x=</span><br><span class="line">      26: invokevirtual #8                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">      29: iload_2</span><br><span class="line">      30: invokevirtual #9                  // Method java/lang/StringBuilder.append:(I)Ljava/lang/StringBuilder;</span><br><span class="line">      33: invokevirtual #10                 // Method java/lang/StringBuilder.toString:()Ljava/lang/String;</span><br><span class="line">      36: invokevirtual #11                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">      39: getstatic     #4                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">      42: new           #5                  // class java/lang/StringBuilder</span><br><span class="line">      45: dup</span><br><span class="line">      46: invokespecial #6                  // Method java/lang/StringBuilder.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">      49: ldc           #12                 // String poutter cons px=</span><br><span class="line">      51: invokevirtual #8                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">      54: aload_1</span><br><span class="line">      55: getfield      #13                 // Field com/h3c/POutter.px:I</span><br><span class="line">      58: invokevirtual #9                  // Method java/lang/StringBuilder.append:(I)Ljava/lang/StringBuilder;</span><br><span class="line">      61: invokevirtual #10                 // Method java/lang/StringBuilder.toString:()Ljava/lang/String;</span><br><span class="line">      64: invokevirtual #11                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">      67: return</span><br><span class="line"></span><br><span class="line">  public com.h3c.POutter$1PInner say();</span><br><span class="line">    Code:</span><br><span class="line">       0: getstatic     #4                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       3: ldc           #14                 // String hello pinner k = 0</span><br><span class="line">       5: invokevirtual #11                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">       8: aload_0</span><br><span class="line">       9: areturn</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们再次看到，对于局部内部类其成员变量新增了外部类对应的对象，因此可以知道序列化肯定是要求外部类也实现序列化，验证结果也正是如此，结果就不展示了，将上面代码贴进去执行就可以看到了。
+这里再次强调以下，局部内部类是和局部变量同一个级别的，因此局部变量可以执行的操作，局部内部类也可以执行，如：</p>
+<ul>
+<li>静态方法内部的局部类可以访问外部类的静态变量，但是不可以访问对象上的字段</li>
+<li>非静态方法北部的局部类可以访问外部类的静态、非静态变量</li>
+</ul>
+<h1 id="匿名内部类"><a href="#匿名内部类" class="headerlink" title="匿名内部类"></a>匿名内部类</h1><p>匿名内部类简单的说就是没有名字的内部类。我们知道类的构造函数要求和类的名称相同，因此如果连类的名称都没有的话，
+那么肯定也就没有办法定义构造函数了，确实是这样子的，如下演示代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AclassTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Aface aface = <span class="keyword">new</span> Aface() &#123;</span><br><span class="line"></span><br><span class="line">        &#125;;</span><br><span class="line">        aface.test();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Aface</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>编译完之后生成的类如下：
+<img src="//southrivers.github.io/2019/03/24/java内部类小结/a-class.png" alt>
+我们反编译AclassTest后，对应的字节码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Compiled from &quot;AclassTest.java&quot;</span><br><span class="line">public class com.h3c.AclassTest &#123;</span><br><span class="line">  public com.h3c.AclassTest();</span><br><span class="line">    Code:</span><br><span class="line">       0: aload_0</span><br><span class="line">       1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       4: return</span><br><span class="line"></span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">    Code:</span><br><span class="line">       0: new           #2                  // class com/h3c/AclassTest$1</span><br><span class="line">       3: dup</span><br><span class="line">       4: invokespecial #3                  // Method com/h3c/AclassTest$1.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       7: astore_1</span><br><span class="line">       8: aload_1</span><br><span class="line">       9: invokevirtual #4                  // Method com/h3c/Aface.test:()V</span><br><span class="line">      12: return</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到在main方法中初始化匿名内部类的时候调用的是抽象类的构造函数，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Compiled from &quot;AclassTest.java&quot;</span><br><span class="line">final class com.h3c.AclassTest$1 extends com.h3c.Aface &#123;</span><br><span class="line">  com.h3c.AclassTest$1();</span><br><span class="line">    Code:</span><br><span class="line">       0: aload_0</span><br><span class="line">       1: invokespecial #1                  // Method com/h3c/Aface.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">       4: return</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于匿名内部类的使用场景一般是只使用一次，而且类比较小。除了不可以给匿名内部类定义构造函数外，其也不可以定义静态的字段或者方法，这大概都是
+由于静态字段和方法都需要一个明确的类名的原因吧。</p>
+<h1 id="内部接口"><a href="#内部接口" class="headerlink" title="内部接口"></a>内部接口</h1><p>除了内部类之外，比较常见的还有内部接口，用法我们一并总结过一下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestInterface</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">interface</span> <span class="title">Inner</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">hell</span><span class="params">()</span></span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">InnerTest</span> <span class="keyword">implements</span> <span class="title">TestInterface</span>.<span class="title">Inner</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">hell</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"hello world"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        InnerTest innerTest = <span class="keyword">new</span> InnerTest();</span><br><span class="line">        innerTest.hell();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由于接口是没有构造函数，因此也就不能被实例化，所以内部接口只有在静态的时候才是有意义的，不论接口是否声明静态或者非静态。</p>
+<h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h1><p>关于内部类还有一些小的特性，比如，内部类不可以与外部类重名，这个是规范。另外当内部类方法和外部类有重叠的时候也会有一些需要注意的
+地方，下面我们就通过一个例子来进行说明：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Hello</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 内部类不可以和外部类重名</span></span><br><span class="line"><span class="comment">//    public class Hello &#123;</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//    &#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">Inner</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">say</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> Hello.<span class="keyword">this</span>.toString();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">say1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>.toString();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">"this is inner class"</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"this is outter class"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Hello hello = <span class="keyword">new</span> Hello();</span><br><span class="line">        Inner inner = hello.<span class="keyword">new</span> Inner();</span><br><span class="line">        System.out.println(inner.say());</span><br><span class="line">        System.out.println(inner.say1());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在上面的代码中，我们可以看到访问非静态内部类的方法的时候直接this就可以了，不过访问外部类的时候要加上类名，这个
+可以通过反编译之后来查看更详细的信息的，具体的不再过多的解释了。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>关于内部类的总结暂时到此可以告一段落了，后续如果发现不对的或者有趣的用法会持续更新上去。
+参考文档：<img src="https://blog.csdn.net/hikvision_java_gyh/article/details/8964155" alt></p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>thread group使用 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2020-01-16">2020-01-16</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">thread group使用</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>看源代码中总免不了一些不是太熟悉的知识，本节过一下线程组的相关知识，以便后续快速翻阅。</p>
+<h1 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h1><p>事出必有因，线程组的出现自然也有一定的原因，那就是方便线程的管理，线程组是树状的结构，整体如下：
+<img src="//southrivers.github.io/2020/01/16/thread-group使用/threadgroup.png" alt>
+简单说明一下，每一个线程都会隶属于一个线程组，线程组也都会有父线程组，
+依次向上查找可以找到system线程组。</p>
+<ul>
+<li>jvm创建的system线程组主要是用来管理jvm系统任务的线程组，如垃圾回收。</li>
+<li>system线程组的直属线程组是main线程组，该线程组至少包含一个main线程，用于执行main方法。</li>
+<li>main线程组的子线程组就是应用程序级别的线程组，这些线程组一般是用户创建的。<h1 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h1>上面简要的介绍了一下线程组的整体结构，接下来代码演示一下线程组的一些用法</li>
+</ul>
+<h2 id="构造"><a href="#构造" class="headerlink" title="构造"></a>构造</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ThreadGroup</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(Thread.currentThread().getThreadGroup(), name);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ThreadGroup</span><span class="params">(ThreadGroup parent, String name)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(checkParentAccess(parent), parent, name);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面是threadgroup的两个构造函数，由上面的两个构造函数可以看到，我们可以仅指定线程组的名称，这样默许创建的线程组隶属于当前线程所在的线程组。
+当然我们也可以明确的指定所创建的线程组的父线程组，这样所创建的线程组的父线程组即是我们在构造函数中指定的线程组</p>
+<h2 id="线程组信息查看"><a href="#线程组信息查看" class="headerlink" title="线程组信息查看"></a>线程组信息查看</h2><p>这里主要涉及到线程组相关的API，暂时可以先忽略，待需要的时候查看即可</p>
+<h2 id="线程管理"><a href="#线程管理" class="headerlink" title="线程管理"></a>线程管理</h2><p>下面以终止线程组中所有的线程的个数为例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorld</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        ThreadGroup tg = <span class="keyword">new</span> ThreadGroup(<span class="string">"aaa"</span>);</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Mythread(tg, <span class="string">"t1"</span>);</span><br><span class="line">        Thread t2 = <span class="keyword">new</span> Mythread(tg, <span class="string">"t2"</span>);</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">        Thread.sleep(<span class="number">10000</span>);</span><br><span class="line">        System.out.println(<span class="string">"before interrupt"</span> + tg.activeCount());</span><br><span class="line">        tg.interrupt();</span><br><span class="line">        <span class="comment">// 获取当前线程组至下所有的活动的线程的个数，该方法返回的是大约的数量</span></span><br><span class="line">        System.out.println(<span class="string">"after interrupt"</span> + tg.activeCount());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Mythread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Mythread</span><span class="params">(ThreadGroup tg, String name)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">super</span>(tg, name);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (<span class="string">"a"</span>) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    System.out.println(<span class="string">"group"</span> + Thread.currentThread().getThreadGroup().getName() + <span class="string">",thread "</span> +Thread.currentThread().getName());</span><br><span class="line">                    <span class="string">"a"</span>.wait();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    System.out.println(<span class="string">"group"</span> + Thread.currentThread().getThreadGroup().getName() + <span class="string">",thread "</span> +Thread.currentThread().getName() + <span class="string">"terminated!"</span>);</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最终的执行结果是，两个线程先后被激活，在等待了10s过后，两个线程又先后被终止</p>
+<p><em>线程、临界资源、cpu调度 有点像是工人、作业、和工作车间的关系</em></p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>上面是java线程组的概要介绍，主要是为了方便后续使用快速查阅，如果在查看源码的过程发现新的用法会持续更新</p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>

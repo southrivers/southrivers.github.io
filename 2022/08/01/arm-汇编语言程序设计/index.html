@@ -1,0 +1,236 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>arm 汇编语言程序设计 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2022-08-01">2022-08-01</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">arm 汇编语言程序设计</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="汇编语言概览"><a href="#汇编语言概览" class="headerlink" title="汇编语言概览"></a>汇编语言概览</h1><p>汇编语言是最接近机器语言的编程语言，如下图所示，汇编语言介于机器语言和高层语言之间：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/armartucture.png" alt></p>
+<h2 id="内存模型：arm架构的cpu内存结构如下图所示："><a href="#内存模型：arm架构的cpu内存结构如下图所示：" class="headerlink" title="内存模型：arm架构的cpu内存结构如下图所示："></a>内存模型：arm架构的cpu内存结构如下图所示：</h2><p><img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/cpu.png" alt></p>
+<ul>
+<li>寄存器：针对不同类型的cpu最重要的大概就是寄存器了，寄存器是最靠近cpu的存储，其在速度上也最接近cpu，如上图我们可以看到针对该种类型的cpu一共有17个寄存器：<ul>
+<li>r0 ~ r6, r8 ~ r12 用于存放cpu需要操作的数据，这些数据可以是输入数据、输出数据、函数调用的时候栈中的数据</li>
+<li>r7是一个特殊的寄存器，用于存放中断信号，中断信号的类型有两种：内中断、外中断，内中断是用户程序在运行过程中因为异常（调用一些需要超级权限才可以执行的指令、错误程序）或者用户程序主动的通过系统调用陷入内核态，外中断是基于时钟定时出发的，在一个时钟周期内cpu专心的处理程序，一个周期过了之后检查一下r7确认一下是否有中断产生，如果没有中断就会继续执行用户程序，如果有中断，则cpu会根据中断信号查找中断向量表，从而切换程序的执行。</li>
+<li>sp叫做stack pointer，是指向堆栈的指针，堆栈在函数调用或者比较复杂的数据结构如list的时候会用到，具体见图:<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/mem.png" alt></li>
+<li>lr叫做link register，这个通常和函数是结合在一起的，lr存放的是函数的地址，当函数执行结束之后，需要继续在lr标记的位置继续往下执行</li>
+<li>pc叫做program counter，也就是程序计数器，用来指向下一条将要执行的代码</li>
+<li>cpsr用来存放运算溢出的信息，比如两个数相减，有可能大于0、也有可能小于0，对于小于0 的数，其在寄存器中表征的数也有可能是一个很大的数，因此需要表征其符号，另外对于两个求和运算的整数，其可能会产生进位，这里的进位也需要一个单独的寄存器来存储，这里就是cpsr</li>
+<li>spsr 用来保存cpsr的状态信息，当有异常的时候可以用来恢复cpsr，不过在实际应用的过程中用的并不多<h1 id="汇编语言语法"><a href="#汇编语言语法" class="headerlink" title="汇编语言语法"></a>汇编语言语法</h1></li>
+</ul>
+</li>
+</ul>
+<h2 id="快速开始："><a href="#快速开始：" class="headerlink" title="快速开始："></a>快速开始：</h2><p>接下来通过一个示例来快速的演示一下汇编程序的hello world：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.global _start</span><br><span class="line">_start:</span><br><span class="line">	mov r0, #30</span><br><span class="line">	</span><br><span class="line">	mov r7, #1</span><br><span class="line">	swi 0</span><br></pre></td></tr></table></figure>
+
+<p>上述代码中.global相当于是将当前文件的代码给export出去了，同时也指示了当前代码开始的位置即 _start，也就是传统编程里面的main函数，对于一般的编程来说，这里的label更多的像是一个函数名称，并且对于一个函数来说比较重要的是要return（void的除外，不过也可以return），这里的return在汇编语言层面上要通过中断产生，也就是这里的swi 0（soft ware interrupt 软中断或者内中断），前面我们知道系统调用的时候会检测r7寄存器的值，由于我们在r7中设置了1，通过查找中断向量表我们知道这是要推出程序的执行，并且是正常退出。 <strong>中断向量表是一个枚举的类型，对于不同架构的cpu来说其枚举值必定不同</strong></p>
+<h2 id="数据寻址（address-data）"><a href="#数据寻址（address-data）" class="headerlink" title="数据寻址（address data）"></a>数据寻址（address data）</h2><ul>
+<li>立即寻址：立即寻址这种方式是向寄存器中移入一个常量值如：mov r0, #222</li>
+<li>直接寻址：直接寻址常见的有寄存器之间的数据传递，或者从stack中移入数据到寄存器，如：mov r0, r1、ldr r0,=list，这里的=list是获取list的地址</li>
+<li>间接寻址：在直接寻址中我们在r0中获取到了list的地址，接下来如果我们要获取list地址对应的值就需要ldr r1, [r0]这种方式来讲list的头元素加载到r1中。<ul>
+<li>前加：当我们需要移动list指针的位置的时候，可以在获取下一个数据之前移动指针，这样获取到的值就是指针指向的下一个元素：ldr r2, [r0, #4]</li>
+<li>后加：后加的意思是我们会先获得数据，然后再进行指针的移位操作，这样会导致获取不到最后一个元素:ldr r2, [r0, #4]!、ldr r2, [r0]，#4</li>
+</ul>
+</li>
+</ul>
+<p>下面通过一段代码来进行演示一下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.global _start</span><br><span class="line">_start:</span><br><span class="line">	ldr r0, =list</span><br><span class="line">	</span><br><span class="line">.data</span><br><span class="line">list:</span><br><span class="line">	.word 1,2,3,4,5</span><br></pre></td></tr></table></figure>
+
+<p>上面我们定义了.data段，这代表的是汇编语言程序的数据段，主要用来存放大量的数据，.data在汇编中是关键词，就像.global一样，可以很明显的看到其和label最大的区别就是后面没有“：”，接下来在data段中我们定一个变量list，变量的名称叫做list，然后我们定义了list的类型<code>.word</code>，值得注意的是汇编语言中的数据类型，.word表征的可以是整数也可以是浮点数，同样的数据类型也还有halfword、doubleworld、byte、bit等。
+上面的代码如下，我们可以明显的看到global和data的分界线：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/acode.png" alt>
+在程序的执行过程中我们可以看到寄存器的状态如下：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/adebug.png" alt>
+我们可以看到寄存器中的值，并根据寄存器中的值查看stack对应的内存区域的数据，如下：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/amem.png" alt>
+上面我们就见识到了寄存器、栈内存的状态，此时如果我们想要获得对应的值就需要使用间接寻址获得</p>
+<h2 id="数学运算"><a href="#数学运算" class="headerlink" title="数学运算"></a>数学运算</h2><p>hexo bug fix</p>
+<h2 id="逻辑运算"><a href="#逻辑运算" class="headerlink" title="逻辑运算"></a>逻辑运算</h2><h2 id="移位操作"><a href="#移位操作" class="headerlink" title="移位操作"></a>移位操作</h2><h2 id="条件分支"><a href="#条件分支" class="headerlink" title="条件分支"></a>条件分支</h2><h2 id="循环"><a href="#循环" class="headerlink" title="循环"></a>循环</h2><h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><h2 id="硬件交互"><a href="#硬件交互" class="headerlink" title="硬件交互"></a>硬件交互</h2><h1 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h1><h1 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h1><h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>参考网站：</p>
+<p><a href="https://www.youtube.com/watch?v=gfmRrPjnEw4" target="_blank" rel="noopener">youtube</a></p>
+<p><a href="https://cpulator.01xz.net/" target="_blank" rel="noopener">在线code网址</a></p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>

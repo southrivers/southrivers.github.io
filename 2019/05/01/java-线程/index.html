@@ -1,0 +1,300 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>线程小结 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2019-05-01">2019-05-01</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">线程小结</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在开始进入线程之前，我们还是先准备一下基础的知识，方便我们后面描述问题。</p>
+<h2 id="内核空间与用户空间"><a href="#内核空间与用户空间" class="headerlink" title="内核空间与用户空间"></a>内核空间与用户空间</h2><p>操作系统的核心是一个内核，独立于用户程序，其具备访问受限内存空间、底层资源的能力。
+为保障系统的安全，一般要求用户的程序不能直接访问这些资源，具体的实现方式就是：操作系统将寻址空间划分成内核空间和用户空间。
+对于一个32位的操作系统来说，其寻址空间位4G。其中用户空间由用户程序持有，内核空间由内核所持有。这里需要强调一下之所以划分
+空间是为了提高操作系统的稳定性和可用性。</p>
+<h2 id="用户态和内核态"><a href="#用户态和内核态" class="headerlink" title="用户态和内核态"></a>用户态和内核态</h2><p>上面我们了解了用户空间和内核空间的基础知识，接下来我们通过一个例子来说明一下用户态和内核态的概念：用户进程的启动必然是首先进入用户态，
+假定此时用户进程发起了一个系统调用：比如读取文件，那么应用也就从用户态切换到内核态，处于内核态的进程会读取文件到内核空间，然后将数据由内核
+空间拷贝到用户空间，最后应用从内核态切换回用户态。上面的切换过程是使用堆栈来保存中间变量，不同的空间会有不同的堆栈（用户空间有用户空间的堆栈，
+内核空间有内核空间的堆栈）。上面只是通过一个例子来说明用户态和内核态，严格的定义并没有说明，因此我们概括一下：
+<strong>运行在用户空间的进程即处于用户态，运行在内核空间的进程即处于内核态</strong>。</p>
+<h1 id="进程-amp-线程"><a href="#进程-amp-线程" class="headerlink" title="进程 &amp; 线程"></a>进程 &amp; 线程</h1><h2 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h2><p>进程是一个正在执行的程序的实例，进程和程序的概念可以通过java里面对象和类的对比。一个进程包含了pcb和用于保存各种变量的内存空间，进程一般是通过
+时间片来实现程序调度的，不过这种调度不方便问题的追踪，因此引入了进程模型来简化相关的问题。简化后的模型是：每一个进程都单独有一个虚拟的的cpu。
+具体可以参考：<a href="https://www.youtube.com/watch?v=SszLFSAV_Ck，**后面可以继续补充这一块资料" target="_blank" rel="noopener">https://www.youtube.com/watch?v=SszLFSAV_Ck，**后面可以继续补充这一块资料</a>**
+<del>进程的层次结构及linux的fork不解（待补充）</del></p>
+<p>进程的状态：</p>
+<ul>
+<li>创建</li>
+<li>就绪：万事俱备，只欠cpu</li>
+<li>阻塞：除cpu之外，还在等待其他资源</li>
+<li>运行：占据cpu，并处于执行的状态</li>
+<li>终止 </li>
+</ul>
+<p>如上面进程的状态中创建和终止是比较好理解的，不太好理解的就是就绪和阻塞，两者的区别已经在上面给出了。</p>
+<h2 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h2><p>上面我们给出了进程的一些基本概念。进程用于资源的聚集，线程才是cpu调度的基本单元（对于早期的单批道计算机可以认为是单线程的进程）。
+每一个线程包含了：</p>
+<ul>
+<li>程序计数器：用于记录线程执行到哪里了</li>
+<li>堆栈：用于暂存一些未返回的调用过程（程序返回地址、方法内的临时变量）</li>
+<li>寄存器：用于暂存执行过程中的临时变量，是高速缓存</li>
+</ul>
+<p>线程的状态和进程的状态是对应起来的，因此这里也就不再重复了。多线程技术可以提高程序并发执行的效率，但是却不一定会提高cpu的利用率，
+原因在于多线程增加了cpu切换的开销，如果每个线程都是cpu密集型，那么多线程会带来很大的开销，而如果多线程中包含了大量的IO操作，多线程通过
+线程的重叠交叉可以很好的提高进程的执行速度，同进程的模型一致，线程的模型是：每一个线程单独拥有一个cpu。这种简化的模型的好处就是可以
+大大的简化cpu切换所带来的复杂性。</p>
+<p>对比进程共享磁盘、物理内存、打印机等各种基础设备，线程则是贡献进程持有的资源，因此线程也可以看作轻量级的进程。</p>
+<p>posix线程模型：</p>
+<ul>
+<li>thread_create：线程的创建</li>
+<li>thread_exit：线程的退出</li>
+<li>thread_join：调用线程阻塞等待当前线程执行完成</li>
+<li>thread_yield：调用线程让出cpu，之所以出现这种情况是因为线程不像进程那样存在时钟中断的机制，因此需要有一种方式来放弃cpu的权限，而yield就是这种方式</li>
+</ul>
+<h3 id="线程模型"><a href="#线程模型" class="headerlink" title="线程模型"></a>线程模型</h3><h4 id="用户空间线程"><a href="#用户空间线程" class="headerlink" title="用户空间线程"></a>用户空间线程</h4><p>用户空间线程是将整个线程包放在用户空间中，内核空间对此一无所知，这样的好处是：可以在不支持线程的操作系统上实现，用户空间负责管理线程（每一个
+进程维护一个线程表类似于内核空间的pcb，用于记录线程的各种属性），可以定制调度线程的算法，另外，由于线程切换的时候调用的都是本地过程，因此相较于
+内核态也会有较高的效率</p>
+<h4 id="内核空间线程"><a href="#内核空间线程" class="headerlink" title="内核空间线程"></a>内核空间线程</h4><p>内核空间线程是将整个线程包放在内核空间中，用户空间对此一无所知，由于在内核空间中创建和销毁线程的代价都是比较大的，因此一般是
+采用回收线程的方式来复用。</p>
+<p>一种更好的实现线程的方式是将用户空间线程和内核空间线程通过多路复用结合起来，这样可以综合二者的优点。</p>
+<h3 id="线程带来的问题"><a href="#线程带来的问题" class="headerlink" title="线程带来的问题"></a>线程带来的问题</h3><p>上面我们介绍了线程的基础知识，接下来我们看一下多线程所带来的问题，并通过这些问题一步步引出我们最关心的对象：<strong>锁</strong>。
+两个或者多个线程可以读写共享数据，而最终的结果则取决于执行的时许，这称作竞争条件。解决这种竞争条件的方式是通过互斥，
+我们把访问共享内存的程序片段称为临界区，如果能够通过互斥使得多个线程不会同时出现在临界区就可以避免这种问题。</p>
+<h3 id="互斥的方式"><a href="#互斥的方式" class="headerlink" title="互斥的方式"></a>互斥的方式</h3><h4 id="忙等待互斥（以下的方式都有忙等待的特点）"><a href="#忙等待互斥（以下的方式都有忙等待的特点）" class="headerlink" title="忙等待互斥（以下的方式都有忙等待的特点）"></a>忙等待互斥（以下的方式都有忙等待的特点）</h4><ul>
+<li><p>屏蔽中断：线程在cpu上执行的时候，设置cpu屏蔽中断，这样当有新的线程想要获取cpu的执行权的时候就不得不等待，这种
+方式仅适用于单核的cpu，而且操作的权利太大，对于操作系统本身来说比较有用，而对于用户进程并没有太大的好处。</p>
+</li>
+<li><p>锁变量：设置一个标志位，通过标志位来决定是否让线程进入临界区，这种方式也会由于比较和设置操作的非原子性而出现问题，具体的解决方式
+参见后面的TSL</p>
+</li>
+<li><p>严格轮换法：设置一个整形变量，只有其值和当前线程的特征值（比如线程id）相同的时候才允许线程进入，如果不一致，则当前线程一直测试并等待。不过
+假定a线程处于就绪状态，但是flag=b，而此时b触发了系统调用如读取磁盘，那么b线程当前其实是处于阻塞的状态，不过由于flag的作用导致a线程还是没有办法获取到cpu，
+因此最终就会导致阻塞的线程阻塞了就绪的线程</p>
+</li>
+<li><p>皮特森互斥算法：这种方法是通过锁变量+告警变量的方式来实现的不需要严格轮转法也可以互斥访问临界资源的方式。具体方式如下：
+<img src="//southrivers.github.io/2019/05/01/java-线程/perterson.png" alt>
+既然是互斥算法，那么肯定是存在互斥条件的，也即是：满足非A即B。我们就从这里入手，看一下如果有两个线程进入的话这里的变量分别会发生什么变化：
+<img src="//southrivers.github.io/2019/05/01/java-线程/p-exclude.png" alt>
+如果两者都处于临界区，则interested必然全部为true，但是turn只有前面的一个才有效，因此通过turn确保了锁的功能，
+这里的<code>interested[other]</code>则是为了实现阻塞的功能。如果只有interested的话，会出现的一种情况是死锁，而单纯的turn则无法保证锁的功能。</p>
+</li>
+<li><p>TSL指令：TSL指令全称是test and set lock（测试并加锁），该指令需要硬件设备的支持。具体一点就是将内存字读取到寄存器中，然后在内存字中写入一个新的非零值。
+整个操作是一个原子的，即便是运行在多核的cpu的情况下（通过内存总线锁来实现），要注意的是锁住内存总线并不等同于屏蔽中断，屏蔽中断是针对cpu的，在多核的情况下屏蔽
+中断并不能保证执行的原子性。
+<img src="//southrivers.github.io/2019/05/01/java-线程/tsl.png" alt></p>
+</li>
+</ul>
+<p>以上各种实现互斥的方式都有一个特点：忙等待！也就是在获取到cpu的时候，等待的线程一直通过自旋的方式尝试获取cpu，这种自旋操作会浪费cpu资源
+（<strong>自旋并不是获取不到cpu，而是获取不到临界区资源的权利</strong>），一种比较好的方式是在无法获取到临界区资源的时候进入阻塞的状态，等待被唤醒。因此
+接下来即将引入<strong>新的实现互斥的方式：睡眠与唤醒！</strong></p>
+<h4 id="睡眠与唤醒"><a href="#睡眠与唤醒" class="headerlink" title="睡眠与唤醒"></a>睡眠与唤醒</h4><p>首先我们通过一个例子来演示一下如何通过睡眠与唤醒来实现临界区的互斥，如下：
+<img src="//southrivers.github.io/2019/05/01/java-线程/p-c.png" alt>
+上面程序的整体思路是当队列长度为0的时候，消费者睡眠，然后发起一个信号唤醒生产者，当队列的长度满的时候，生产者睡眠，然后发起一个信号给消费者。
+不过这个过程存在一个缺陷：如果队列长度为0的时候，消费者发送了一个信号，不过当前生产者是上次生产任务的收尾处，也就是说已经生产了数据但是被消费者取走了，
+此时生产者处于就绪的状态，当信号到达的时候刚好又调度到运行的状态，那么该信号就会丢失，也即意味着生产者将会进入睡眠的状态，而此时生产者已经进入了休眠的状态，
+那么最终的结果就是生产者和消费者都进入了休眠的状态，整个进程就处于僵死的状态。</p>
+<p>上面问题出现的原因是由于在唤醒的过程中出现了信号的丢失，如果信号不丢失而是最终保存在一个标记位上，那么这个问题就会得到解决，不过一个标记位仅能解决
+两个线程间的通信问题，如果有更多的线程进行通信的话就需要增加新的标记位。</p>
+<p>为了解决上面的信号丢失的问题，引入了<strong>信号量</strong>：使用一个整形变量来记录唤醒的次数。信号量支持两种操作：up、down，为了保障信号量能够正常工作，
+需要能够以原子的方式执行上面的两种操作（不然又可能出现新的多线程更新的问题）。这里一般是<strong>使用TSL的方式来保障操作的原子性</strong>，上面我们看到TSL其实是一个
+忙等待的过程，不过这个过程相对来说是一个轻量级的操作，执行速度很快，因为该过程只涉及寄存器和内存字的读写操作，并不涉及其他的用户操作，代码如下：
+<img src="//southrivers.github.io/2019/05/01/java-线程/semp.png" alt>
+在上面的过程中使用到了3个信号量，其中mutex是为了实现互斥的方式进入临界区的，而剩下的信号量实现的则是计数的功能！</p>
+<p>如果不需要计数的功能，而只需要互斥的功能，上面的过程可以简化成只需要一个信号量mutex：信号量取消计数功能退化成<strong>排他锁</strong>！
+下面就是排他锁的TSL实现：
+<img src="//southrivers.github.io/2019/05/01/java-线程/exclusive-lock.png" alt>
+这里我们可以看到该过程和TSL的忙等待很像，不过不同的是在获取不到锁的时候其并不是忙等待，而是调用了thread_yield的方法，该方法会让出cpu，
+等待下一次调度来临的时候再去竞争锁。</p>
+<h3 id="pthread中的互斥"><a href="#pthread中的互斥" class="headerlink" title="pthread中的互斥"></a>pthread中的互斥</h3><p>pthread提供了许多可以用来线程同步的函数：
+1、互斥量：互斥量在允许或者阻塞对临界区资源的访问上很有用（临界区资源的访问）
+2、条件变量：允许线程在没有到达一定的条件而阻塞
+通常的使用方式是两者相互配合
+<img src="//southrivers.github.io/2019/05/01/java-线程/use-pattern.png" alt>
+结合上面的信号量可以强化我们的认识。
+<del><strong>最后需要强调的是条件变量不会丢失！！！！！</strong></del></p>
+<h3 id="管程"><a href="#管程" class="headerlink" title="管程"></a>管程</h3><p>最后我们稍微提及一下管程，管程是保证在管程之内只会出现一个线程的一种计数（也即是互斥），管程的互斥由编译器负责，进入之后由条件变量负责唤醒</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>以上我们通过对线程的介绍，慢慢引入线程所带来的问题，并通过解决这些多线程问题一步一步的引入了自旋锁、信号量（up、down操作）、互斥量、条件（及两个相关的操作signal、wait），
+后面我们会进一步的探讨java中的同步机制（synchronized）、锁（AQS）、一些并发编程的工具类（LockSupport）以及通信的原语。</p>
+<p>线程上等待的队列维护在JVM上</p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>scala classtag剖析 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2021-12-06">2021-12-06</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">scala ClassTag剖析</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>最近在学习kafka的源代码，按照建议从KafkaApi进行入手，对于业务流程的话基本是清楚的，不过在阅读源码的时候发现有些语法实在是晦涩难懂，因此在网上多方查证并记录，以便后续可以快速的拾起来。</p>
+<h1 id="详解"><a href="#详解" class="headerlink" title="详解"></a>详解</h1><p>废话不多说直接看代码：</p>
+<p><code>val produceRequest = request.body[ProduceRequest]</code>该过程会调用如下方法：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">body</span></span>[<span class="type">T</span> &lt;: <span class="type">AbstractRequest</span>](<span class="keyword">implicit</span> classTag: <span class="type">ClassTag</span>[<span class="type">T</span>], nn: <span class="type">NotNothing</span>[<span class="type">T</span>]): <span class="type">T</span> = &#123;</span><br><span class="line">  bodyAndSize.request <span class="keyword">match</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> r: <span class="type">T</span> =&gt; r</span><br><span class="line">    <span class="keyword">case</span> r =&gt;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> <span class="type">ClassCastException</span>(<span class="string">s"Expected request with type <span class="subst">$&#123;classTag.runtimeClass&#125;</span>, but found <span class="subst">$&#123;r.getClass&#125;</span>"</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先我们从方法入手，上述方法的定义包含了两个参数，不过在调用的时候并没有将这两个参数传入，这是因为参数列表是隐式参数的一种写法，这种写法会将implicit后面的参数都作为隐式变量，既然作为隐式变量，相应的就需要有定义并导入这些隐式参数的地方，对于classTag是由编译器传入的隐式变量，而nn则是通过NotNothing的伴生对象传入的。</p>
+<p>解释完这个方法的调用，我们继续看一下这个方法本身，可以看到这是一个泛型方法，并且泛型参数指定了类型的上界，不过在jvm的运行态中这种泛型方法会被擦除，因此如果需要保存运行时的类型信息就需要特定的容器进行保存，这里的ClassTag[T]的作用就在于保存参数类型，对于这种写法还有一种上下文界定的写法即：<strong>[T : ClassTag]</strong>，其表示使用ClassTag接收T类型的参数，这样我们就可以在运行的时候获取到对应的类型，不过你可能会想怎么获取类型呢？这就需要implicitly[ClassTag]来查看对应的隐式变量了（需要注意这里并不是implicit，两者是不一样的，implicit是关键字，implicitly是函数，其接收一个类型参数，并返回当前域内的该类型的隐式的值，可以发散一下，如果域内有两个类型相同的隐式的值则必定会产生错误，具体是什么错误可以自己试一下），我们举个例子如下：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> scala.reflect.<span class="type">ClassTag</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">ct</span></span>[<span class="type">T</span>](t: <span class="type">T</span>)(<span class="keyword">implicit</span> ct: <span class="type">ClassTag</span>[<span class="type">T</span>]) = &#123;</span><br><span class="line">  print(ct)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ct(<span class="type">List</span>(<span class="number">1</span>))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">ct1</span></span>[<span class="type">T</span>: <span class="type">ClassTag</span>](t: <span class="type">T</span>) = &#123;</span><br><span class="line">  <span class="comment">// 获取隐式变量</span></span><br><span class="line">  <span class="keyword">val</span> ct = implicitly[<span class="type">ClassTag</span>[<span class="type">T</span>]]</span><br><span class="line">  print(ct)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ct1(<span class="type">List</span>(<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+
+<p>对应结果如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">import scala.reflect.ClassTag</span><br><span class="line"></span><br><span class="line">ct: [T](t: T)(implicit ct: scala.reflect.ClassTag[T])Unit</span><br><span class="line"></span><br><span class="line">scala.collection.immutable.List</span><br><span class="line"></span><br><span class="line">ct1: [T](t: T)(implicit evidence$1: scala.reflect.ClassTag[T])Unit</span><br><span class="line"></span><br><span class="line">scala.collection.immutable.List</span><br></pre></td></tr></table></figure>
+
+<p>另外我们可以看一下上下文界定这种写法直接在编译器上显示的结果：</p>
+<p>![](/Users/shuaizi/workspace/github/southrivers.github.io/source/_posts/scala-ClassTag剖析/屏幕快照 2021-12-07 01.04.14.png)</p>
+<p>可以看到编译器会自动的将上述函数自动的转化成带有隐式变量参数的函数。另外有需要强调的是，参数是有上界的，这里对应的上界是AbstractRequest，这样我们是否还可以使用上下文界定呢？答案是可以的，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">sealed trait TT</span><br><span class="line"></span><br><span class="line">case class XTT() extends TT</span><br><span class="line"></span><br><span class="line">case class YTT() extends TT</span><br><span class="line"></span><br><span class="line">def ct2[T&lt;: TT : ClassTag](t: T) = &#123;</span><br><span class="line">  // 获取隐式变量</span><br><span class="line">  val ct = implicitly[ClassTag[T]]</span><br><span class="line">  print(ct)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ct2(XTT())</span><br></pre></td></tr></table></figure>
+
+<p>最终结果输出如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">defined trait TT</span><br><span class="line"></span><br><span class="line">defined class XTT</span><br><span class="line"></span><br><span class="line">defined class YTT</span><br><span class="line"></span><br><span class="line">ct2: [T &lt;: TT](t: T)(implicit evidence$1: scala.reflect.ClassTag[T])Unit</span><br><span class="line"></span><br><span class="line">$line7.$read$$iw$$iw$XTT</span><br></pre></td></tr></table></figure>
+
+<p>更一般的，上下文界定的右边的类型不止可以是ClassTag，还可以是任意的泛型类，其代表的含义是传入一个隐式的该类型的参数，具体可以参考<strong>scala那些事</strong>中的Ordering。</p>
+<p>等等，好像还有一点遗漏了，函数的参数有两个，一个是ClassTag，一个是NotNoting，第二个参数起到什么作用？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">import scala.annotation.implicitNotFound</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line">  * This is a trick to prevent the compiler from inferring the `Nothing` type in cases where it would be a bug to do</span><br><span class="line">  * so. An example is the following method:</span><br><span class="line">  *</span><br><span class="line">  *</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>def body[T &lt;: AbstractRequest](implicit classTag: ClassTag[T], nn: NotNothing[T]): T</li>
+<li><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">  *</span><br><span class="line">  * If we remove the `nn` parameter and we invoke it without any type parameters (e.g. `request.body`), `Nothing` would</span><br><span class="line">  * be inferred, which is not desirable. As defined above, we get a helpful compiler error asking the user to provide</span><br><span class="line">  * the type parameter explicitly.</span><br><span class="line">  */</span><br><span class="line">@implicitNotFound(&quot;Unable to infer type parameter, please provide it explicitly.&quot;)</span><br><span class="line">trait NotNothing[T]</span><br><span class="line"></span><br><span class="line">object NotNothing &#123;</span><br><span class="line">  private val evidence: NotNothing[Any] = new Object with NotNothing[Any]</span><br><span class="line"></span><br><span class="line">  implicit def notNothingEvidence[T](implicit n: T =:= T): NotNothing[T] = evidence.asInstanceOf[NotNothing[T]]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>基本可以预测其用途也是用于上下文界定的，只是在调用方法的时候如果不传递类型参数的话，我们需要显示的表示出来，说实话，我暂时还没有理解这句话的意思，后续再慢慢搞吧</p>
+<p>TODO</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; def ct2[T&lt;: TT : ClassTag : Ordering](t: T) = &#123;</span><br><span class="line">     |   // 获取隐式变量</span><br><span class="line">     |   val ct = implicitly[ClassTag[T]]</span><br><span class="line">     |   print(ct)</span><br><span class="line">     | &#125;</span><br><span class="line">ct2: [T &lt;: TT](t: T)(implicit evidence$1: scala.reflect.ClassTag[T], implicit evidence$2: Ordering[T])Unit</span><br></pre></td></tr></table></figure>
+
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1>
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>

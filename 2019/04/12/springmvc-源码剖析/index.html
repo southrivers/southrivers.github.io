@@ -1,0 +1,269 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>springmvc 解析 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2019-04-12">2019-04-12</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">springmvc 解析</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>提到spring mvc，很多初学者都会和spring搞混，前几篇文章分析了和web相关的tomcat、spring等源码，
+现在来看一下spring mvc吧。</p>
+<h1 id="原理解剖"><a href="#原理解剖" class="headerlink" title="原理解剖"></a>原理解剖</h1><p>正如Spring 起始于xml，我们的web应用起始于web.xml。而web.xml中最重要的配置就是listener和servlet了，
+在分析tomcat源码的时候，我们已经看到了listener的作用，接下来就来看一下servlet吧。</p>
+<p><strong>spring mvc框架是依托于spring容器的</strong>。在加载完listener之后，容器将会加载load-on-startup为非负数的servlet，
+通常情况下就是我们的dispatcherservlet了，dispatcherservlet在初始化的过程中会建立一个自己的IOC容器上下文：
+servletWebApplicationContext，并会以contextLoaderListener建立的Root上下文作为自己的父级上下文（这里
+上下文可以理解为容器）。dispatcherservlet持有的上下文默认是xmlwebapplicationContext，servlet有自己的bean空间，
+同时还可以访问到父容器空间。
+<img src="//southrivers.github.io/2019/04/12/springmvc-源码剖析/springmvc-ioc.png" alt></p>
+<h1 id="源码解析"><a href="#源码解析" class="headerlink" title="源码解析"></a>源码解析</h1><h2 id="DispatcherServlet"><a href="#DispatcherServlet" class="headerlink" title="DispatcherServlet"></a>DispatcherServlet</h2><p>上文我们了解到web应用启动的过程中会创建的容器及流程，接下来我们来看一下最核心的类dispatcherservlet。
+dispatcherservlet是spring mvc中最为核心的类，起到前置控制器的作用，负责请求的分发。其类的继承关系图如下：
+<img src="//southrivers.github.io/2019/04/12/springmvc-源码剖析/class.png" alt>
+上图可以发现dispatcherservlet本质上也是一个servlet，既然是servlet，那么肯定也是有固定的生命周期。</p>
+<ul>
+<li>初始化</li>
+<li>处理请求</li>
+<li>销毁</li>
+</ul>
+<p>我们分别来看一下这些阶段都做了那些事情吧</p>
+<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><p>初始化方法存在于HttpServletBean中，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> <span class="keyword">throws</span> ServletException </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Set bean properties from init parameters.</span></span><br><span class="line">    PropertyValues pvs = <span class="keyword">new</span> ServletConfigPropertyValues(getServletConfig(), <span class="keyword">this</span>.requiredProperties);</span><br><span class="line">    <span class="keyword">if</span> (!pvs.isEmpty()) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(<span class="keyword">this</span>);</span><br><span class="line">            ResourceLoader resourceLoader = <span class="keyword">new</span> ServletContextResourceLoader(getServletContext());</span><br><span class="line">            bw.registerCustomEditor(Resource<span class="class">.<span class="keyword">class</span>, <span class="title">new</span> <span class="title">ResourceEditor</span>(<span class="title">resourceLoader</span>, <span class="title">getEnvironment</span>()))</span>;</span><br><span class="line">            initBeanWrapper(bw);</span><br><span class="line">            bw.setPropertyValues(pvs, <span class="keyword">true</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        .....</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Let subclasses do whatever initialization they like.</span></span><br><span class="line">    initServletBean();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的过程是读取init-param中的参数设置到dispatcherservlet中，并配置相关的bean，完成之后调用initServletBean来
+创建servletwebApplicationContext，其中initServletBean方法在FrameworkServlet重写了，这些也是通用的模板方法模式。
+代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">initServletBean</span><span class="params">()</span> <span class="keyword">throws</span> ServletException </span>&#123;</span><br><span class="line">....</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 初始化springmvc所需要的容器</span></span><br><span class="line">        <span class="keyword">this</span>.webApplicationContext = initWebApplicationContext();</span><br><span class="line">        <span class="comment">// 扩展方法：实现为空</span></span><br><span class="line">        initFrameworkServlet();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">protected</span> WebApplicationContext <span class="title">initWebApplicationContext</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    WebApplicationContext rootContext =</span><br><span class="line">            WebApplicationContextUtils.getWebApplicationContext(getServletContext());</span><br><span class="line">    WebApplicationContext wac = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.webApplicationContext != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="comment">// A context instance was injected at construction time -&gt; use it</span></span><br><span class="line">        wac = <span class="keyword">this</span>.webApplicationContext;</span><br><span class="line">        <span class="keyword">if</span> (wac <span class="keyword">instanceof</span> ConfigurableWebApplicationContext) &#123;</span><br><span class="line">            ConfigurableWebApplicationContext cwac = (ConfigurableWebApplicationContext) wac;</span><br><span class="line">            <span class="keyword">if</span> (!cwac.isActive()) &#123;</span><br><span class="line">                <span class="comment">// The context has not yet been refreshed -&gt; provide services such as</span></span><br><span class="line">                <span class="comment">// setting the parent context, setting the application context id, etc</span></span><br><span class="line">                <span class="keyword">if</span> (cwac.getParent() == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="comment">// The context instance was injected without an explicit parent -&gt; set</span></span><br><span class="line">                    <span class="comment">// the root application context (if any; may be null) as the parent</span></span><br><span class="line">                    cwac.setParent(rootContext);</span><br><span class="line">                &#125;</span><br><span class="line">                configureAndRefreshWebApplicationContext(cwac);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (wac == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="comment">// No context instance was injected at construction time -&gt; see if one</span></span><br><span class="line">        <span class="comment">// has been registered in the servlet context. If one exists, it is assumed</span></span><br><span class="line">        <span class="comment">// that the parent context (if any) has already been set and that the</span></span><br><span class="line">        <span class="comment">// user has performed any initialization such as setting the context id</span></span><br><span class="line">        wac = findWebApplicationContext();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (wac == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="comment">// No context instance is defined for this servlet -&gt; create a local one</span></span><br><span class="line">        wac = createWebApplicationContext(rootContext);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">this</span>.refreshEventReceived) &#123;</span><br><span class="line">        <span class="comment">// Either the context is not a ConfigurableApplicationContext with refresh</span></span><br><span class="line">        <span class="comment">// support or the context injected at construction time had already been</span></span><br><span class="line">        <span class="comment">// refreshed -&gt; trigger initial onRefresh manually here.</span></span><br><span class="line">        onRefresh(wac);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.publishContext) &#123;</span><br><span class="line">        <span class="comment">// Publish the context as a servlet context attribute.</span></span><br><span class="line">        String attrName = getServletContextAttributeName();</span><br><span class="line">        getServletContext().setAttribute(attrName, wac);</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.logger.isDebugEnabled()) &#123;</span><br><span class="line">            <span class="keyword">this</span>.logger.debug(<span class="string">"Published WebApplicationContext of servlet '"</span> + getServletName() +</span><br><span class="line">                    <span class="string">"' as ServletContext attribute with name ["</span> + attrName + <span class="string">"]"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> wac;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>tomcat在启动的过程中会通过contextloaderlistener来创建一个webapplicationContext，然后将其作为一个字段存放在
+servletContext中。
+上面initWebApplicationContext的主要过程就是获取这个webapplicationcontext，并将其设置为当前容器的父容器，接下来
+会调用onRefresh方法，这个方法最终会初始化我们的servlet，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">initStrategies</span><span class="params">(ApplicationContext context)</span> </span>&#123;</span><br><span class="line">    initMultipartResolver(context);</span><br><span class="line">    initLocaleResolver(context);</span><br><span class="line">    initThemeResolver(context);</span><br><span class="line">    initHandlerMappings(context);</span><br><span class="line">    initHandlerAdapters(context);</span><br><span class="line">    initHandlerExceptionResolvers(context);</span><br><span class="line">    initRequestToViewNameTranslator(context);</span><br><span class="line">    initViewResolvers(context);</span><br><span class="line">    initFlashMapManager(context);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面这一步会初始化就我们当前容器中所需要的一些java bean了，这里是子容器java bean的初始化。</p>
+<h3 id="处理请求"><a href="#处理请求" class="headerlink" title="处理请求"></a>处理请求</h3><p>续接上文，我们已经大概清楚dispatcherservlet的初始化流程，以及初始化的时候都会初始化哪些资源了，
+接下来我们看一下一个请求的处理过程。我们知道servlet请求的处理起始于service方法（service方法
+可以认为是一个门面类，最终请求的处理肯定是落到doGet、doPost等方法中），在dispatcherservlet中
+该方法的实现在FrameworkServlet类中。所有的处理最终都会经过的方法FrameworkServlet的processRequest：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">processRequest</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line">.....</span><br><span class="line"></span><br><span class="line">    LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();</span><br><span class="line">    LocaleContext localeContext = buildLocaleContext(request);</span><br><span class="line"></span><br><span class="line">    RequestAttributes previousAttributes = RequestContextHolder.getRequestAttributes();</span><br><span class="line">    ServletRequestAttributes requestAttributes = buildRequestAttributes(request, response, previousAttributes);</span><br><span class="line"></span><br><span class="line">    WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);</span><br><span class="line">    asyncManager.registerCallableInterceptor(FrameworkServlet<span class="class">.<span class="keyword">class</span>.<span class="title">getName</span>(), <span class="title">new</span> <span class="title">RequestBindingInterceptor</span>())</span>;</span><br><span class="line"></span><br><span class="line">    initContextHolders(request, localeContext, requestAttributes);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        doService(request, response);</span><br><span class="line">    &#125;......</span><br><span class="line"></span><br><span class="line">    <span class="keyword">finally</span> &#123;</span><br><span class="line">        resetContextHolders(request, previousLocaleContext, previousAttributes);</span><br><span class="line">        <span class="keyword">if</span> (requestAttributes != <span class="keyword">null</span>) &#123;</span><br><span class="line">            requestAttributes.requestCompleted();</span><br><span class="line">        &#125;.....</span><br><span class="line"></span><br><span class="line">        publishRequestHandledEvent(request, response, startTime, failureCause);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面代码是final类型的，可以看到请求的处理过程大致如下：</p>
+<ul>
+<li>调用initContextHolders将获取到的请求相关的参数绑定到线程上</li>
+<li>调用doService方法处理请求</li>
+<li>重置与线程绑定的信息，然后发布请求处理完成的事件</li>
+</ul>
+<p>可以看到核心代码还在doService方法中(在dispatcherServlet中实现的)，doService最终会进入doDispatch方法中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doDispatch</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		HttpServletRequest processedRequest = request;</span><br><span class="line">		HandlerExecutionChain mappedHandler = <span class="keyword">null</span>;</span><br><span class="line">		<span class="keyword">boolean</span> multipartRequestParsed = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);</span><br><span class="line"></span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			ModelAndView mv = <span class="keyword">null</span>;</span><br><span class="line">			Exception dispatchException = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">				processedRequest = checkMultipart(request);</span><br><span class="line">				multipartRequestParsed = (processedRequest != request);</span><br><span class="line"></span><br><span class="line">				<span class="comment">// Determine handler for the current request.</span></span><br><span class="line">				mappedHandler = getHandler(processedRequest);</span><br><span class="line">				<span class="keyword">if</span> (mappedHandler == <span class="keyword">null</span> || mappedHandler.getHandler() == <span class="keyword">null</span>) &#123;</span><br><span class="line">					noHandlerFound(processedRequest, response);</span><br><span class="line">					<span class="keyword">return</span>;</span><br><span class="line">				&#125;</span><br><span class="line"></span><br><span class="line">				<span class="comment">// Determine handler adapter for the current request.</span></span><br><span class="line">				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());</span><br><span class="line"></span><br><span class="line">				<span class="comment">// Process last-modified header, if supported by the handler.</span></span><br><span class="line">				String method = request.getMethod();</span><br><span class="line">				<span class="keyword">boolean</span> isGet = <span class="string">"GET"</span>.equals(method);</span><br><span class="line">				<span class="keyword">if</span> (isGet || <span class="string">"HEAD"</span>.equals(method)) &#123;</span><br><span class="line">					<span class="keyword">long</span> lastModified = ha.getLastModified(request, mappedHandler.getHandler());</span><br><span class="line">					<span class="keyword">if</span> (logger.isDebugEnabled()) &#123;</span><br><span class="line">						logger.debug(<span class="string">"Last-Modified value for ["</span> + getRequestUri(request) + <span class="string">"] is: "</span> + lastModified);</span><br><span class="line">					&#125;</span><br><span class="line">					<span class="keyword">if</span> (<span class="keyword">new</span> ServletWebRequest(request, response).checkNotModified(lastModified) &amp;&amp; isGet) &#123;</span><br><span class="line">						<span class="keyword">return</span>;</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line"></span><br><span class="line">				<span class="keyword">if</span> (!mappedHandler.applyPreHandle(processedRequest, response)) &#123;</span><br><span class="line">					<span class="keyword">return</span>;</span><br><span class="line">				&#125;</span><br><span class="line"></span><br><span class="line">				<span class="comment">// Actually invoke the handler.</span></span><br><span class="line">				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());</span><br><span class="line"></span><br><span class="line">				<span class="keyword">if</span> (asyncManager.isConcurrentHandlingStarted()) &#123;</span><br><span class="line">					<span class="keyword">return</span>;</span><br><span class="line">				&#125;</span><br><span class="line"></span><br><span class="line">				applyDefaultViewName(processedRequest, mv);</span><br><span class="line">				mappedHandler.applyPostHandle(processedRequest, response, mv);</span><br><span class="line">			&#125;.....</span><br><span class="line">			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);</span><br><span class="line">		&#125;.....</span><br><span class="line">		<span class="keyword">finally</span> &#123;</span><br><span class="line">			<span class="keyword">if</span> (asyncManager.isConcurrentHandlingStarted()) &#123;</span><br><span class="line">				<span class="comment">// Instead of postHandle and afterCompletion</span></span><br><span class="line">				<span class="keyword">if</span> (mappedHandler != <span class="keyword">null</span>) &#123;</span><br><span class="line">					mappedHandler.applyAfterConcurrentHandlingStarted(processedRequest, response);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">else</span> &#123;</span><br><span class="line">				<span class="comment">// Clean up any resources used by a multipart request.</span></span><br><span class="line">				<span class="keyword">if</span> (multipartRequestParsed) &#123;</span><br><span class="line">					cleanupMultipart(processedRequest);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面代码的大致流程是：</p>
+<ul>
+<li><p>通过getHandler从HandleMapping找到该请求对应的Handler</p>
+</li>
+<li><p>通过getHandlerAdapter获取找到对应的HandlerAdapter</p>
+</li>
+<li><p>判断是否有拦截器，如果有执行applyPreHandle</p>
+</li>
+<li><p>handlerAdapter会进行处理请求并返回ModelAndView，此处就会将请求发送到对应的controller</p>
+</li>
+<li><p>接下来判断是否有后置拦截器，如果有则调用applyPostHandle进行增强</p>
+</li>
+<li><p>最后会调用processDispatchResult，这个方法又分为以下几个步骤：</p>
+<ul>
+<li>通过viewResolver获取响应的View（视图）</li>
+<li>根据获取的视图进行渲染页面，具体的就是调用view的render方法进行页面的渲染</li>
+</ul>
+</li>
+</ul>
+<p>相关的流程图如下：
+<img src="//southrivers.github.io/2019/04/12/springmvc-源码剖析/process.png" alt></p>
+<h3 id="销毁"><a href="#销毁" class="headerlink" title="销毁"></a>销毁</h3><p>销毁流程比较简单，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">destroy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    getServletContext().log(<span class="string">"Destroying Spring FrameworkServlet '"</span> + getServletName() + <span class="string">"'"</span>);</span><br><span class="line">    <span class="comment">// Only call close() on WebApplicationContext if locally managed...</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.webApplicationContext <span class="keyword">instanceof</span> ConfigurableApplicationContext &amp;&amp; !<span class="keyword">this</span>.webApplicationContextInjected) &#123;</span><br><span class="line">        ((ConfigurableApplicationContext) <span class="keyword">this</span>.webApplicationContext).close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其实就是关闭当前容器，因此也可以知道，只有我们的容器关闭了，dispatcherservlet才会销毁</p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>上面对spring mvc的流程进行了初步的分析，方便后面回顾，到此Spring相关的东西可以告一段落了。</p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>
