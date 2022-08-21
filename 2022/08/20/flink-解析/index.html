@@ -166,6 +166,22 @@
 </li>
 </ul>
 <p>可以看到上述作业提交的过程中几个重要角色：client、dispatcher、jobmanager、taskmanager。</p>
+<h2 id="编程模型"><a href="#编程模型" class="headerlink" title="编程模型"></a>编程模型</h2><h3 id="部署模式"><a href="#部署模式" class="headerlink" title="部署模式"></a>部署模式</h3><p>flink的部署模式存在local、standlone、yarn这几种模式，其中flink on yarn的模式又可以per-job和yarn session模式，我们来分析一下这几种模式的区别：</p>
+<ul>
+<li>local： 我们直接解压flink的压缩包，并通过start-cluster脚本就可以直接启动这种模式，不过这种模式的flink集群在提交作业之后jobmanager和taskmanager在同一个节点上，<strong>不确定这种模式是否会有jobmanager直接启动，如果没有，我们的作业提交是提交到什么进程呢？</strong></li>
+<li>standlone：对于这种模式，是采用比较经典的主从模式，即存在master、slave节点，通常是一主多从的模式，这种模式也有很大的局限性，无法做到高可用，在生产环境中多半也不会使用</li>
+<li>yarn：这种模式依赖于hadoop集群，并且通常我们还需要用到zookeeper集群，hadoop集群提供yarn的环境，zookeeper则用于保障flink集群的HA，基于yarn的模式也分了两种情况<ul>
+<li>flink on yarn：这种方式在client提交了作业之后会生成对应的jobmanager，jobmanager会从yarn的resourcemanager申请对应的资源，该过程会创建taskmanager，这种情况下不同的作业彼此之间的资源是隔离的</li>
+<li>yarn session：这种方式要求先创建一个yarn的session，在创建session的时候我们会指定该session的资源，接下来我们在提交作业的时候会指定作业使用的yarn session，如果我们提交的作业该session无法满足，那么该作业的运行将会进入阻塞的状态，直到有足够的资源释放出来，该模式存在的问题就是作业之间的资源是不隔离的，如果yarn session因为某种原因异常退出，那么该session托管的所有作业都将会被kill掉。</li>
+</ul>
+</li>
+</ul>
+<p>上述过程中依然存在理解障碍的地方在于集群运行的常驻进程究竟是什么？？？？？？</p>
+<p>通过上面作业提交流程的分析，我们对flink有了一个感性的认识后，我们接下来介绍一下flink的编程模型：
+<img src="//southrivers.github.io/2022/08/20/flink-解析/programmodal.png" alt>
+我们一般使用的是DataSet、DataStream级别的接口进行数据的处理，对于简单的应用场景来说我们也可以使用table或者sql API来进行编程，这种编程模式是采用了apache calcite来进行sql的解析，不过对于程序的优化就显得无能为力了。</p>
+<p>算子是一个一个的运算，可以将其看作一个类，任务是算子在运行时候的体现，因此当我们设定了算子的并行度的时候，其会在任务执行的时候体现，比如我们设定某个算子的并行度为8，那么该算子对应的任务在执行的时候就会有8个。</p>
+<p>窗口、时间</p>
 
             
                 
