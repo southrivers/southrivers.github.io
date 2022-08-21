@@ -180,9 +180,13 @@
 <h2 id="编程模型"><a href="#编程模型" class="headerlink" title="编程模型"></a>编程模型</h2><p>通过上面作业提交流程的分析，我们对flink有了一个感性的认识后，我们接下来介绍一下flink的编程模型：
 <img src="//southrivers.github.io/2022/08/20/flink-解析/programmodal.png" alt>
 我们一般使用的是DataSet、DataStream级别的接口进行数据的处理，对于简单的应用场景来说我们也可以使用table或者sql API来进行编程，这种编程模式是采用了apache calcite来进行sql的解析，不过对于程序的优化就显得无能为力了。</p>
-<p>算子是一个一个的运算，可以将其看作一个类，任务是算子在运行时候的体现，因此当我们设定了算子的并行度的时候，其会在任务执行的时候体现，比如我们设定某个算子的并行度为8，那么该算子对应的任务在执行的时候就会有8个。</p>
+<p>算子是一个一个的运算，可以将其看作一个类，任务是算子在运行时候的体现，因此当我们设定了算子的并行度的时候，其会在任务执行的时候体现，比如我们设定某个算子的并行度为8，那么该算子对应的任务在执行的时候就会有8个，这些被切分的task叫做subtask，subtask是针对一个算子的切分，而不是operater进行chain之后的切分。</p>
 <h3 id="stream"><a href="#stream" class="headerlink" title="stream"></a>stream</h3><p>keyedStream、nonkeyedStream</p>
-<h3 id="dataset"><a href="#dataset" class="headerlink" title="dataset"></a>dataset</h3><h2 id="容错"><a href="#容错" class="headerlink" title="容错"></a>容错</h2><h3 id="时间"><a href="#时间" class="headerlink" title="时间"></a>时间</h3><h3 id="状态"><a href="#状态" class="headerlink" title="状态"></a>状态</h3><h3 id="exactly-once"><a href="#exactly-once" class="headerlink" title="exactly-once"></a>exactly-once</h3><h2 id="反压"><a href="#反压" class="headerlink" title="反压"></a>反压</h2><p>窗口、时间</p>
+<h3 id="dataset"><a href="#dataset" class="headerlink" title="dataset"></a>dataset</h3><h2 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h2><h3 id="分布式缓存"><a href="#分布式缓存" class="headerlink" title="分布式缓存"></a>分布式缓存</h3><p>在日常的开发过程中我们难免会遇到需要使用缓存的情况，flink给我们提供了分布式缓存的能力，这些分布式缓存可以从本地文件中读取，也可以从hdfs中读取，并且最终会缓存到taskmanager的对内存中，因此这份缓存不应该太大，因为可能会导致jvm 的 OOM，我们可以通过一个示例来演示一下分布式缓存的使用：</p>
+<h3 id="重启策略"><a href="#重启策略" class="headerlink" title="重启策略"></a>重启策略</h3><p>flink作业的执行是在分布式的环境上进行执行的，不考虑operator chian的情况下某一个operator对应的task在执行的过程中可能会运行失败，因此我们需要针对这种情况定制重启策略，当前默认的重启策略有以下几种：</p>
+<p>对于使用了checkpoint的情况，其重启策略又会有所不同</p>
+<h3 id="并行度"><a href="#并行度" class="headerlink" title="并行度"></a>并行度</h3><p>并行度是一个算子可以拆分成多少个子任务的标记，并行度越大作业将会执行的越快，常见的设置作业并行度的方式有以下几种</p>
+<h2 id="容错"><a href="#容错" class="headerlink" title="容错"></a>容错</h2><h3 id="时间"><a href="#时间" class="headerlink" title="时间"></a>时间</h3><h3 id="状态"><a href="#状态" class="headerlink" title="状态"></a>状态</h3><h3 id="exactly-once"><a href="#exactly-once" class="headerlink" title="exactly-once"></a>exactly-once</h3><h2 id="反压"><a href="#反压" class="headerlink" title="反压"></a>反压</h2><p>窗口、时间</p>
 <h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1>
             
                 
