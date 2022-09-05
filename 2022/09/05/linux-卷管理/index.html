@@ -24,7 +24,7 @@
 <link rel="shortcut icon" href="/images/favicon.png">
 
 
-<title>离亭燕 - </title>
+<title>lvm - 离亭燕</title>
 
 <meta name="keywords" content>
 
@@ -82,9 +82,9 @@
 
             <div class="page-title">
     <ul>
-        <li class="active">
-            <a href="/" data-name="最近">最近</a>
-        </li>
+        <li><a href="/">最近</a></li>
+        
+
         
         <li class="page-search">
     <form id="search" class="search-form">
@@ -96,121 +96,59 @@
     </ul>
 </div>
 <div class="main-inner">
-    
-        
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2022-09-05">2022-09-05</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">LVM</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <p><img src="//southrivers.github.io/2022/09/05/linux-卷管理/lvm.png" alt></p>
+<p>LVM全称叫做linux 卷管理器，使用来管理磁盘的子系统。</p>
+<p>通常情况下我们需要通过pvcreate来初始化物理磁盘。上层的文件系统可以通过lvm来申请指定容量的磁盘空间。在磁盘初始化成功之后，需要新建卷组，并将卷组和磁盘关联起来，vg可以创建很多个逻辑卷，逻辑卷对应的基本单位是LE，通过这种方式创建的逻辑卷的好处是逻辑卷可以跨磁盘存在，使得我们屏蔽了底层硬件的差异。此时创建的逻辑卷并不是目录，而是块设备（<strong>需要格式化成ext4之类的文件系统才可以使用</strong>），逻辑卷的前几个文件块会记录对应的inode信息（<strong>需要提前格式化才会有对应的信息</strong>）。另外PE到LE的转换通常是在初始化磁盘的时候保存在了磁盘的前几个块中，当磁盘对应的卷组激活后就会加载到内存中。</p>
+<p>常听说和磁盘挂载相关的知识，需要注意的是，linux操作系统提供的挂载点在/etc/fstab中，我们常说的挂载一个镜像文件什么的，所使用的并不能称之为挂载点，或者叫临时挂载点更合适，之所以这么说是因为对应的挂载信息在fstab中并不存在。</p>
+<p>对于块设备（逻辑卷）的使用，通常情况下是需要格式化成确定的文件系统才可以的。在格式化成特定文件系统之后，我们就可以创建文件夹或者文件了，这里的文件夹和文件就和挂载信息没啥关系了，可以将挂载点看作管理平面，文件、文件夹看作业务面。</p>
+<p>上图中我们看到的磁盘、卷组、卷和磁盘raid的关系是，<strong>只有做了raid之后</strong>，才会有对应的磁盘，因此磁盘raid和LE、PE的分布没有什么关系。</p>
+
             
-<article class="post">
-    
-    <div class="post-header">
-        <div class="post-meta">
-            <a href="http://southrivers.github.io" target="_blank">
-                <strong>原站</strong>
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
             </a>
-            <em>·</em>2019-03-24
-            
         </div>
-        <a class="post-title" href="/2019/03/24/java内部类小结/" title="java内部类小结">java内部类小结</a>
-        <div class="post-meta">
-
-            
-        </div>
-    </div>
-    <div class="post-desc">
-        java内部类小结
-    </div>
-</article>
-
-
-
         
-            
-<article class="post">
-    
-    <div class="post-header">
-        <div class="post-meta">
-            <a href="http://southrivers.github.io" target="_blank">
-                <strong>原站</strong>
-            </a>
-            <em>·</em>2019-03-08
+        <div class="post-tags">tags：
             
         </div>
-        <a class="post-title" href="/2019/03/08/spring-IOC/" title="Spring IOC流程解析">Spring IOC流程解析</a>
-        <div class="post-meta">
-
-            
-        </div>
-    </div>
-    <div class="post-desc">
-        Spring IOC流程解析
-    </div>
-</article>
-
-
-
         
-            
-<article class="post">
+    </article>
     
-    <div class="post-header">
-        <div class="post-meta">
-            <a href="http://southrivers.github.io" target="_blank">
-                <strong>原站</strong>
-            </a>
-            <em>·</em>2019-01-26
-            
-        </div>
-        <a class="post-title" href="/2019/01/26/SPI机制/" title="SPI机制">SPI机制</a>
-        <div class="post-meta">
-
-            
-        </div>
-    </div>
-    <div class="post-desc">
-        SPI机制
-    </div>
-</article>
-
-
-
-        
-            
-<article class="post">
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
     
-    <div class="post-header">
-        <div class="post-meta">
-            <a href="http://southrivers.github.io" target="_blank">
-                <strong>原站</strong>
-            </a>
-            <em>·</em>2018-09-23
-            
-        </div>
-        <a class="post-title" href="/2018/09/23/原码、补码、反码那些事/" title="原码、补码、反码那些事">原码、补码、反码那些事</a>
-        <div class="post-meta">
-
-            
-        </div>
-    </div>
-    <div class="post-desc">
-        原码、补码、反码那些事
-    </div>
-</article>
-
-
-
-        
     
+    
+
 </div>
-
-<div id="btn-pager">
-    
-    <a class="extend prev" rel="prev" href="/page/8/">上一页</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span>
-</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
 
 
         </div><!-- end #main-->
     </div><!-- end #body -->
     <footer class="footer">
-    <div class="footer-inner" style="text-align: left">
+    <div class="footer-inner" style="text-align: center">
 
     </div>
 </footer>
