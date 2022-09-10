@@ -1,0 +1,347 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>分布式一致性分析 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2019-10-08">2019-10-08</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">分布式一致性分析</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>分布式一致性一直以来是困扰我的一个问题，造成这种困扰的原因主要有：</p>
+<ul>
+<li>分布式一致性和数据库的一致性有什么关系？</li>
+<li>分布式一致性中间这么多的中间状态会对最终的一致性有什么影响？</li>
+</ul>
+<p>关于第一个问题，我想说的是分布式一致性和数据库一致性没有什么关系。这一点最初很难理解，差了很多资料，基本上都说的稀里糊涂的。
+尤其在看了《分布式原理与实践》之后：开篇就以2pc、3pc为背景来阐述一致性，讲的我云里雾里。直到后来从万能的知乎上找到还算
+说的过去的讲解：<strong>分布式一致性算法可以认为是分布式共识算法</strong>，也就是说对于一个分布式系统中所有的节点都对某一个状态达成共识。
+而数据库的一致性则是ACID中的C，这里说的其实是事务的一个特征，我也查阅了相关的数据库资料，对于事务里面一致性的解释并没有
+一个严格的定义，而是说符合预期。这个可真就是比较宽泛的定义了，<strong>符合预期！</strong> 当然杠精们肯定会有此一杠，系统达到一个一致性的状态
+也算是符合预期啊或者反之。这个真就是仁者见仁、智者见智了。</p>
+<p>关于第二个问题，是由于在投票的过程中出现的各种网络问题导致的丢包，或者说请求丢失的问题，排列组合起来
+基数会很大，因此正向推导一致性基本不可行（状态实在是太多了，当然这肯定是一个有限状态机）。不过比较好的方案是反向推导,
+比如对于2pc的提交操作，具体的流程可以是：事务提交的条件-&gt;所有的参与者都提交，所有的参与者都提交的条件-&gt;所有的参与者在第一
+阶段都通过了请求。</p>
+<h1 id="分布式一致性协议的演化"><a href="#分布式一致性协议的演化" class="headerlink" title="分布式一致性协议的演化"></a>分布式一致性协议的演化</h1><p>在分布式系统中，每个子系统都能够准确地知道自己的状态，不过却没有办法直接获取其他节点的状态，因此当一个操作需要跨越多台机器的时候，需要一个
+<strong>协调者</strong>负责收集所有<strong>参与者</strong>的状态，并根据状态来决定参与者下一步的操作，基于此衍生出了两种大名鼎鼎的算法：2pc、3pc。</p>
+<h2 id="2pc"><a href="#2pc" class="headerlink" title="2pc"></a>2pc</h2><p>2pc全称是two phase commit，也就是2阶段提交协议，里面包含了两种角色，协调者、参与者，协调者知道所有参与者的信息。具体如下：</p>
+<h3 id="提交事务请求"><a href="#提交事务请求" class="headerlink" title="提交事务请求"></a>提交事务请求</h3><ul>
+<li>事务询问：协调者首先向参与者发起请求，询问是否可以执行事务操作</li>
+<li>执行事务：各个参与者在收到协调者发过来的请求之后，会将对应的操作记录到undo和redo事务日志中（<del>如果有节点没有响应会如何？</del>）</li>
+<li>参与者向协调者反馈：参与者向协调者反馈是否成功记录了操作的redo和undo日志，如果成功记录了就返回yes，否则返回no（<del>有节点丢失了响应会如何？</del>）</li>
+</ul>
+<h3 id="执行事务提交"><a href="#执行事务提交" class="headerlink" title="执行事务提交"></a>执行事务提交</h3><p>协调者会根据参与者反馈的消息进行判断接下来的操作，具体如下：</p>
+<h4 id="执行事务提交-1"><a href="#执行事务提交-1" class="headerlink" title="执行事务提交"></a>执行事务提交</h4><p>如果协调者从所有参与者收到的响应都是yes的话，那么这个时候会发起请求来提交事务，具体如下：</p>
+<ul>
+<li>发送提交请求：协调者向参与者发起事务提交请求</li>
+<li>事务提交：参与者在收到协调者发来的提交请求之后会提交本机事务，并释放事务资源</li>
+<li>反馈结果：参与者反馈事务提交的结果</li>
+<li>完成事务：协调者收到所有的请求之后，来提交事务</li>
+</ul>
+<p>上面的整个过程是事务提交的过程，不过这里是存在异常情况的，如反馈提交的结果中包含了no的消息，这马上就要转到下面这种方式了。</p>
+<h4 id="中断事务"><a href="#中断事务" class="headerlink" title="中断事务"></a>中断事务</h4><p>如果协调者收到了来自参与者第二阶段no的反馈，或者协调者在等待超时之后还没有收到所有参与者反馈的消息，那么就会中断当前事务的执行，具体如下：</p>
+<ul>
+<li>发送回滚请求：协调者向所有的参与这发送回滚请求</li>
+<li>事务回滚：参与者接收到来自协调者的请求之后会执行undo操作，并释放事务执行期间占用的资源</li>
+<li>反馈事务回滚结果：参与者向协调者反馈事务的执行结果</li>
+<li>中断事务：协调者在收到所有参与者的ack之后，完成事务中断，结束会话。</li>
+</ul>
+<p>上面的过程中存在的异常状态实在是太多太多了，比如在事务处理的过程中，部分节点丢包了结果会如何呢？</p>
+<p>按照前面的思路，我们其实可以倒推：事务什么时候提交呢？所有参与者在第二阶段的响应都已经反馈给协调者yes，如果中间有节点没有反馈的话会怎么样呢？
+要么事务中断回滚（网络连接没有问题），要么系统处于异常状态，需要人为介入。如果所有的协调者都反馈为yes，那么第一阶段肯定也都是yes了，如果第一阶段
+有请求丢失了，那么会产生什么影响呢？事务中断或者系统处于异常状态！因此，这样来考虑就不用考虑中间可能出现的各种异常状态了（毕竟中间状态实在太多，无法枚举）。</p>
+<p>二阶段提交的问题也比较明显（参与的角色及数据角度来分析）：</p>
+<ul>
+<li>同步阻塞：参与者之间相互阻塞</li>
+<li>单点故障：协调者单点故障</li>
+<li>脑裂：在第二阶段由于网络问题可能导致部分节点提交的情况</li>
+</ul>
+<h2 id="3pc"><a href="#3pc" class="headerlink" title="3pc"></a>3pc</h2><p>3pc全称是three phase commit，也就是三阶段提交协议，相较于二阶段提交，其主要多了一个超时提交的机制，这个机制就会导致数据出现不一致的情况，具体的分为：</p>
+<h3 id="cancommit"><a href="#cancommit" class="headerlink" title="cancommit"></a>cancommit</h3><ul>
+<li>事务咨询：协调者向所有的参与者发送canCommit请求，询问是否可以执行事务提交操作，等待各个参与者的响应</li>
+<li>各个参与者向协调者反馈事务询问的响应：参与者在收到来自协调者的canCommit请求后，会根据自身是否可以执行事务来决定返回的信息</li>
+</ul>
+<h3 id="precommit"><a href="#precommit" class="headerlink" title="precommit"></a>precommit</h3><p>该阶段协调者会根据参与者的反馈来决定是否可以进行事务的预提交操作，因此该阶段有点类似于二阶段提交的第二个阶段了（
+不过从过程上来看更多的是二阶段中的第一个阶段）</p>
+<h4 id="执行事务预提交（没有提到超时的情况，不过超时会回滚）"><a href="#执行事务预提交（没有提到超时的情况，不过超时会回滚）" class="headerlink" title="执行事务预提交（没有提到超时的情况，不过超时会回滚）"></a>执行事务预提交（没有提到超时的情况，不过超时会回滚）</h4><ul>
+<li>发送预提交请求：协调者向所有的参与者发送preCommit的请求，此时协调者进入prepare状态</li>
+<li>事务预提交：参与者在收到协调者的请求之后，会执行事务提交，并将undo和redo信息记录到事务日志中</li>
+<li>各参与者向协调者反馈事务执行结果：参与者向协调者反馈事务预提交的执行结果，并进入等待状态</li>
+</ul>
+<h4 id="中断事务-1"><a href="#中断事务-1" class="headerlink" title="中断事务"></a>中断事务</h4><p>上面事务进入预提交的阶段是所有的参与者给协调者的ack中都是成功的情况，如果在canCommit阶段返回的ack有失败的情况，那么就会
+在preCommit中进入事务中断的执行，具体过程如下：</p>
+<ul>
+<li>发送中断请求：协调者向所有的参与者发送中断请求</li>
+<li>中断事务：收到来自协调者的中断请求之后（或者自身等待超时之后），该事务就会被中断</li>
+</ul>
+<h3 id="docommit"><a href="#docommit" class="headerlink" title="docommit"></a>docommit</h3><p>到了这个阶段，事务会进行真正的提交，具体情况又存在两种：</p>
+<h4 id="执行提交"><a href="#执行提交" class="headerlink" title="执行提交"></a>执行提交</h4><ul>
+<li>发送提交请求：协调者收到来自所有参与者的请求之后，会向所有的参与者发送doCommit请求</li>
+<li>事务提交：参与者在收到协调者的请求之后会提交本地的事务</li>
+<li>反馈事务提交结果：参与者完成事务提交之后，向协调者发送ack的响应</li>
+<li>完成事务：协调者在接收到来自参与者的ack响应之后，即完成事务</li>
+</ul>
+<h4 id="中断事务-2"><a href="#中断事务-2" class="headerlink" title="中断事务"></a>中断事务</h4><ul>
+<li>发送中断请求：协调者向所有的参与者发送abort请求</li>
+<li>事务回滚：参与者接收到abort请求之后，执行事务回滚</li>
+<li>反馈事务回滚的结果： 参与者在完成事务回滚之后，向协调者发送Ack的消息</li>
+<li>中断事务：协调者接收到所有的参与者反馈的消息后，完成事务的中断</li>
+</ul>
+<p>上面的过程也是太多太多了，我们也可以采用倒推（其实是最优解的算法的方式）的方式来缩减状态：事务什么情况下会提交 -&gt; 
+所有的参与者都收到doCommit请求（如果部分节点超时回滚，就需要人工介入来解决状态的不一致性），
+什么情况下会收到所有参与者doCommit的请求呢 -&gt; 那就是收到所有的preCommit的请求，如果preCommit请求有部分没有收到呢？
+这种情况下压根就不会再执行doCommit请求，因此也就意味着事务执行失败。</p>
+<p>通过上面这种分析，我们可以知道3pc解决的是减小冲突域，当然也从一定角度上在preCommit阶段就通过canCommit阶段的响应来快速反馈是否可以提交事务了。
+简而言之，就是一个字：快！</p>
+<hr>
+<p>对比二阶段提交，我们可以看到三阶段的前两个阶段是对2pc进行了拆分，这个有点类似于降低锁的颗粒度（细化了提交操作的过程），
+带来的好处自然也是类似的，那就是减小阻塞的颗粒度。</p>
+<p>该过程还存在一个问题，这个问题其实和二阶段是同一个问题，那就是在真正发送提交动作之前（协调者已经准备doCommit提交的操作了），结果
+参与者之间出现网络分区，有些节点能收到这个doCommit请求，有些没有收到，那么就会导致最终整体出现不一致性。</p>
+<p><strong>另外，超时就应该回滚</strong></p>
+<hr>
+<h2 id="paxos算法"><a href="#paxos算法" class="headerlink" title="paxos算法"></a>paxos算法</h2><p><strong>个人觉得分布式一致性和三阶段提交较为相似，其主要解决的是三阶段里面的controller异常挂死的问题，多个提议者更像是多个controller，如果多个controller同时
+挂死，那么也是没有办法达成一致性的，另外三阶段是为了实现提交数据的一致性，而分布式一致性主要是为了实现提议者一致性，因此，两者目的并不相同</strong></p>
+<p>在分布式系统中，大名鼎鼎的分布式一致性算法当属paxos了，这是一种基于消息传递并且高度容错的算法，不过在理解这个算法的时候是着实不好理解，
+每次总是看着后面的又忘记了前面的，这个个人感觉还是因为缺少相应的场景可以适配这种算法，或者说理论的本身是枯燥的。不过，我们还是稍微提一下
+这个理论，并通过leader的选举来例证这个算法的正确性。这个算法中存在三种角色（每种角色都会存在多个成员）：</p>
+<p>简单的理解，对于分布式一致性的目标应该是我set一个变量到这个集群，一旦集群接受了这个值，那么我再次从该集群get该条数据的时候结果一定是上次提交的结果，
+不过这里需要注意的是，是从集群get该数据的时候，并不是从集群中的某一个具体实例获取（具体实例获取到的值可能不同）</p>
+<ul>
+<li>决策者：对最终的结果提出决策的角色，回应提议者的proposal</li>
+<li>提议者：发起提议的角色，提议包含了proposal id和对应的value</li>
+<li>群众：学习最终决策的结果</li>
+</ul>
+<p>对应的过程如下：</p>
+<ul>
+<li>阶段一：<ul>
+<li>提议者首先发起(Mn)的proposal，该请求会发送给超过半数的决策者，该请求的类型是prepare，并且该请求并不会携带value，只有议案的编号</li>
+<li>决策者收到了一个(Mn)的prepare请求之后，会承诺不再接收编号小于Mn的proposal了。同时会响应提议者promise类型的响应。生成该响应的规则
+及内容是：<ul>
+<li>首先会比较该提议编号是不是大于自己响应的所有的prepare提议的编号，如果是
+则该决策者会返回自己之前同意的（很明显这里的同意的议案不是prepare阶段提供的）编号最大的提议对应的值vx，</li>
+<li>同时该决策者也会拒绝批准任何编号小于等于Mn的prepare请求，也会拒绝编号小于Mn的propose请求（该请求在阶段二，注意prepare和promise的区别）。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>阶段二：<ul>
+<li>如果提议者收到了来自半数以上的决策者对于其发出的编号为Mn的prepare请求的响应promise之后，那么他会发出一个propose请求，该请求
+为(Mn, vx)，vx就是收到的编号最大的提议的值，当然如果响应中不包含任何vx（决策者还没有做过决策），那么该value就是随意设定的</li>
+<li>决策者在收到accept类型的(Mn， vx)的请求后，如果该决策者还没有对任何大于Mn的prepare类型的提议做出过决议，决策者就会通过并提交
+该议案。并将决策的结果返回给提议者</li>
+<li>提议者收到来自决策者的响应之后，会判断是否有过半的决策者提交了该议案，如果是则表示本次提议成功。</li>
+</ul>
+</li>
+</ul>
+<p>个人觉得这和三阶段提交非常相似，但是又略有不同，可以尝试分析一下三阶段主要是基于controller实现提议的发起，这里则是通过提议者发起提议，
+两者发起提议的第一个阶段都是类似于canCommit的判断，对于三阶段就不必多说了，对于paxos来说，这个阶段是发起一个提议，该提议携带了一个
+自增且唯一的proposal ID（并未携带value）。另外paxos中的提议者和决策者是可以相互转换的，这意味着客户端的请求打到集群中的那个节点，那个节点则充当了三阶段
+的controller的角色。由于paxos中的controller节点是集群中的一份子，这也因此保证了一点就是controller是多活的，也因此可以保证服务一直可用。
+这一阶段的主要目的是对能够提交请求的proposer形成一个决议，通俗的讲就是在集群中选举一个leader用来提交客户端的请求，可以看到，每来一个客户端的请求，
+就需要执行一遍阶段一，这个本身是可以优化掉的，优化的前提就是在当前的集群中选举出一个恒定的leader，该leader负责客户端请求的发起，如果客户端的请求
+打到了非leader的节点，该节点会将请求转发到leader节点（leader此时充当了proposer的角色），选出了leader之后，就可以忽略当前这个阶段了，这也是
+工程中用到的raft、multiple-paxos协议的核心机制了。至于如何在当前用于决策客户端请求的集群中筛选出来leader的角色则可以基于当前的paxos协议来实现了，
+这个有点像是怎么一条咬住了自己尾巴的大蛇了。</p>
+<p>接下来三阶段和paxos都会根据返回的结果来继续下面的操作了。不过三阶段中提交的value是用户自己设置的，而paxos中的value则是由在提交议案的后返回promise的时候
+，携带了决策者本身已经接收到的proposal ID最大的value的值。不过二者决策是否进入下一个阶段的时候都是通过半数决议来达成的。接下来paxos则只会有一个
+阶段就是提交议案（这个时候会携带对应的value），而三阶段则进入precommit的阶段。</p>
+<p>上面的过程中阶段二的最后一个阶段可能会由于决策者在还没有收到propose的情况下，有其他的提议者发起一个Mn+1的请求而导致再次发起prepare请求，这样就会形成活锁。</p>
+<p>raft精简了paxos，因此可以从raft的角度证明一致性协议的正确性。</p>
+<p>另外集群节点动态的变更带来的问题如何解决？？？？？</p>
+<p>上面的过程中我们看到的是提议的生成，其中提到的角色是提议者和决策者，并没有群众这种角色。群众这种类型的角色主要是用来学习议案的，不过
+话说回来，提议者本身也是群众的角色（毕竟prepare的过程中学到的是前面议案的结果）。</p>
+<p>其实上面的过程已经简化了论证，另外书里面也还有些细节并没有提起，例如：</p>
+<p>很显然上述协议的过程要求提议者提前知道有多少个决策者，不然提议者无法根据返回结果来判断自己的提议是否被大多数的决策者通过（大多数
+也就意味着，要知道总数）。当因为脑裂或者宕机发生导致集群中部分节点出现问题的时候，整个决策者就可能无法提供后续的服务，这种情况下就需要
+人工介入来解决这个问题，另外值得一提的是，如果有新的决策者加入了，那么提议者之前所知道的总的数量就会发生变化，而决策者们要将这种变化
+广播出去，也会存在相应的问题，我怎么才能在广播之后保证我广播之前的决策者的数量没有发生变化呢，呵呵！看来还是无解了，当然这个只是我自己的
+一些看法，不过，相信不久的将来应该可以找到答案，只是现在我还没有这个方法解释而已。</p>
+<p>另外要强调一下的是分布式一致性实现的是共识算法，也就是对某个事情达成共识，但是一致的结果正确性如何保证并没有提及，不过既然能够保证一致性了，
+那么在此基础上保证结果的可预测性（或者说正确性）应该就仅仅涉及工程上的实践了。</p>
+<h3 id="leader选举"><a href="#leader选举" class="headerlink" title="leader选举"></a>leader选举</h3><p>后议！另外raft也是一种分布式一致性算法，有时间可以查看并总结一下，另外基于raft而实现的copycat也是不错的源代码，有时间可以看一下</p>
+<p><strong>raft的leader是兼具了paxos的提议者和决策者的角色</strong></p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>
