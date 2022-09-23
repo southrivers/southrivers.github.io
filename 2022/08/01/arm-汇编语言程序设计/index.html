@@ -199,6 +199,15 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">.equ swth, 0xff200040</span><br><span class="line">.equ led, 0xff200000</span><br><span class="line"></span><br><span class="line">.global _start</span><br><span class="line">_start:</span><br><span class="line">	// 加载开关位置信息</span><br><span class="line">	ldr r0, =swth</span><br><span class="line">	// 将开关对应内存信息加载到r1</span><br><span class="line">	ldr r1, [r0]</span><br><span class="line">	// 加载led的位置信息到r0中</span><br><span class="line">	ldr r0, =led</span><br><span class="line">	// 将r1中的数据写入到r0所指向的地址内存</span><br><span class="line">	str r1, [r0]</span><br></pre></td></tr></table></figure>
 
 <p><img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/led.png" alt></p>
+<h1 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h1><h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>下载内核引导文件<code>https://github.com/dhruvvyas90/qemu-rpi-kernel/blob/master/kernel-qemu-4.4.34-jessie</code>，以及操作系统镜像<code>https://downloads.raspberrypi.org/raspbian/images/raspbian-2017-04-10/</code>，这里为方便使用arm编程，因此使用树莓派的操作系统：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/rpos.png" alt>
+运行以下指令启动虚拟操作系统，并指定对应的运行设备：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-arm -kernel ~/qemu_vms/kernel-qemu-4.4.34-jessie -cpu arm1176 -m 256 -M versatilepb -serial stdio -append &quot;root=/dev/sda2 rootfstype=ext4 rw&quot; -hda ~/qemu_vms/2017-04-10-raspbian-jessie.img -nic user,hostfwd=tcp::5022-:22 -no-reboot</span><br></pre></td></tr></table></figure>
+
+<p><img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/runos.png" alt></p>
+<p>启动树莓派操作系统之后，启动ssh 服务（<code>sudo service ssh start</code>），通过远程连接<code>ssh pi@127.0.0.1 -p 5022</code>连接到机器。</p>
+<p>最后通过汇编代码进行测试：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/armcode.png" alt></p>
 <h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>cpu 的核心就是一堆寄存器 加上MCU（计算控制单元，说的直白点就是逻辑门电路，可以针对寄存器进行计算），计算机的核心就是cpu、内存、输入、输出，其中内存用来缓存cpu要用到的数据。</p>
 <p>参考网站：</p>
 <p><a href="https://www.youtube.com/watch?v=gfmRrPjnEw4" target="_blank" rel="noopener">youtube</a></p>
