@@ -1,0 +1,234 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>js promise - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2022-11-05">2022-11-05</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">js promise</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="起源"><a href="#起源" class="headerlink" title="起源"></a>起源</h1><p>日常工作中我们想要获取一个函数的返回值有很多种方式，常见的有：</p>
+<ul>
+<li>return，通过return返回我们想要获取的值，这种是最常见的</li>
+<li>callback，通过传入一个callback来获取对应的值</li>
+</ul>
+<p>上面两种方式均可以获取函数的返回值，其中return多半是对应同步操作，也就是我们会等待函数调用完成之后才会进行下一步操作，如果我们不希望程序被阻塞在调用的过程中，就可以使用回调函数来执行。</p>
+<h1 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h1><p>下面通过几个例子来进行说明:</p>
+<ul>
+<li>示例1：return
+  <img src="//southrivers.github.io/2022/11/05/js-promise/return.png" alt>
+  如上所示我们直接通过return来返回函数的调用结果，不过很显然，这里是阻塞的，也就是说compute不完成计算就不会进行下一步的操作。</li>
+<li>示例2：回调
+  <img src="//southrivers.github.io/2022/11/05/js-promise/callback.png" alt>
+  这里我们在函数的最后传入了一个回调函数，此时compute并不会再返回什么数据，而是将计算结果返回给回调函数，由回调函数进行进一步的处理，这得益于函数式编程<strong>我们可以将函数作为参数传递给其他函数</strong>，可能这显得并不是那么重要，因为仅仅是换了一个地方来处理函数返回的数据，不过模式的改变带来的好处是解耦合。</li>
+</ul>
+<p>上面我们可以看到函数的执行都是同步的，这是因为这些程序的执行只需要cpu的参与，对于需要经由网络、IO、外部时钟参与的通常是需要等待的，由于js是单线程执行的，因此等待意味着阻塞，对于耗时较长的任务这种阻塞会使程序出现卡顿，为了优化这个问题，js提供了promise来解决这个问题，promise和java的future很类似，翻译过来叫做承诺，也就是将来要做某件事，而做这个动作就是通过回调函数来实现的，接下来我们通过代码演示一下promise的使用：</p>
+<p>示例1：promise callback：
+<img src="//southrivers.github.io/2022/11/05/js-promise/callback1.png" alt>
+上面的代码中我们可以看到程序的执行效果，程序并不会阻塞在compute这里，而是会直接跳过这里，然后通过回调函数继续执行。</p>
+<p>示例2：promise then：
+<img src="//southrivers.github.io/2022/11/05/js-promise/then1.png" alt>
+这里我们演示了promise then的写法，首先我们要获取一个promise，promise的生成代表了一个耗时的，非cpu的运算，其接受两个回调函数，分别是resolve、reject，分别代表了运行无问题正常返回和异常。</p>
+<p>上面这个示例略微有点硬，因为我们是自己直接创建并返回了一个promise，更多的情况下我们自己是不需要创建promise的，都是其他函数返回的promise，然后我们通过回调函数来处理返回的值，我们通过setTimeout来演示一下这种情况，setTimeout的执行逻辑是当程序遇到setTimeout代码段的时候，会将其中的执行逻辑交给定时器外设，程序此时并不会阻塞，会跳过这一段代码继续往下执行，等到外设执行完了就会回调该函数继续执行原来跳过的代码，因此我们可以通过setTimeout来模拟promise，具体如下：
+<img src="//southrivers.github.io/2022/11/05/js-promise/callbackhell.png" alt>
+这里很明显能看到一个问题，就是为了保障promise的顺序执行，我们不得不在回调函数中继续调用promise，这样循环嵌套，最终会让代码看的臃肿不堪。我们上面演示的promise-then的方式就解决了这个问题。而且上面的代码还并不包含异常的处理逻辑。</p>
+<p>对于示例1里面的callback hell我们可以提供promise版本的优雅地写法：对于一个黑盒函数来说，我们要将其变成promise的唯一的途径就是包一层，哈哈，包一层。。。具体如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 黑盒函数</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">compute</span>(<span class="params">a, b, cb</span>) </span>&#123;</span><br><span class="line">    setTimeout(<span class="function"><span class="params">()</span>=&gt;</span>&#123;</span><br><span class="line">        c = a+b;</span><br><span class="line">        cb(c)</span><br><span class="line">    &#125;, a * <span class="number">100</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 将回调逻辑连同匿名函数一起包装了，不过回调的执行代码放在了之后的then的代码块里面</span></span><br><span class="line"><span class="comment">// function cbl(res) &#123;</span></span><br><span class="line"><span class="comment">//     console.log(`res: $&#123;res&#125;`)</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">promiseCompute</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">        compute(a, b, (res) =&gt; &#123;</span><br><span class="line">            <span class="comment">// 这里忽略异常检测逻辑 reject</span></span><br><span class="line">            resolve(res);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">main</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"start"</span>)</span><br><span class="line">    promiseCompute(<span class="number">1</span>,<span class="number">2</span>).then(<span class="function">(<span class="params">r</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">`res: <span class="subst">$&#123;r&#125;</span>`</span>)</span><br><span class="line">        <span class="comment">// then后不再是promise了，因此这里如果想要顺序执行，</span></span><br><span class="line">        <span class="comment">// 就在后面不断地返回promise并不断地再次调用then方法</span></span><br><span class="line">        <span class="keyword">return</span> promiseCompute(<span class="number">2</span>,<span class="number">3</span>)</span><br><span class="line">    &#125;).then(<span class="function">(<span class="params">r</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">`res: <span class="subst">$&#123;r&#125;</span>`</span>)</span><br><span class="line">    &#125;).catch(<span class="function">(<span class="params">e</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// 异常统一处理逻辑</span></span><br><span class="line">        <span class="built_in">console</span>.log(e)</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"end"</span>)</span><br><span class="line">&#125;</span><br><span class="line">main();</span><br></pre></td></tr></table></figure>
+
+<p>上面代码有点长，因此这里把代码贴出来演示一下，具体逻辑已经在注释里面说明的比较详细了。</p>
+<p>示例3：async、await语法糖：
+上面我们看到promise比较经典的用法，就是通过then-catch的方式来执行的，不过js给我们提供了语法糖，让程序看起来更像是串行的执行的，修改之后的逻辑如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 黑盒函数</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">compute</span>(<span class="params">a, b, cb</span>) </span>&#123;</span><br><span class="line">    setTimeout(<span class="function"><span class="params">()</span>=&gt;</span>&#123;</span><br><span class="line">        c = a+b;</span><br><span class="line">        cb(c)</span><br><span class="line">    &#125;, a * <span class="number">100</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 将回调逻辑连同匿名函数一起包装了，不过回调的执行代码放在了之后的then的代码块里面</span></span><br><span class="line"><span class="comment">// function cbl(res) &#123;</span></span><br><span class="line"><span class="comment">//     console.log(`res: $&#123;res&#125;`)</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">promiseCompute</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">        compute(a, b, (res) =&gt; &#123;</span><br><span class="line">            <span class="comment">// 这里忽略异常检测逻辑 reject</span></span><br><span class="line">            resolve(res);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">main</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"start"</span>)</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> r1 = <span class="keyword">await</span> promiseCompute(<span class="number">1</span>,<span class="number">2</span>)</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">`res1 : <span class="subst">$&#123;r1&#125;</span>`</span>)</span><br><span class="line">        <span class="keyword">const</span> r2 = <span class="keyword">await</span> promiseCompute(<span class="number">2</span>,<span class="number">3</span>)</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">`res2 : <span class="subst">$&#123;r2&#125;</span>`</span>)</span><br><span class="line">    &#125; <span class="keyword">catch</span> (error) &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(error)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"end"</span>)</span><br><span class="line">&#125;</span><br><span class="line">main();</span><br></pre></td></tr></table></figure>
+
+<p>上述代码执行结果如下：
+<img src="//southrivers.github.io/2022/11/05/js-promise/restang.png" alt>
+可以看到程序完全变成了同步的代码，包括最后的<code>end</code>，这是由于我们的await的逻辑等同于将其后的代码包装到then里面了（一直包含到程序的最后，并且await函数返回的结果是对应函数中resolve、reject的结果，这看起来有点不可思议，毕竟try是有作用于的，不过结果确实是这个样子）。如果想要将上述执行结果start、end和中间的代码看起来不是同步的话，我们只需要再包一层就可以了，提炼出新的函数，将异步逻辑放到新的函数中就完事了，这里就不再演示了。</p>
+<hr>
+<p>除了上述串行执行外，可能还会涉及到一种新的逻辑，就是我们希望几个promise能够并发执行，完事之后我们等待所有的并发结果都执行出来了才继续下一步，这个有点类似于java里面的栅栏了，这个其实也是可以实现的，具体实现方式如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">main</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"start"</span>)</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> p1 = promiseCompute(<span class="number">1</span>,<span class="number">2</span>)</span><br><span class="line">        <span class="keyword">const</span> p2 = promiseCompute(<span class="number">2</span>,<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">const</span> [r1, r2] = <span class="keyword">await</span> <span class="built_in">Promise</span>.all([p1, p2])</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">`res1 : <span class="subst">$&#123;r1&#125;</span>`</span>)</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">`res2 : <span class="subst">$&#123;r2&#125;</span>`</span>)</span><br><span class="line">    &#125; <span class="keyword">catch</span> (error) &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(error)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"end"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>参考网上学习 <a href="https://www.youtube.com/watch?v=GPA3YPK3vZo&list=LL&index=1" target="_blank" rel="noopener">视频</a></p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>

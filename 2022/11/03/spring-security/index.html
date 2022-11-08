@@ -1,0 +1,234 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>spring security - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2022-11-03">2022-11-03</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">spring security</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>很早以前我们开发web应用的时候，是面向servlet的编程，我们的每个页面都会对应一个servlet，这样产生了大量的模板代码，spring mvc带来的变革是只生成了一个dispatchservlet，这个组件会接受所有的请求，并将请求分发给对应的controller，这样我们就可以只用关注业务代码，忽略模板代码了。</p>
+<p>spring security 就是通过对dispactherservlet的保护来实现整个应用保护的，其通过filter chain实现基于filter的保护机制，具体如下：
+<img src="//southrivers.github.io/2022/11/03/spring-security/security-mv.png" alt></p>
+<h1 id="详解"><a href="#详解" class="headerlink" title="详解"></a>详解</h1><h2 id="快速开始"><a href="#快速开始" class="headerlink" title="快速开始"></a>快速开始</h2><p>我们通过在spring的web应用中引入对应的依赖就可以实现应用的安全防护，对应的pom依赖如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-security<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这样我们在启动web应用的时候就会启用默认的配置实现应用的防护：
+<img src="//southrivers.github.io/2022/11/03/spring-security/security-dlogin.png" alt></p>
+<h2 id="原理讲解"><a href="#原理讲解" class="headerlink" title="原理讲解"></a>原理讲解</h2><p>在开始讲解整体的代码逻辑之前，我们先来详细的看一下spring security内部是如何实现安全认证的，如下图所示：
+<img src="//southrivers.github.io/2022/11/03/spring-security/process-security.png" alt></p>
+<ul>
+<li>认证请求被usernamepasswordauthenticationfilter拦截</li>
+<li>spring security将请求发送给authenmanager</li>
+<li>authenmanager负责管理authenprovider，并将请求依次发送给provider，manager可以认为是一个<strong>策略的管理者</strong></li>
+<li>provider可以认为是策略的提供者，会接受manager发送过来的请求进行验证，这里就是验证策略的具体实现</li>
+<li>userdetailservice用来将provider的逻辑和加载用户信息的实现进行解耦</li>
+</ul>
+<p>接下来，我们可以看一下默认的处理流程
+<img src="//southrivers.github.io/2022/11/03/spring-security/filterchain.png" alt>
+可以看到其业务的处理流程正如上面所示。不过这里的provider的具体实现是DaoAuthenticationProvider。</p>
+<ul>
+<li>认证成功的信息会通过<strong>writeheaderfilter</strong>写入到响应头里面，后面我们再请求的时候就会携带上请求头的信息来实现免认证</li>
+<li>当然这里请求头的信息需要和后端形成映射，比如请求头里面携带了jsessionid，那么后端就需要有地方存放这些session信息，从而决定session的信息是否有效，这也是在filter里面实现的，对应的filter为：<strong>SecurityContextPersistenceFilter</strong>。</li>
+</ul>
+<p>下面为filter详细：</p>
+<ul>
+<li>org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter</li>
+<li>org.springframework.security.web.context.SecurityContextPersistenceFilter</li>
+<li>org.springframework.security.web.header.HeaderWriterFilter</li>
+<li>org.springframework.security.web.authentication.logout.LogoutFilter</li>
+<li>org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter</li>
+<li>org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter</li>
+<li>org.springframework.security.web.authentication.AnonymousAuthenticationFilter</li>
+<li>org.springframework.security.web.session.SessionManagementFilter</li>
+<li>org.springframework.security.web.access.ExceptionTranslationFilter</li>
+<li>org.springframework.security.web.access.intercept.FilterSecurityInterceptor</li>
+</ul>
+<p>上面我们见识了spring security提供的filter的能力，接下来来看一下这些filter的顺序：
+<img src="//southrivers.github.io/2022/11/03/spring-security/fc.png" alt>
+上面是spring security提供给我们的默认的filter的顺序，我们可以看到securitycontextpersistencefilter是比较靠前的，这里是我们验证jessionid的地方，因此如果我们要实现单点登录就可以对此处的逻辑做调整，将session信息存储到所有服务器公用的数据仓库中，比如redis中即可。</p>
+<h2 id="定制化逻辑"><a href="#定制化逻辑" class="headerlink" title="定制化逻辑"></a>定制化逻辑</h2><p>如果我们要实现各模块的自定义处理就需要通过spring security提供的websecurityconfigadapter接口来修改默认的配置，接下来我们通过一个示例来演示业务流程</p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1>
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>
