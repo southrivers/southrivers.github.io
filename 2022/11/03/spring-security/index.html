@@ -221,6 +221,10 @@ cookie不跨域，这个可以在前端页面上看到。常见的有iframe或�
 <p>我们的filter依然是使用上面的filter，http拦截的逻辑也依然是上面的逻辑。</p>
 </li>
 </ul>
+<p>最后顺便提一下jwt token，通常我们的web应用如果是单节点的应用可以使用session的认证机制，如果是多个后端或者将开发的业务集成到现有的框架中通常采用token认证的方式。jwt token带来的好处是服务端变成了无状态的了，也就是说服务端不会留存token的任何信息，用户所有的信息都将保存到token里面了，凭借这个token我们可以知道对应的用户、token失效的时间等，这给后端带来了极大的扩展，多移动端或者前后端分离的web应用。</p>
+<p>TODO： 后续继续补充session的相关机制
+<img src="//southrivers.github.io/2022/11/03/spring-security/sessionweb.png" alt></p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>spring security 推荐学习视频：<a href="https://www.youtube.com/watch?v=ElY3rjtukig" target="_blank" rel="noopener">学习材料</a></p>
 <!------------
 针对定制化的用户验证模块存在两个过程：
 - 获取认证：我们只需要新建一个endpoint并且不对其进行拦截，将请求体中的用户名密码识别出来之后提供给AuthenticationManager，am将会使用authenticate方法来认证用户，其接受一个Authentication类型的参数
@@ -233,10 +237,6 @@ cookie不跨域，这个可以在前端页面上看到。常见的有iframe或�
 <li>识别认证：这里我们就需要使用自定义的Filter来对其进行识别，确认用户是否有效</li>
 </ul>
 <p>如果我们要实现各模块的自定义处理就需要通过spring security提供的websecurityconfigadapter接口来修改默认的配置，接下来我们通过一个示例来演示业务流程–&gt;</p>
-<p>最后顺便提一下jwt token，通常我们的web应用如果是单节点的应用可以使用session的认证机制，如果是多个后端或者将开发的业务集成到现有的框架中通常采用token认证的方式。jwt token带来的好处是服务端变成了无状态的了，也就是说服务端不会留存token的任何信息，用户所有的信息都将保存到token里面了，凭借这个token我们可以知道对应的用户、token失效的时间等，这给后端带来了极大的扩展，多移动端或者前后端分离的web应用。</p>
-<p>TODO： 后续继续补充session的相关机制
-<img src="spring-security/sessionweb.png" alt=""></p>
-<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>spring security 推荐学习视频：<a href="https://www.youtube.com/watch?v=ElY3rjtukig">学习材料</a></p>
 -->
             
                 
