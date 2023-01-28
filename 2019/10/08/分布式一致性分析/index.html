@@ -266,6 +266,31 @@
 那么在此基础上保证结果的可预测性（或者说正确性）应该就仅仅涉及工程上的实践了。</p>
 <h3 id="leader选举"><a href="#leader选举" class="headerlink" title="leader选举"></a>leader选举</h3><p>后议！另外raft也是一种分布式一致性算法，有时间可以查看并总结一下，另外基于raft而实现的copycat也是不错的源代码，有时间可以看一下</p>
 <p><strong>raft的leader是兼具了paxos的提议者和决策者的角色</strong></p>
+<h1 id="TODO"><a href="#TODO" class="headerlink" title="TODO"></a>TODO</h1><p>1、任期是针对某一个slot的，每一个slot在完成状态一致的确认后，任期都再次从0开始，每一个slot对应了一个base case</p>
+<p>2、如果本次针对其中的一个slot的一致性提议失败了，可以继续针对下一个slot对失败的提议再次提议</p>
+<p>3、leader在失活后再次进入下一个选举的时候，被分到小脑裂的节点簇种leader选举会是如何</p>
+<p>4、有新的节点加入到集群之中的时候会是什么样的流程</p>
+<ul>
+<li>日志的append和commit是两个概念，commit是会将状态应用到状态机的，append
+则会直接追加到follower，在下次重新选举的时候</li>
+</ul>
+<p>问题：leader接受到客户的请求后，将请求发送给follower之后，大部分的follower也接受了
+请求，并返回响应给leader，leader对该消息进行了commit，然后返回客户端确认消息，并同时
+对所有的 follower进行commit；但是该过程中存在不确定性，也就是返回客户端是成功了，但是
+follwer在接受消息的时候由于和leader之间出现了短暂的网络中断，因此commit消息被丢失了，
+恰在消息丢失之后，leader发生了切换，其中的一个follower成为leader，其最后一条消息还没有提交
+此时这条消息将作何解决？不提交肯定是存在问题，提交了的话则会出现另外一个问题。</p>
+<p>另外一个问题：当请求给到leader之后，leader刚发送给其中的一个follower就下线了，此时这个接受了
+最新消息的follower成为了最新的leader（被选为leader有一定的随机性，假定我们很幸运的选择了它成为leader），
+按照上面第一个问题，我们选择提交改请求，那么理论上来说也是不存在问题的，不过这又会带来新的问题</p>
+<p>再一个问题：还是上面的情况，很不幸拥有最新的数据的节点没有被选为leader，而是拥有旧数据的节点被选为了leader
+，此时上面请求的数据将会丢失。</p>
+<p>综上：因此消息只需要被复制到follower节点就可以认为是被接受了，commit的过程其实是对客户端做出应答，如果没有
+commit的话，可能存在正常和异常两种状态，此时客户端都需要发起重试来解决，服务端要保障幂等才可以。</p>
+<p>补充说明：即使日志（2，2）已经被大多数节点（S1、S2、S3）确认了，但是它不能被Commit，因为它是来自之前term(2)的日志，直到S1在当前term（4）产生的日志（4， 3）被大多数Follower确认，S1方可Commit（4，3）这条日志，当然，根据Raft定义，（4，3）之前的所有日志也会被Commit。此时即使S1再下线，重新选主时S5不可能成为Leader，因为它没有包含大多数节点已经拥有的日志（4，3）。
+<a href="https://zhuanlan.zhihu.com/p/27207160" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/27207160</a>
+上面的commit就是返回响应给客户端</p>
+<hr>
 
             
                 
