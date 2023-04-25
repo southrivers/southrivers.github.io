@@ -178,6 +178,13 @@
     - 在rehash进行的期间，每次对字典执行添加、删除、查找或者更新操作的时候，程序除了执行指定的操作之外还会将<code>ht[0]</code>中对应的rehashidx下标所标识的数据移过去
     - 重复上述操作直到将哈希表中所有的键值对移过去</p>
 <p>在渐进式rehash的过程中需要注意的是增加只会在新的哈希表中执行，而删除、修改、查询则会在两个哈希表中进行</p>
+<h3 id="redis基本数据结构小结"><a href="#redis基本数据结构小结" class="headerlink" title="redis基本数据结构小结"></a>redis基本数据结构小结</h3><ul>
+<li>string：redis的string是simple dynamic string，相较于c语言里面的string，其最大的特点是预分配、懒回收的策略，所谓的预分配是redis在给string类型的value分配内存空间的时候会多分配一些空间，这样做的好处是string类型的数据在修改长度的时候基本不用再次分配一块内存空间，懒回收则是string在长度减少的那一刻并不会立即回收掉内存</li>
+<li>hash：hash数据结构的实现采用的是hash表，这种数据结构有点类似于java的hash实现，同样对于产生了hash冲突的键也是采用链地址法来解决</li>
+<li>list：redis的list采用了双向链表的数据结构来实现，分别保存了head、tail的指针，这样push和pop的复杂度都是O(1)</li>
+<li>set：set的数据结构类似于hash，只是对应的value统统为null，这和java里面hashset的实现也是类似的</li>
+<li>zset：zset相较于set多了一个score的权重值，其本质是<strong>有序链表</strong>，其基础的数据结构可以分为ziplist、skipList，在有序链表的长度或者大小比较小的时候使用的是ziplist的数据结构，这种数据结构的好处是节省内存空间来；在有序链表的长度比较长或者数据比较多的时候，则采用了skiplist的数据结构，skiplist这种数据结构本质是针对有序链表做了多级索引的一种结构，这样我们可以在o(lg N)的复杂度内检索到数据，当然删除、修改的复杂度也是这个级别（删除、修改的本质在于检索到数据），这种数据结构的缺点也是显而易见的，那就是会浪费内存空间。</li>
+</ul>
 <h2 id="redis集群模式"><a href="#redis集群模式" class="headerlink" title="redis集群模式"></a>redis集群模式</h2><p>redis集群模式大概可以分为三种类型：</p>
 <ul>
 <li>主从：这种模式包含了master和slave两种角色，其中祝数据库提供读写操作，并将写操作导致的数据变化自动同步给从数据库，在从数据库进行同步的时候包含了两种同步的方式：<ul>

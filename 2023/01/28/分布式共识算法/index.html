@@ -171,7 +171,7 @@
 <p>上面proposer的phase1阶段已经完成了，接下来是phase2阶段，这个就比较简单了直接提交proposer当前拥有的值即可，对应的v、vrnd均会被持久化写入。</p>
 <h3 id="multi-paxos"><a href="#multi-paxos" class="headerlink" title="multi-paxos"></a>multi-paxos</h3><p>区别于paxos的2次多数读、多数写操作，multiple是在多数读阶段一次性提交了多个多数读，多数写仍然是一个一个进行的写，这样做的好处是原来可能需要20次读、写操作，现在只需要11次。</p>
 <h3 id="fast-paxos"><a href="#fast-paxos" class="headerlink" title="fast-paxos"></a>fast-paxos</h3><p>fast-paxos的过程相对来说比较简单，首先直接进入phase2阶段，如果系统是干净的、并且没有竞争那么直接就成功了，如果系统不干净或者存在多个竞争，那么就会退化为paxos。</p>
-<p>fast-paxos存在一个问题，我们假设是2n+1个节点，如果其中的n+1个直接在proposer1的phase2的过程就确认了，但是另外n个几点没有存放的是其他proposer2对应的phase2的值，这个时候直接返回客户端ok的信息，客户端认为proposer1已经确认了，但是此时确认了proposer1的其中的n个节点突然挂了，此时剩下了1个proposer1和n个proposer2，我们无法确认是proposer1被确认了还是proposer2被确认了。这种情况就要扩大多数节点的数量。原来是大于n/2，需要变成大于n/2+(n/2)/2，也就是大于3*n/4个节点正常工作才可以，因此此时集群最少得有5个节点，并且至少此时至少要有4个节点正常记录才可以。</p>
+<p>fast-paxos存在一个问题，我们假设是2n+1个节点，如果其中的n+1个直接在proposer1的phase2的过程就确认了，但是另外n个几点没有存放的是其他proposer2对应的phase2的值，这个时候直接返回客户端ok的信息，客户端认为proposer1已经确认了，但是此时确认了proposer1的其中的n个节点突然挂了，此时剩下了1个proposer1和n个proposer2，我们无法确认是proposer1被确认了还是proposer2被确认了。这种情况就要扩大多数节点的数量。原来是大于n/2，需要变成大于n/2+(n/2)/2，也就是大于3*n/4个节点正常工作才可以，这里不像是n/2+1个节点，不需要多个1，是因为集群的节点必然是奇数，因此除4必然是会带小数，因此我们只需要向上取整就可以了，因此此时集群最少得有5个节点，并且至少此时至少要有4个节点正常记录才可以。</p>
 <!-- https://mp.weixin.qq.com/s/fgDqKqD-GcSGMlC_M5Nf1Q -->
 
 <h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>参考： <a href="https://mp.weixin.qq.com/s/fgDqKqD-GcSGMlC_M5Nf1Q" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/fgDqKqD-GcSGMlC_M5Nf1Q</a></p>
