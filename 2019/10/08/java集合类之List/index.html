@@ -1,0 +1,240 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>java集合类之list - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2019-10-08">2019-10-08</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">java集合类之List</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <p>底层实现和树的关系</p>
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>java中常用的list有LinkedList、ArrayList，他们的区别是底层的数据存储，对于LinkedList而言，底层采用的是链表，而对于
+ArrayList而言，底层采用的是数组，链表的特点是能够很方便的使用内存碎片，并且加入、删除元素的过程由于仅仅需要改动指针，
+因此是常量级别的响应时间，而对于数组而言，其底层的存储空间要求是连续的，因此需要分配大量的连续空间，不过因为其内存空间
+连续的特点，我们可以以常量的访问时间获取元素，不过当我们针对ArrayList中的元素进行增加或者删除的时候，需要移动大量的
+元素，因此当数据结构有变化的时候其操作的效率是比较低的，而数组的特点则是可以以常量的</p>
+<h1 id="详解"><a href="#详解" class="headerlink" title="详解"></a>详解</h1><p>先来看一下LinkedList，其类图如下所示：</p>
+<p><img src="//southrivers.github.io/2019/10/08/java集合类之List/linkedList.png" alt></p>
+<p>我们先来看一下该类上面的注释：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * Doubly-linked list implementation of the &#123;@code List&#125; and &#123;@code Deque&#125;</span><br><span class="line"> * interfaces.  Implements all optional list operations, and permits all</span><br><span class="line"> * elements (including &#123;@code null&#125;).</span><br><span class="line"> *</span><br><span class="line"> * &lt;p&gt;All of the operations perform as could be expected for a doubly-linked</span><br><span class="line"> * list.  Operations that index into the list will traverse the list from</span><br><span class="line"> * the beginning or the end, whichever is closer to the specified index.</span><br><span class="line"> *</span><br><span class="line"> * &lt;p&gt;&lt;strong&gt;Note that this implementation is not synchronized.&lt;/strong&gt;</span><br><span class="line"> * If multiple threads access a linked list concurrently, and at least</span><br><span class="line"> * one of the threads modifies the list structurally, it &lt;i&gt;must&lt;/i&gt; be</span><br><span class="line"> * synchronized externally.  (A structural modification is any operation</span><br><span class="line"> * that adds or deletes one or more elements; merely setting the value of</span><br><span class="line"> * an element is not a structural modification.)  This is typically</span><br><span class="line"> * accomplished by synchronizing on some object that naturally</span><br><span class="line"> * encapsulates the list.</span><br><span class="line"> *</span><br><span class="line"> * If no such object exists, the list should be &quot;wrapped&quot; using the</span><br><span class="line"> * &#123;@link Collections#synchronizedList Collections.synchronizedList&#125;</span><br><span class="line"> * method.  This is best done at creation time, to prevent accidental</span><br><span class="line"> * unsynchronized access to the list:&lt;pre&gt;</span><br><span class="line"> *   List list = Collections.synchronizedList(new LinkedList(...));&lt;/pre&gt;</span><br><span class="line"> *</span><br><span class="line"> * &lt;p&gt;The iterators returned by this class&apos;s &#123;@code iterator&#125; and</span><br><span class="line"> * &#123;@code listIterator&#125; methods are &lt;i&gt;fail-fast&lt;/i&gt;: if the list is</span><br><span class="line"> * structurally modified at any time after the iterator is created, in</span><br><span class="line"> * any way except through the Iterator&apos;s own &#123;@code remove&#125; or</span><br><span class="line"> * &#123;@code add&#125; methods, the iterator will throw a &#123;@link</span><br><span class="line"> * ConcurrentModificationException&#125;.  Thus, in the face of concurrent</span><br><span class="line"> * modification, the iterator fails quickly and cleanly, rather than</span><br><span class="line"> * risking arbitrary, non-deterministic behavior at an undetermined</span><br><span class="line"> * time in the future.</span><br><span class="line"> *</span><br><span class="line"> * &lt;p&gt;Note that the fail-fast behavior of an iterator cannot be guaranteed</span><br><span class="line"> * as it is, generally speaking, impossible to make any hard guarantees in the</span><br><span class="line"> * presence of unsynchronized concurrent modification.  Fail-fast iterators</span><br><span class="line"> * throw &#123;@code ConcurrentModificationException&#125; on a best-effort basis.</span><br><span class="line"> * Therefore, it would be wrong to write a program that depended on this</span><br><span class="line"> * exception for its correctness:   &lt;i&gt;the fail-fast behavior of iterators</span><br><span class="line"> * should be used only to detect bugs.&lt;/i&gt;</span><br></pre></td></tr></table></figure>
+
+<p>上面大概意思是说：</p>
+<ul>
+<li>linkedList同时实现了List和Deque接口，并且允许List中的元素为null</li>
+<li>由于实现了一个双端队列的接口，当我们获取List中的某个元素的时候，其真实的操作是会选择性的选择队头或者队尾的元素作为起始节点。</li>
+<li>LinkedList所有的操作都是线程非安全的，因此在存在多个线程并发的访问List的时候，我们需要通过外部的锁对象来保证并发访问的安全性，
+或者通过Collections.synchronizedList来保障</li>
+<li>提供了fail-fast的机制，当我们的List在对应的iterator创建好之后，如果我们不是通过iterator对应的add或者remove方法改变了数据的话，当我们发现
+List的结构发生了变化，说明可能是存在其他的线程操作了这个List，这个时候我们会抛出ConcurrentModificationException来终止当前的操作。
+（如果我创建了iterator不用，我又通过add方法修改数据结构会抛出异常么？同一个线程的情况下。怎么样解决这个问题？）</li>
+</ul>
+<p>java的集合中大量的使用了模版模式，也就是将公共的实现放到抽象类中（如有必要，提供默认的实现），针对不同的特性在子类中提供覆盖的
+能力。</p>
+<p>来看一下LinkedList类的成员变量：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">transient</span> <span class="keyword">int</span> size = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Pointer to first node.</span></span><br><span class="line"><span class="comment"> * Invariant: (first == null &amp;&amp; last == null) ||</span></span><br><span class="line"><span class="comment"> *            (first.prev == null &amp;&amp; first.item != null)</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">transient</span> Node&lt;E&gt; first;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Pointer to last node.</span></span><br><span class="line"><span class="comment"> * Invariant: (first == null &amp;&amp; last == null) ||</span></span><br><span class="line"><span class="comment"> *            (last.next == null &amp;&amp; last.item != null)</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">transient</span> Node&lt;E&gt; last;</span><br></pre></td></tr></table></figure>
+
+<p>对应的Node的定义如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Node</span>&lt;<span class="title">E</span>&gt; </span>&#123;</span><br><span class="line">    E item;</span><br><span class="line">    Node&lt;E&gt; next;</span><br><span class="line">    Node&lt;E&gt; prev;</span><br><span class="line"></span><br><span class="line">    Node(Node&lt;E&gt; prev, E element, Node&lt;E&gt; next) &#123;</span><br><span class="line">        <span class="keyword">this</span>.item = element;</span><br><span class="line">        <span class="keyword">this</span>.next = next;</span><br><span class="line">        <span class="keyword">this</span>.prev = prev;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由Node的定义我们也可以看出LinkedList是一个双向链表。</p>
+<p>查看一下LinkeList继承的AbstractSequentialList的抽象类可以知道，我们的LinkedList只需要实现listIterator和size方法就可以了。
+我们首先看一下AbstractSequentialList中方法listIterator被用到的地方可以看到如下代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> E <span class="title">get</span><span class="params">(<span class="keyword">int</span> index)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> listIterator(index).next();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (NoSuchElementException exc) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IndexOutOfBoundsException(<span class="string">"Index: "</span>+index);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也即是当我们尝试获取某个位置的对象的时候就会调用listIterator方法，next方法会返回下一个元素并返回前一个游标（或者说指针），这里不是太清楚下一个元素指代的是哪一个元素，
+因为按理说下表应该就是从0开始的（TODO）</p>
+<p>续接上文，我们跟进一下在linkedList中listIterator的实现是什么样子的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> ListIterator&lt;E&gt; <span class="title">listIterator</span><span class="params">(<span class="keyword">int</span> index)</span> </span>&#123;</span><br><span class="line">    checkPositionIndex(index);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> ListItr(index);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>第一步是针对查询的元素进行的合法性校验，后面会返回一个ListItr对象，该对象实现了ListIterator接口。不过很遗憾上面get方法被LinkedList给重写掉了，重写的方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> E <span class="title">get</span><span class="params">(<span class="keyword">int</span> index)</span> </span>&#123;</span><br><span class="line">    checkElementIndex(index);</span><br><span class="line">    <span class="keyword">return</span> node(index).item;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里最终会调用如下方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Node&lt;E&gt; <span class="title">node</span><span class="params">(<span class="keyword">int</span> index)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// assert isElementIndex(index);</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (index &lt; (size &gt;&gt; <span class="number">1</span>)) &#123;</span><br><span class="line">        Node&lt;E&gt; x = first;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; index; i++)</span><br><span class="line">            x = x.next;</span><br><span class="line">        <span class="keyword">return</span> x;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        Node&lt;E&gt; x = last;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = size - <span class="number">1</span>; i &gt; index; i--)</span><br><span class="line">            x = x.prev;</span><br><span class="line">        <span class="keyword">return</span> x;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个方法中我们可以看到，当我们获取某一个下标的数据的时候，LinkedList首先会判断该下标是离头节点近呢还是离尾节点近，
+并根据这个条件选择从队头或者是队尾访问元素。</p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1>
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>

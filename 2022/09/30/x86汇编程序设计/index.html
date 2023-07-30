@@ -1,0 +1,262 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>x86汇编程序设计 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2022-09-30">2022-09-30</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">x86汇编程序设计</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="环境搭建："><a href="#环境搭建：" class="headerlink" title="环境搭建："></a>环境搭建：</h1><p>标准的开发环境的搭建并不是容易的事情，遇到和处理器平台相关的问题的时候更是无解，比如我现在要给予x86的cpu做arm的开发，或者基于arm的cpu开发x86的开发，这是件很头疼的事情，比较好的是我们可以使用docker来生成标准的开发环境，这样就可以屏蔽本机硬件的耦合。</p>
+<ul>
+<li>Dockerfile 构建环境：</li>
+</ul>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> randomdude/gcc-cross-x86_64-elf</span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span> apt-get update </span><br><span class="line"><span class="keyword">RUN</span> apt-get upgrade -y</span><br><span class="line"><span class="keyword">RUN</span> apt-get install -y nasm</span><br><span class="line"><span class="keyword">RUN</span> apt-get install -y xorriso</span><br><span class="line"><span class="keyword">RUN</span> apt-get install -y grub-pc-bin</span><br><span class="line"><span class="keyword">RUN</span> apt-get install -y grub-common</span><br><span class="line"></span><br><span class="line"><span class="keyword">VOLUME</span> /root/env</span><br><span class="line"><span class="keyword">WORKDIR</span> /root/env</span><br></pre></td></tr></table></figure>
+
+<p>上述就是构建x86汇编语言标准的镜像，这里我们是基于ubuntu的，构建命令行如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build buildenv -t myos-buildenv</span><br></pre></td></tr></table></figure>
+
+<p>在vscode的环境下启动如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --rm -it -v "$(pwd)":/root/env myos-buildenv</span><br></pre></td></tr></table></figure>
+
+<p>至此，我们就完成了本地环境和容器环境的共享，其中的<code>-v</code>就是将本地的目录和容器的环境共享，最后完成环境搭建，我们可以通过helloworld代码进行测试：</p>
+<p><img src="//southrivers.github.io/2022/09/30/x86汇编程序设计/x86env.png" alt></p>
+<h1 id="基本语法"><a href="#基本语法" class="headerlink" title="基本语法"></a>基本语法</h1><p><del>操作系统切换线程或者进程，是通过中断来实现的，中断可以分为两种：软中断、硬中断，所谓软终端是我们在程序的过程中可能发生了异常、程序退出，所谓硬中断是cpu在一个时钟周期切换的时候发现终端标记位上有程序要切换，从而通过系统调用触发程序的切换。</del>
+操作系统内核提供了系统调用，我们可以通过寄存器来进行参数的传递，且传递参数的数量是有上限的：
+<img src="//southrivers.github.io/2022/09/30/x86汇编程序设计/argument.png" alt></p>
+<p>这里我们通过系统调用传递参数的时候，id对应了syscall的唯一的标识，或者可以将其认为是函数的唯一标识，其他的寄存器则是传递的参数。</p>
+<p><img src="//southrivers.github.io/2022/09/30/x86汇编程序设计/syscalltab.png" alt></p>
+<p>以上是系统调用的功能表，详见：<a href="https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md#x86_64-64_bit" target="_blank" rel="noopener">https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md#x86_64-64_bit</a>
+，其中的参数类型为<code>*</code>的代表了指针类型，其指向内存中的地址。</p>
+<h2 id="段"><a href="#段" class="headerlink" title="段"></a>段</h2><p>汇编语言通常通过section来定义段，我们常见的有</p>
+<ul>
+<li><p>.data（数据段）：用来存放已经初始化的变量的区域</p>
+</li>
+<li><p>.text（代码段）：用来存放程序执行代码的区域</p>
+</li>
+<li><p>.bss（用来存放未初始化的全局变量）</p>
+</li>
+<li><p>global：当模块中有需要被连接的模块的时候可以使用global定义</p>
+</li>
+<li><p>qeu 用来定义常数</p>
+</li>
+</ul>
+<p>目前暂时用到这几种，后面再补充</p>
+<h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><p>针对不同的段，我们需要使用不同类型的数据，对于data段，我们常见的数据类型为</p>
+<ul>
+<li>db：defined bytes，代表了一个8位 1字节 的数据</li>
+<li>dw：defined words，在汇编中通常16位对应了一个word，即是一个字</li>
+<li>dd：defined double words，同上代表了32位</li>
+<li>dq：代表了64位</li>
+</ul>
+<p>以上数据类型对应了已经初始化的变量</p>
+<p>对于.bss段，我们通常的数据类型为：<code>resb resw resd resq</code>和data段类型是对应的，不过数据并未初始化。以上关键字需要带一个操作数，比如：<code>resb 1</code>代表了保留一个字节的未初始化的空间</p>
+<h2 id="寄存器"><a href="#寄存器" class="headerlink" title="寄存器"></a>寄存器</h2><p>x86架构中存在如下寄存器，这里我们可以看到寄存器是可以复用的，也就是8位的寄存器可以是64位寄存器的低8位，同理其他情况也是：
+<img src="//southrivers.github.io/2022/09/30/x86汇编程序设计/register.png" alt></p>
+<p>前面我们看到了寄存器，并且看到了寄存器是可以进行拆分的，这里我们继续看一些特殊的寄存器，或者叫做标记位会更合适：
+<img src="//southrivers.github.io/2022/09/30/x86汇编程序设计/flags.png" alt></p>
+<p>指针也是一种特殊类型的寄存器，其用来指向一块内存空间，在其指向的内存空间中保存着数据：
+<img src="//southrivers.github.io/2022/09/30/x86汇编程序设计/pointers.png" alt>
+上面是比较常用的几种类型的指针，其中rip就是我们常说的程序计数器pc，rsp中的s代表了stack、rbp中的b代表了bottom，也即是stack的栈底</p>
+<h2 id="输入输出"><a href="#输入输出" class="headerlink" title="输入输出"></a>输入输出</h2><p>如本小结开始所说，函数的调用是通过syscall来触发的，输出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mov rax,1</span><br><span class="line">mov rdi,1;d可以认为是destionation，也就是写出到哪里，1的话是标准输出，也就是输出到屏幕上</span><br><span class="line">mov rsi,text ;这一步代表了参数传递，将想要输出到屏幕的参数传递给rsi寄存器</span><br><span class="line">mov rdx,length ;这一步用来指定text的长度</span><br><span class="line">syscall</span><br></pre></td></tr></table></figure>
+
+<p>以上就是输出数据到屏幕上的操作，接下来看一下从命令行读入参数的代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mov rax, 0</span><br><span class="line">mov rdi, 0</span><br><span class="line">mov rsi, text</span><br><span class="line">mov rdx, length</span><br><span class="line">syscall</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码可以看到，输入和输出代码非常类似，不过这里我们读取数据的时候数据的内容和长度都不确定，因此我们需要时bss段来申请一块存储空间，申请的时候会指定长度，这里的length就是我们申请的时候指定的长度</p>
+<h2 id="控制流"><a href="#控制流" class="headerlink" title="控制流"></a>控制流</h2><p>常见的控制程序的方式在高等语言中有if、while、for等，这些对应到汇编中也是存在相应的影子的，if对应到汇编可以使用cmp &amp; jne、jge等来实现，循环也可以通过jmp或者jmp的衍生来指令来进行控制</p>
+<h2 id="宏"><a href="#宏" class="headerlink" title="宏"></a>宏</h2><p><img src="//southrivers.github.io/2022/09/30/x86汇编程序设计/macro.png" alt>
+宏是一种特殊的代码，其在编译的时候会展开为指定代码，其定义如上图所示，<code>%macro</code>、<code>%endmacro</code>用于标记宏的开始和结束的区间，后面的名称是我们在其他的代码片段可以引用的标识，或者将其理解为函数名称也可以，最后的argc则指代了该宏的参数的<strong>个数</strong>，我们获取参数的时候通过<code>%num</code>的方式来指定获取第几个参数，并且参数传递给宏的时候，使用<code>,</code>进行分割，我们下面通过一个简单的示例来说明宏的定义及使用：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">section .data</span><br><span class="line">    text: db &quot;hello&quot;</span><br><span class="line"></span><br><span class="line">section .text</span><br><span class="line">    global _start</span><br><span class="line"></span><br><span class="line">%macro print 1</span><br><span class="line">	mov rax,1</span><br><span class="line">	mov rdi,1</span><br><span class="line">	mov rsi,%1</span><br><span class="line">	mov rdx,14</span><br><span class="line">	syscall</span><br><span class="line">%endmacro</span><br><span class="line">;宏的定义必须要放到引用前面，通过include过来的也可以认为是放到了前面</span><br><span class="line">%macro sumall 2</span><br><span class="line">;这里类似于函数的定义</span><br><span class="line">%%test:</span><br><span class="line">    mov rax, %1</span><br><span class="line">    add rax, %2</span><br><span class="line">    mov [sumof], rax; 将rbx中保存的临时数据写入到bss预申请的内存空间中</span><br><span class="line">%endmacro</span><br><span class="line"></span><br><span class="line">%macro exit 0</span><br><span class="line">    mov rax, 60</span><br><span class="line">    mov rdi, 0</span><br><span class="line">    syscall</span><br><span class="line">%endmacro</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">_start:</span><br><span class="line">    sumall 3,1</span><br><span class="line"></span><br><span class="line">    mov rax, 1</span><br><span class="line">    mov rdi, 1</span><br><span class="line">    mov rsi, [sumof]</span><br><span class="line">    mov rdx, 16</span><br><span class="line">    syscall</span><br><span class="line"></span><br><span class="line">    exit</span><br><span class="line"></span><br><span class="line">section .bss</span><br><span class="line">    sumof: resb 16</span><br></pre></td></tr></table></figure>
+
+<p>上面我们看到了宏的定义及使用，宏的定义必须在使用之前，否则会出现符号不识别的问题，另外在宏中定义label的时候尽量使用%%开头，原因是当多次调用宏的时候，由于宏最终会被中间的代码给替代，这样就出现了多个同样的标记，因此就会出现模棱两可的问题，如下：
+<img src="//southrivers.github.io/2022/09/30/x86汇编程序设计/macroun.png" alt></p>
+<p>上面的代码还存在一个问题，就是数字的打印是有问题的，因此尝试使用汇编来完成数字的打印</p>
+<h2 id="读写文件"><a href="#读写文件" class="headerlink" title="读写文件"></a>读写文件</h2><h2 id="接收参数"><a href="#接收参数" class="headerlink" title="接收参数"></a>接收参数</h2><p>采用堆栈来接收参数</p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>参考：<a href="https://github.com/davidcallanan/os-series" target="_blank" rel="noopener">https://github.com/davidcallanan/os-series</a>
+<a href="https://www.youtube.com/watch?v=XuUD0WQ9kaE&amp;list=PLetF-YjXm-sCH6FrTz4AQhfH6INDQvQSn&amp;index=1" target="_blank" rel="noopener">https://www.youtube.com/watch?v=XuUD0WQ9kaE&amp;list=PLetF-YjXm-sCH6FrTz4AQhfH6INDQvQSn&amp;index=1</a></p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>

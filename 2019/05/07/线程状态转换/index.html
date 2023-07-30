@@ -1,0 +1,235 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>线程状态转换 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2019-05-07">2019-05-07</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">线程状态转换</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>在之前的文章中我们分析了线程的由来及并发线程带来的问题，不过并没有针对线程的状态进行过多的分析，而只是针对进程的状态做了简要的介绍。
+本节就来介绍一下线程的状态及之间的状态转换。线程的状态相较于进程要稍微复杂一点，我们在描述进程状态的时候从是否持有cpu的角度来划分的，
+线程的话，除了cpu之外还要考虑的就是锁，也就是说影响线程状态的两个因素是：<strong>cpu和锁</strong></p>
+<h1 id="状态转换"><a href="#状态转换" class="headerlink" title="状态转换"></a>状态转换</h1><p>还是用一张图来说明线程的状态转换，如下：
+<img src="//southrivers.github.io/2019/05/07/线程状态转换/thread-state-change.png" alt>
+java中线程的状态类的定义如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">enum</span> State &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Thread state for a thread which has not yet started.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    NEW,</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Thread state for a runnable thread.  A thread in the runnable</span></span><br><span class="line"><span class="comment">     * state is executing in the Java virtual machine but it may</span></span><br><span class="line"><span class="comment">     * be waiting for other resources from the operating system</span></span><br><span class="line"><span class="comment">     * such as processor.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    RUNNABLE,</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Thread state for a thread blocked waiting for a monitor lock.</span></span><br><span class="line"><span class="comment">     * A thread in the blocked state is waiting for a monitor lock</span></span><br><span class="line"><span class="comment">     * to enter a synchronized block/method or</span></span><br><span class="line"><span class="comment">     * reenter a synchronized block/method after calling</span></span><br><span class="line"><span class="comment">     * &#123;<span class="doctag">@link</span> Object#wait() Object.wait&#125;.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    BLOCKED,</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Thread state for a waiting thread.</span></span><br><span class="line"><span class="comment">     * A thread is in the waiting state due to calling one of the</span></span><br><span class="line"><span class="comment">     * following methods:</span></span><br><span class="line"><span class="comment">     * &lt;ul&gt;</span></span><br><span class="line"><span class="comment">     *   &lt;li&gt;&#123;<span class="doctag">@link</span> Object#wait() Object.wait&#125; with no timeout&lt;/li&gt;</span></span><br><span class="line"><span class="comment">     *   &lt;li&gt;&#123;<span class="doctag">@link</span> #join() Thread.join&#125; with no timeout&lt;/li&gt;</span></span><br><span class="line"><span class="comment">     *   &lt;li&gt;&#123;<span class="doctag">@link</span> LockSupport#park() LockSupport.park&#125;&lt;/li&gt;</span></span><br><span class="line"><span class="comment">     * &lt;/ul&gt;</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * &lt;p&gt;A thread in the waiting state is waiting for another thread to</span></span><br><span class="line"><span class="comment">     * perform a particular action.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * For example, a thread that has called &lt;tt&gt;Object.wait()&lt;/tt&gt;</span></span><br><span class="line"><span class="comment">     * on an object is waiting for another thread to call</span></span><br><span class="line"><span class="comment">     * &lt;tt&gt;Object.notify()&lt;/tt&gt; or &lt;tt&gt;Object.notifyAll()&lt;/tt&gt; on</span></span><br><span class="line"><span class="comment">     * that object. A thread that has called &lt;tt&gt;Thread.join()&lt;/tt&gt;</span></span><br><span class="line"><span class="comment">     * is waiting for a specified thread to terminate.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    WAITING,</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Thread state for a waiting thread with a specified waiting time.</span></span><br><span class="line"><span class="comment">     * A thread is in the timed waiting state due to calling one of</span></span><br><span class="line"><span class="comment">     * the following methods with a specified positive waiting time:</span></span><br><span class="line"><span class="comment">     * &lt;ul&gt;</span></span><br><span class="line"><span class="comment">     *   &lt;li&gt;&#123;<span class="doctag">@link</span> #sleep Thread.sleep&#125;&lt;/li&gt;</span></span><br><span class="line"><span class="comment">     *   &lt;li&gt;&#123;<span class="doctag">@link</span> Object#wait(long) Object.wait&#125; with timeout&lt;/li&gt;</span></span><br><span class="line"><span class="comment">     *   &lt;li&gt;&#123;<span class="doctag">@link</span> #join(long) Thread.join&#125; with timeout&lt;/li&gt;</span></span><br><span class="line"><span class="comment">     *   &lt;li&gt;&#123;<span class="doctag">@link</span> LockSupport#parkNanos LockSupport.parkNanos&#125;&lt;/li&gt;</span></span><br><span class="line"><span class="comment">     *   &lt;li&gt;&#123;<span class="doctag">@link</span> LockSupport#parkUntil LockSupport.parkUntil&#125;&lt;/li&gt;</span></span><br><span class="line"><span class="comment">     * &lt;/ul&gt;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    TIMED_WAITING,</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Thread state for a terminated thread.</span></span><br><span class="line"><span class="comment">     * The thread has completed execution.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    TERMINATED;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结合上面的图和状态的定义我们从cpu和锁的角度来总结一下：</p>
+<p>线程刚被创建出来的时候是处于<strong>new状态</strong>，在线程调用了start方法之后，就进入了<strong>runnable（就绪</strong>）的状态，这里就绪的意思是
+完事具备只差cpu（当然如果有锁的话肯定也是要获取锁了），在线程获取到了cpu之后，就处于运行的状态了（此处不知道为什么没有running状态），由于线程的层面上
+并不会像进程那样可以通过时钟中断来切换，因此需要有一种方式来让线程自己决定什么时候让出cpu，这个时候就用到了yield，不过yield
+只会让出cpu，并不会让出锁（如果有的话），
+上面在调用了start方法之后，在线程还没有处于runnable状态的时候，如果线程进入了一个被synchronized或者锁修饰的方法块的话，如果之前有线程
+正在当前这个代码块运行的话，那么当前这个线程也就没有办法获取到锁了，这个时候线程其实是处于<strong>block状态</strong>的，类比于进程，线程的block状态是除了cpu之外
+还在等待其他的资源，从这一点来看两者是一样的。处于runnable状态的线程，在没有锁的情况下，不能使用wait的方法，可以使用join、sleep方法，
+在有锁的情况下可以使用的方法：sleep、join、wait、park，至于不能使用wait方法的原因，是因为wait方法并不是thread提供的方法，而是Object方法提供的
+该方法要求当前线程要持有锁，因此只有处于运行状态的并且持有锁的线程才可以使用这个方法。对于持有锁的线程，我们看一下调用了这几个相关的方法后分别会发生什么。
+sleep、join会释放cpu，但是并不会释放锁，wait、park则会释放锁也会释放cpu。</p>
+<h1 id="线程的中断"><a href="#线程的中断" class="headerlink" title="线程的中断"></a>线程的中断</h1><p><em>说明：线程的中断是一个不大不小的话题，后面如果有必要的话单独整理一篇，现在就放在这里了。</em></p>
+<p>首先，线程的不应该由其他的线程中断或停止，试想一下如果一个获取了锁的线程还没有来得及释放锁突然被终止了，这会导致后面的线程都没有办法再次获取
+这个锁了，因此Thread的stop、suspend等方法都被废弃了，取而代之的是interrupt方法，不过这里的interrupt并不是中断或者停止线程，而是设置一个中断
+标记位，让被中断的线程在适当的时候自行决定如何处理。</p>
+<p>我们可以将interrupt想像成一个邮箱，在调用当前线程的interrupt的时候有点像是给当前的线程发送了一封信件，告诉当前线程，你运行的时间太久了，要终止了！
+如果当前这个线程在waiting、timed_waiting状态（也就是并非运行的状态），那么当前这个线程会立即退出当前的状态，并抛出一个interruptException，
+这种情况下线程需要知道如何处理这种抛出的异常，或者抛出该异常让调用者来进行处理。
+如果当前这个线程处于运行的状态，那么，仅仅是当前线程的中断标志位会变为true，线程的正常运行并不会受到影响。那么问题来了，这个interrupt应该如何使用呢？</p>
+<ul>
+<li>方式1：interrupt中断的是线程的业务逻辑，需要线程周期性的检查自己的中断状态，线程需要对interruptException进行处理或者抛出给调用者进行处理</li>
+<li>方式2：结合volatile来处理，这个时候通过周期性的检查该变量来判断是否需要终止，在线程退出之前可以选择将中断标记位清除（清除标记位可以理解为将信箱清空，方便接受后面再次发过来的信件）</li>
+</ul>
+<p>具体实例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.sync;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">InterruptTest</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">volatile</span> <span class="keyword">boolean</span> flag = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 方式1</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">while</span> (!Thread.currentThread().isInterrupted()) &#123;</span><br><span class="line">                <span class="comment">// 阻塞代码块，用于生成interruptException</span></span><br><span class="line">                sleep(<span class="number">2000</span>);</span><br><span class="line">                System.out.println(<span class="string">"thread is running in block1"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            System.out.println(<span class="string">"thread is interrupt in block"</span>);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            System.out.println(<span class="string">"clean up block1"</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">"====================="</span>);</span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 方式2</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="keyword">while</span> (flag) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                sleep(<span class="number">2000</span>);</span><br><span class="line">                System.out.println(<span class="string">"block is running in block2"</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                System.out.println(<span class="string">"thread is interrupt in block2"</span>);</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">"clean up block2"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">"----------block2 stopped!----------"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        InterruptTest interruptTest = <span class="keyword">new</span> InterruptTest();</span><br><span class="line">        interruptTest.start();</span><br><span class="line">        sleep(<span class="number">3000</span>);</span><br><span class="line">        System.out.println(<span class="string">"start interrupt"</span>);</span><br><span class="line"></span><br><span class="line">        interruptTest.interrupt();</span><br><span class="line"></span><br><span class="line">        sleep(<span class="number">3000</span>);</span><br><span class="line">        interruptTest.flag = <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最终的执行结果如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">thread is running in block1</span><br><span class="line">start interrupt</span><br><span class="line">thread is interrupt in block</span><br><span class="line">clean up block1</span><br><span class="line">=====================</span><br><span class="line">block is running in block2</span><br><span class="line">clean up block2</span><br><span class="line">block is running in block2</span><br><span class="line">clean up block2</span><br><span class="line">----------block2 stopped!----------</span><br></pre></td></tr></table></figure>
+
+<p>个人觉得还是用volatile控制的力度会更好一点，不过二者都可以</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>上面针对线程的状态做了简要的分析以便后续查看，后面会根据实际的情况持续更新</p>
+<p>参考文章：
+<a href="https://blog.csdn.net/pange1991/article/details/53860651" target="_blank" rel="noopener">https://blog.csdn.net/pange1991/article/details/53860651</a>
+<a href="https://www.cnblogs.com/aspirant/p/8876670.html" target="_blank" rel="noopener">https://www.cnblogs.com/aspirant/p/8876670.html</a></p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>二层交换机那些事 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2021-05-18">2021-05-18</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">二层交换机那些事</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>计算机网络是分层的，我们通常所说的以太网是数据链路层的网络，这是因为以太是数据链路层面上的一种协议，其所对应的设备就是二层交换机，接下来看一下二层交换机的通信原理</p>
+<h1 id="以太网二层交换机通信原理"><a href="#以太网二层交换机通信原理" class="headerlink" title="以太网二层交换机通信原理"></a>以太网二层交换机通信原理</h1><p>二层交换机在接收到主机发送的报文的时候会学习报文中的源mac地址，并在交换机上面的<strong>mac地址表</strong>中查找对应的目的mac地址所对应的端口，如果找不到就直接广播该报文。这其中包含了两个对象：主机、交换机。</p>
+<ul>
+<li>主机：会缓存arp表项（ip和mac地址的对应关系），可以使用arp -a来查看，通常情况下arp表项是动态的。</li>
+<li>二层交换机：会缓存mac地址信息和端口的对应情况，不过其中不会包含对应的arp表项，因为arp表项是ip和mac地址的对应关系，很明显交换机并不具备ip信息。</li>
+</ul>
+<p>上面我们知道主机会缓存ip对应的mac信息，不过这些信息并不是从一开始就存在的，而是动态生成的，并且具有老化时间。arp表项的生成依赖于arp协议，这是从主机发送的广播报文（对应的目的mac为全f）。</p>
+<p>上面的这种方式存在以下两种问题：</p>
+<ul>
+<li>当同一个子网内包含了较多的主机的时候，将会形成广播风暴</li>
+<li>没有对单播的数据报文进行访问控制</li>
+</ul>
+<p>上述问题的解决依赖于以太网的vlan技术</p>
+<h1 id="以太网vlan技术"><a href="#以太网vlan技术" class="headerlink" title="以太网vlan技术"></a>以太网vlan技术</h1><p>以太网的vlan技术是通过配置交换机的端口实现了同一个子网的不同组的划分，这样可以保证数据的交换只会发生在特定的区间内（并不一定是同组，跟端口类型有关系），从而减少了广播风暴，并且实现了单播报文的控制。</p>
+<h2 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h2><p>以太网的vlan是通过在目的mac和源mac地址后面增加一定的字节用来标识该报文所属的vlan，交换机的端口将会处理和其相关的报文。这里有两个主体：报文、交换机端口，我们将会从交换机的端口出发，来深入了解一下端口对于报文的处理的逻辑：</p>
+<ul>
+<li><p>access口：</p>
+<ul>
+<li>接收报文处理规则：接收无tag的报文，此时会加上端口的pvid，接收的数据包含tag的时候只允许tag和pvid相等的情况</li>
+<li>发送报文处理规则：只能够发送包含的tag和该接口对应的pvid相同的数据帧</li>
+<li>配置端口命令：<ul>
+<li>默认进入用户管理界面</li>
+<li>使用 <code>system-view</code> 进入系统视图</li>
+<li>创建<code>全局的vlan</code>，vlan batch 3 to 4，其中如果vlan不连续可以直接使用空格来表征(也可以vlan 4创建一个vlan)</li>
+<li>配置端口vlan，需要先进入对应的端口，指定其对应的接口类型和pvid：<ul>
+<li><code>interface Gb 0/0/1</code> (指定端口)</li>
+<li><code>port link-type access</code>（指定端口类型）</li>
+<li><code>port default vlan 3</code>(配置端口pvid) </li>
+<li><code>diaplay this</code> 可以查看配置是否生效，最后可以quit退出</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>使用场景：通常使用在交换机和终端的链接的地方</li>
+</ul>
+</li>
+<li><p>trunk口：</p>
+<ul>
+<li><p>接收报文处理规则：接收无tag的报文，此时会加上端口对应的pvid，接收的数据帧中包含的tag需要在该接口的<code>vlan-list</code>（起到了pvid的作用，不过范围更广了）中才接收，<strong>这一点和a口类似，只不过a口允许的是pvid，这里允许的是一个list</strong></p>
+</li>
+<li><p>发送报文处理规则：判断数据帧的tag是否在vlan-list中，如果在才处理，并且<code>和pvid相等，则去掉tag</code>并转发，如果和<strong>pvid不同则透传</strong>，这个是增强的A口的功能（A口不具备透传非pvid的情况）</p>
+</li>
+<li><p>配置端口命令：</p>
+<ul>
+<li>默认进入用户管理界面</li>
+<li>使用 <code>system-view</code> 进入系统视图</li>
+<li>配置端口vlan，需要先进入对应的端口，指定其对应的接口类型和pvid：<ul>
+<li>进入端口：<code>interface Eth-trunk 1</code></li>
+<li>配置端口类型： <code>port link-type trunk</code></li>
+<li>配置vlan-list：<code>port trunk allow-pass vlan 4</code>（允许pvid为4的数据通过）</li>
+</ul>
+</li>
+</ul>
+<p>  <strong>值得注意的是这里并没有配置trunk的pvid，而是使用了系统默认的pvid，其实是可以的</strong></p>
+</li>
+<li><p>使用场景：通常用在交换机之间的数据交换，当vlan-list和pvid一致的时候trunk实现的就是access接口</p>
+</li>
+</ul>
+</li>
+<li><p>hybrid口：</p>
+<ul>
+<li>接收报文处理规则：如果数据报文是untag的报文就直接加上pvid，否则判断vlan-list中是否包含了该tag，是则接受，否则丢弃，可以看到这和trunk端口类似。</li>
+<li>发送报文处理规则：接口发送报文的时候判断数据报文是否在vlan-list中，是才处理，否则不处理，对于是的情况如果数据帧中对应的vlanid在untag vlan-list中则剥去标签并转发，否则直接透传，<strong>可以看到这里增强了Trunk口的剥去pvid的规则</strong></li>
+<li>配置端口命令：<ul>
+<li>默认进入用户管理界面</li>
+<li>使用 <code>system-view</code> 进入系统视图</li>
+<li>配置端口vlan，需要先进入对应的端口，指定其对应的接口类型和pvid：<ul>
+<li><code>interface xxx</code> 进入接口</li>
+<li><em><code>undo port default vlan(解除vlan其他类型的限制，初始化可以不用作)</code></em></li>
+<li><code>port link-type hybrid</code>，指定端口类型</li>
+<li><code>port hybrid pvid vlan 3</code>，指定端口的pvid</li>
+<li><code>port hybrid untagged vlan 3 to 5</code>，指定端口能处理的untag vlan-list</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>使用场景：一般是在A口和trunk都不满足的情况下使用，<strong>更一般的是用来实现不同vlan之间的通信（通过vlan的untag vlan-list实现，毕竟是要去不同vlan对应的标签的），而且通常应该是在主机侧，并不在交换机之间</strong></li>
+</ul>
+</li>
+</ul>
+<h1 id="以太网端口聚集技术"><a href="#以太网端口聚集技术" class="headerlink" title="以太网端口聚集技术"></a>以太网端口聚集技术</h1><p>以太网端口聚集技术用来实现端口的负载均衡、并可以实现链路的备份。</p>
+<h2 id="具体做法"><a href="#具体做法" class="headerlink" title="具体做法"></a>具体做法</h2><ul>
+<li>默认进入用户管理界面</li>
+<li>使用 <code>system-view</code> 进入系统视图</li>
+<li><code>sysname xxx</code> 重命名设备</li>
+<li><code>interface Eth-Trunk 1</code>，创建eth-trunk端口</li>
+<li><code>trunkport GigabitEthernet 0/0/9</code>将指定接口添加到对应的eth-trunk中</li>
+<li><code>interface Eth-Trunk 1</code> 进入eth-trunk端口</li>
+<li><code>port link-type trunk</code>，配置ethtrunk类型并指定其vlan-list：<code>port trunk allow-pass vlan 4</code>或者<code>port trunk allow-pass vlan 3 5</code>添加也可以</li>
+</ul>
+<h1 id="以太网堆叠技术"><a href="#以太网堆叠技术" class="headerlink" title="以太网堆叠技术"></a>以太网堆叠技术</h1><p>TODO 省略</p>
+<h1 id="其他命令"><a href="#其他命令" class="headerlink" title="其他命令"></a>其他命令</h1><p>display mac-address
+display this 
+save</p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>

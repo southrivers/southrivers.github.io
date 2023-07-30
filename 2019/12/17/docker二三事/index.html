@@ -1,0 +1,241 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>docker二三事 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2019-12-17">2019-12-17</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">docker二三事</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>云计算的技术底座就是虚拟化，根据虚拟化的程度可以大致分为：</p>
+<ul>
+<li>全虚拟化：代表产品有vmware、virtualbox，这些种类的虚拟化，是在原有的操作系统之上通过软件完全模拟了cpu、内存、io这些硬件设备</li>
+<li>半虚拟化：代表技术为xen</li>
+<li>硬件辅助虚拟化：代表技术为kvm</li>
+<li>容器虚拟化：容器虚拟化采用了namespace做资源隔离（主要是cpu、内存、网络）、cgroup做资源的限制、联合文件系统来实现容器之间以及容器与宿主机之间的文件系统的隔离</li>
+</ul>
+<h1 id="详解"><a href="#详解" class="headerlink" title="详解"></a>详解</h1><h2 id="docker基本概念及架构"><a href="#docker基本概念及架构" class="headerlink" title="docker基本概念及架构"></a>docker基本概念及架构</h2><p>我们常说的docker是客户端的进程，docker是cs架构的应用程序，除了客户端和服务端之外，还有一个镜像仓库，下面是docker容器技术的整体架构：
+<img src="//southrivers.github.io/2019/12/17/docker二三事/container-jg.png" alt></p>
+<p>如上图所示，容器的服务端运行着dockerd、containerd、container-shim、run的服务模块：
+dockerd：用于接受用户请求</p>
+<p>下面我们介绍一下容器中的一些概念：</p>
+<ul>
+<li>镜像：镜像可以简单的认为是快照</li>
+<li>容器：容器是镜像的运行时</li>
+<li>仓库：仓库是用来存放镜像的服务器</li>
+<li>docker：容器的客户端应用程序</li>
+<li>dockerd：服务端用来接受客户端的请求，并返回响应到客户端的模块，可以将其认为是一个门面的功能，起到的主要是请求分发的作用</li>
+<li>containerd：该模块是真正用来创建容器运行时环境的模块，并且会和仓库进行交互获取对应的镜像</li>
+<li>container-shim：该模块的主要功能是提供了容器和containerd的垫片层，这样能够确保containerd在重启的过程中运行的容器不受任何影响</li>
+<li>runc：容器的运行时环境</li>
+<li>reopsitory：用来存放镜像的中央仓库，当然该仓库也可以自行搭建</li>
+</ul>
+<h2 id="核心实现技术原理"><a href="#核心实现技术原理" class="headerlink" title="核心实现技术原理"></a>核心实现技术原理</h2><h3 id="namespace"><a href="#namespace" class="headerlink" title="namespace"></a>namespace</h3><p>namespace是linux内核提供的能力，namespace对内核不同的资源进行分区，使不同的进程看到的是资源有所不同，这些资源包含进程ID、网络、存储等，docker基于namespace的技术实现了所有容器对宿主机内核的共享。当前linux提供了以下8种namespace，其中docker选择使用了前面6种namespace：
+<img src="//southrivers.github.io/2019/12/17/docker二三事/namespace.png" alt></p>
+<ul>
+<li>mount namespace：隔离不同的进程看到的挂载点，容器内（就是进程）只能够看到自己的挂载点，并且在容器内的挂载不会影响宿主机</li>
+<li>pid namespace：该namespace使用来隔离进程的，在容器内部的主进程都是1号进程，不过容器进称在主机上则各有不同</li>
+<li>UTS namespace：主要是用来隔离主机名称的，其允许不同的namespace使用不同的主机名</li>
+<li>IPC namespace：ipc namespace是用来隔离进程间通信的，ipc namespace和pid namespace 结合可以实现同一个ipc namespace内不同pid的通信。可以使用ipcs命令进行验证</li>
+<li>user namespace：是用来进行用户隔离的，通过该namespace的能力可以实现宿主机普通用户到该namespace的root用户的转换</li>
+<li>net namespace：可以用来隔离网络信息，实现ip地址、端口号、网卡信息的隔离</li>
+</ul>
+<p>当docker创建容器的时候，会创建以上6种namespace，并将docker进称加入到对应的namespace中，从而实现资源的隔离</p>
+<p>以上namespace的能力都可以通过linux自带的工具unshare来模拟并实现出来。</p>
+<h3 id="cgroup"><a href="#cgroup" class="headerlink" title="cgroup"></a>cgroup</h3><p>cgroup是linux提供的可以限制资源使用的能力，cgroup的实现依赖于subsyetem（子系统）、cgroup（控制组）、hierarchy（层级树）。</p>
+<ul>
+<li>subsystem：子系统是一个内核组件，一个子系统代表了一类资源控制器，我们在容器中常见的子系统有内存子系统、cpu子系统，分别用于控制内存、cpu的分配</li>
+<li>cgroup：代表了一组进程和带有参数的子系统之间的关联关系</li>
+<li>hierarchy： 控制组的继承树，保证了控制组之间的继承关系，这样的好处是可以不需要重复定义资源的限制</li>
+</ul>
+<p>可以使用mount -t cgroup查看linux操作系统下挂载的子系统的信息。</p>
+<p>在cgroup下面创建一个文件夹，默认会初始化的创建一些文件，其中task限制了能够使用该资源的进程id：
+<img src="//southrivers.github.io/2019/12/17/docker二三事/cgroup.png" alt>
+docker在创建容器的时候指定的资源，会在docker目录下创建对应的容器，并将资源的限制情况写入到文件，当容器启动的时候，会根据写入的资源限制文件设置对应的cgroup资源使用文件，从而达到对容器的资源的限制</p>
+<h3 id="联合文件系统"><a href="#联合文件系统" class="headerlink" title="联合文件系统"></a>联合文件系统</h3><p>联合文件系统是docker使用的另外一项技术，联合文件系统是通过分层的叠加的方式实现的文件系统，其中每一层都是一个快照，对应的文件也是只读的，容器在运行时要操作某个文件是将只读的文件通过写时复制的方式拷贝到最上层，形成可读写层</p>
+<h2 id="容器编排技术"><a href="#容器编排技术" class="headerlink" title="容器编排技术"></a>容器编排技术</h2><p>常见的容器的编排技术有docker compose、swarm、k8s。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>容器的监控、网络有时间再分析。</p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>
