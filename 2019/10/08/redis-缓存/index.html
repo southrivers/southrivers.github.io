@@ -1,0 +1,290 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>redis那些事 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2019-10-08">2019-10-08</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">redis那些事</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>工作的过程中有使用过redis作为热点数据的缓存，刚接触的时候还热火朝天的学了一把基本的数据类型和操作，不过并没有深入的
+了解过这个东西，刚好趁闲下来的时间好好地学习一下。</p>
+<h1 id="详解"><a href="#详解" class="headerlink" title="详解"></a>详解</h1><h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>为了方便初始化环境，采用了一种比较方便的安装方式docker安装：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker pull redis</span><br><span class="line">docker run --name myredis -d -p 6379:6379 redis</span><br><span class="line">docker exec -it myredis redis-cli</span><br></pre></td></tr></table></figure>
+
+<h2 id="上帝视角"><a href="#上帝视角" class="headerlink" title="上帝视角"></a>上帝视角</h2><p>redis对外呈现的数据结构是包括<code>string、list、hash、set、zset</code>，不过这些种类的对象都源自于同一个结构体：redisObject，对应结构体的
+定义如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">typedef struct redisObject &#123;</span><br><span class="line">    unsigned type:4;        </span><br><span class="line">    unsigned encoding:4;    </span><br><span class="line">    unsigned lru:LRU_BITS;  </span><br><span class="line">    int refcount;　　　　　　 </span><br><span class="line">    void *ptr;              </span><br><span class="line">&#125; robj;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>type：记录了对象对外呈现的类型，分别是string、hash、list、set、zset</li>
+<li>encoding：用于记录该类型的对象底层采用的数据结构</li>
+<li>lru：记录对象最后一次被访问的时间</li>
+<li>refcount：表示当前对象引用计数的大小，当值为0的时候将会被回收</li>
+<li>ptr：指向实际数据的指针</li>
+</ul>
+<p>redisObject的存在更多的像是一个门面，可以提供一些通用的函数，并没有特殊的含义或者目的</p>
+<h3 id="基本数据结构"><a href="#基本数据结构" class="headerlink" title="基本数据结构"></a>基本数据结构</h3><p>redis是key-value类型的数据库，redis的key是string，对应的value则由以下几种基本数据类型组成：</p>
+<ul>
+<li>string：string的底层实现方式redisObject中的encoding包括了int、raw、embstr，其中每种具体的实现都是针对内存空间的占用和
+内存分配成本的管控，具体如下：
+<img src="//southrivers.github.io/2019/10/08/redis-缓存/string.png" alt>
+这里需要注意的是出现了一种新的数据结构SDS（简单动态字符串），对应的定义如下(<em>还有flag标记位，不重要，未给出</em>)：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">struct sdshdr&#123;</span><br><span class="line">    //  记录已使用长度</span><br><span class="line">    int len;</span><br><span class="line">    // 记录空闲未使用的长度</span><br><span class="line">    int free;</span><br><span class="line">    // 字符数组</span><br><span class="line">    char[] buf;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>可以看到底层采用的是字符数组的方式来存放数据，而字符数组采用预分配的机制，也即是空间不够用的时候会对数组长度进行扩展，<strong>预分配的好处是减少了内存空间的分配次数</strong>，
+这在一定程度上可以提升内存的使用效率。另外上面的结构体中我们可以看到其中记录了已使用的长度，这样就使得<strong>获取字符串长度的时候时间复杂度是O(1)</strong>。</p>
+<ul>
+<li>set：redis的底层采用了intset和hashtable两种数据结构存储，intset可以理解为数组，hashtable就是普通的哈希表，只不过对应的value为null，
+只有在集合中的元素都是整数值并且集合中元素的数量不超过512个的时候才会采用intset</li>
+<li>zset：zset在集合数量小于128个并且所有成员的长度小于64字节的时候直接使用zipList进行存储，其中节点中的第一个元素保存数据，第二个保存score，
+这样依次按照score从小到大进行存储，其查找复杂度也为<code>O(n)</code>，而当上述条件不满足的时候则直接使用skipList编码来进行存储，对应的结构体如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">typedef struct zset &#123;</span><br><span class="line"></span><br><span class="line">    // 字典，键为成员，值为分值</span><br><span class="line">    // 用于支持 O(1) 复杂度的按成员取分值操作</span><br><span class="line">    dict *dict;</span><br><span class="line"></span><br><span class="line">    // 跳跃表，按分值排序成员</span><br><span class="line">    // 用于支持平均复杂度为 O(log N) 的按分值定位成员操作</span><br><span class="line">    // 以及范围操作</span><br><span class="line">    zskiplist *zsl;</span><br><span class="line"></span><br><span class="line">&#125; zset;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>如上，其对应的dict字段指向一个字典，字典的key为member，value为该member对应的score，zskiplist则是跳表，用于支持<code>O(log N)</code>的查找操作。相较于平衡树，跳表
+并不要求太严格的平衡操作，实现上更为粗糙，不过查询效率却能够大大的提高</p>
+<ul>
+<li>list：list底层采用的数据结构为quickList+zipList，它会在长度为空的时候自动删除，具体如下图所示：
+<img src="//southrivers.github.io/2019/10/08/redis-缓存/list.png" alt>
+其基本的组成是quickList，其中保存了head和tail指针，这也保证了lpush、rpop操作的时间复杂度是O(1)，quickList中的每一个元素由一个quickListNode组成，
+其中除了指向前后节点的指针外，还包含了指向zipList的指针，zipList是list中的数据真正存储的地方。采用zipList而不是LinkedList的主要原因是因为LinkedList中的每个
+节点都包含了两个指针，这会造成极大的内存开销，而这些开销本身都是没有用的。因此底层采用了zipList这种压缩的数据结构（连续的内存空间分配）有效的减少了内存空间的
+浪费。zipList在存储的元素或者其内存空间达到一定程度之后会逆行裂变的操作。</li>
+<li>hash：redis使用字典作为其底层实现（长度、数量小于一定值的时候采用的是zipList来优化内存使用，过大则直接使用hashtable），一个字典中可以包含多个哈希表节点，而每一个哈希表节点中保存了字典中的一个键值对，对应
+内存分布如下所示：
+<img src="//southrivers.github.io/2019/10/08/redis-缓存/hash.png" alt>
+如上图所示会涉及以下几种数据结构：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">typedef struct dict &#123;</span><br><span class="line">    dictType *type;    //类型特定函数</span><br><span class="line">    void *privdata;    //私有数据</span><br><span class="line">    dictht ht[2];    //2个哈希表，哈希表负载过高进行rehash的时候才会用到第2个哈希表</span><br><span class="line">    int rehashidx;    //rehash目前进度，当哈希表进行rehash的时候用到，其他情况下为-1</span><br><span class="line">&#125;dict;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>其中的type字段为指针类型，其定义了针对特定类型的函数，这里的指针很像是java中的接口一样，通过虚化实现提供了多台的能力。ht为一个数组，通常情况下我们只会使用<code>ht[0]</code>，
+只有在hash负载过高进行rehash的时候才会使用<code>ht[1]</code>,rehashidx则表示了在rehash的过程中的进度，默认为-1（没有进行rehash操作）。哈希表指向的字段为<code>dictht</code>
+其具体定义如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">typedef struct dictht &#123;</span><br><span class="line">    dictEntry **table;    //哈希表数组</span><br><span class="line">    unsigned long size;    //哈希表大小，即哈希表数组大小</span><br><span class="line">    unsigned long sizemask; //哈希表大小掩码，总是等于size-1，主要用于计算索引</span><br><span class="line">    unsigned long used;    //已使用节点数，即已使用键值对数</span><br><span class="line">&#125;dictht;</span><br></pre></td></tr></table></figure>
+
+<p>在上述的结构中主要是table指针，该指针指向一个数组，数组的每一个元素又是一个指针，指向了dictEntry结构，对应定义如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">typedef struct dictEntry &#123;</span><br><span class="line">    void *key;</span><br><span class="line">    union &#123;</span><br><span class="line">        void *val;</span><br><span class="line">        uint64_t u64;    //uint64_t整数</span><br><span class="line">        int64_t s64;    //int64_t整数</span><br><span class="line">    &#125;v;</span><br><span class="line">    struct dictEntry *next;    //指向下个哈希表节点</span><br><span class="line">&#125;dictEntry;</span><br></pre></td></tr></table></figure>
+
+<p>上述结构体中需要注意的next指针是用来解决hash冲突的问题。redis采用了渐进式rehash的方式来避免在hash表扩容的时候阻塞时间太久而造成的不可用，具体过程如下：
+    - 为<code>ht[1]</code>分配空间，让字典同时持有<code>ht[0]</code>、<code>ht[1]</code>两个哈希表
+    - 将字典中的rehashidx置位为0，标识rehash的正式开始
+    - 在rehash进行的期间，每次对字典执行添加、删除、查找或者更新操作的时候，程序除了执行指定的操作之外还会将<code>ht[0]</code>中对应的rehashidx下标所标识的数据移过去
+    - 重复上述操作直到将哈希表中所有的键值对移过去</p>
+<p>在渐进式rehash的过程中需要注意的是增加只会在新的哈希表中执行，而删除、修改、查询则会在两个哈希表中进行</p>
+<h3 id="redis基本数据结构小结"><a href="#redis基本数据结构小结" class="headerlink" title="redis基本数据结构小结"></a>redis基本数据结构小结</h3><ul>
+<li>string：redis的string是simple dynamic string，相较于c语言里面的string，其最大的特点是预分配、懒回收的策略，所谓的预分配是redis在给string类型的value分配内存空间的时候会多分配一些空间，这样做的好处是string类型的数据在修改长度的时候基本不用再次分配一块内存空间，懒回收则是string在长度减少的那一刻并不会立即回收掉内存</li>
+<li>hash：hash数据结构的实现采用的是hash表，这种数据结构有点类似于java的hash实现，同样对于产生了hash冲突的键也是采用链地址法来解决</li>
+<li>list：redis的list采用了双向链表的数据结构来实现，分别保存了head、tail的指针，这样push和pop的复杂度都是O(1)</li>
+<li>set：set的数据结构类似于hash，只是对应的value统统为null，这和java里面hashset的实现也是类似的</li>
+<li>zset：zset相较于set多了一个score的权重值，其本质是<strong>有序链表</strong>，其基础的数据结构可以分为ziplist、skipList，在有序链表的长度或者大小比较小的时候使用的是ziplist的数据结构，这种数据结构的好处是节省内存空间来；在有序链表的长度比较长或者数据比较多的时候，则采用了skiplist的数据结构，skiplist这种数据结构本质是针对有序链表做了多级索引的一种结构，这样我们可以在o(lg N)的复杂度内检索到数据，当然删除、修改的复杂度也是这个级别（删除、修改的本质在于检索到数据），这种数据结构的缺点也是显而易见的，那就是会浪费内存空间。</li>
+</ul>
+<h2 id="redis集群模式"><a href="#redis集群模式" class="headerlink" title="redis集群模式"></a>redis集群模式</h2><p>redis集群模式大概可以分为三种类型：</p>
+<ul>
+<li>主从：这种模式包含了master和slave两种角色，其中祝数据库提供读写操作，并将写操作导致的数据变化自动同步给从数据库，在从数据库进行同步的时候包含了两种同步的方式：<ul>
+<li>增量同步：这种方式同步的是指令流，主节点会将对自己的状态产生修改性影响的指令记录在内存的buffer中，然后异步的将指令同步到从节点，既然是异步，
+必然以带来问题，当祝节点进程突然挂掉之后，就会导致数据的丢失</li>
+<li>快照同步：这种同步方式首先需要在祝节点上执行bgsave，将内存中的数据全部写到磁盘中，然后将内容全部传递到从节点，从节点清空内存，并加载快照，不过在快照同步的过程中
+可能会有新的指令过来，这部分指令则采用增量同步的方式完成，值得一提的是由于redis是单线程，因此在同步数据到磁盘的时候其实是通过fork出一个子进程来完成数据落地操作的。</li>
+</ul>
+</li>
+<li>哨兵：上述主从方式解决了高可用的问题，不过需要人工介入来完成主备的切换，哨兵模式实现了类似故障自愈的能力，在主节点不可用的时候，哨兵进程会通过投票的机制将原来的主节点移除，
+并选出新的主节点，而客户端进程在链接集群的时候，会首先链接到哨兵，由哨兵告诉客户端祝节点的地址，并在主节点出现问题的时候将这种变化知会到客户端</li>
+<li>cluster模式：在上述两种模式中都解决了数据库高可用的问题，不过很遗憾的是不管是主从还是哨兵其本质都无法将数据分片，来切分到不同的服务器上面，这也带来了一个问题，
+当数据量、请求访问量足够大的时候，单机就会出现性能瓶颈。redis集群模式的数据分片采用的是数据分片的方式，一个redis集群包含了16384个槽位，数据库中的每一个键都属于这些槽位中的
+一个，同时每个槽位也对应了一个节点，如下演示了一个包含了三个主节点redis集群：
+<img src="//southrivers.github.io/2019/10/08/redis-缓存/slot.png" alt>
+redis集群的客户端在连接到集群中的一个节点的时候会获取这种映射关系，这种关系将会在收到重定向响应（slot发生了迁移导致对应的key发生了迁移）的时候进行更新，如上图所示，
+集群模式下的redis更多的是像多套主从集群组成的联邦，只不过slave只会从master同步数据并不会占用槽位。并且集群模式下，所有的主节点承担了客户端所有的读写操作，而对于slave节点仅仅
+是做了高可用的保障机制。另外值得一提的是redis集群采用的是流言协议，这可能会在一定的程度上造成数据的缺失。</li>
+</ul>
+<h2 id="常用操作"><a href="#常用操作" class="headerlink" title="常用操作"></a>常用操作</h2><p>如果说redis中最常用的操作，应该就是获取对应的value这种操作了，大多数的redis客户端都提供了<code>keys、scan</code>这两种模式，对于keys这种操作会一次性将所有的数据查出来，当key的个数过多的时候
+会导致服务端处于阻塞的状态，因此该命令是严禁用于生产环境中的，而scan操作则是采用游标的方式迭代返回所有的数据，我们可以设置批量查询的数据量，不过基于scan的操作在对应的value结构发生改变的时候
+可能会导致数据重复查询，因此使用的时候需要注意去重的操作，至于为什么会导致数据重复被查询，有兴趣的可以自行查阅文档。</p>
+<h2 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h2><h3 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h3><p>TODO</p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>redis采用了epoll的模型避免了服务端阻塞的性能问题，并且所有的操作都是基于内存的，因此即便是单线程也依然是非常快的，另外单线程带来的好处是避免了线程切换和竞态产生的消耗</p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>

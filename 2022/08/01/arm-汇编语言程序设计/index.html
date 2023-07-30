@@ -1,0 +1,293 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>arm 汇编语言程序设计 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2022-08-01">2022-08-01</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">arm 汇编语言程序设计</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="汇编语言概览"><a href="#汇编语言概览" class="headerlink" title="汇编语言概览"></a>汇编语言概览</h1><p>汇编语言是最接近机器语言的编程语言，如下图所示，汇编语言介于机器语言和高层语言之间：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/armartucture.png" alt></p>
+<h2 id="内存模型：arm架构的cpu内存结构如下图所示："><a href="#内存模型：arm架构的cpu内存结构如下图所示：" class="headerlink" title="内存模型：arm架构的cpu内存结构如下图所示："></a>内存模型：arm架构的cpu内存结构如下图所示：</h2><p><img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/cpu.png" alt></p>
+<ul>
+<li>寄存器：针对不同类型的cpu最重要的大概就是寄存器了，寄存器是最靠近cpu的存储，其在速度上也最接近cpu，如上图我们可以看到针对该种类型的cpu一共有17个寄存器：<ul>
+<li>r0 ~ r6, r8 ~ r12 用于存放cpu需要操作的数据，这些数据可以是输入数据、输出数据、函数调用的时候栈中的数据</li>
+<li>r7是一个特殊的寄存器，用于存放中断信号，中断信号的类型有两种：内中断、外中断，内中断是用户程序在运行过程中因为异常（调用一些需要超级权限才可以执行的指令、错误程序）或者用户程序主动的通过系统调用陷入内核态，外中断是基于时钟定时出发的，在一个时钟周期内cpu专心的处理程序，一个周期过了之后检查一下r7确认一下是否有中断产生，如果没有中断就会继续执行用户程序，如果有中断，则cpu会根据中断信号查找中断向量表，从而切换程序的执行。</li>
+<li>sp叫做stack pointer，是指向堆栈的指针，堆栈在函数调用或者比较复杂的数据结构如list的时候会用到，具体见图:<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/mem.png" alt></li>
+<li>lr叫做link register，这个通常和函数是结合在一起的，lr存放的是函数的地址，当函数执行结束之后，需要继续在lr标记的位置继续往下执行</li>
+<li>pc叫做program counter，也就是程序计数器，用来指向下一条将要执行的代码</li>
+<li>cpsr用来存放运算溢出的信息，比如两个数相减，有可能大于0、也有可能小于0，对于小于0 的数，其在寄存器中表征的数也有可能是一个很大的数，因此需要表征其符号，另外对于两个求和运算的整数，其可能会产生进位，这里的进位也需要一个单独的寄存器来存储，这里就是cpsr</li>
+<li>spsr 用来保存cpsr的状态信息，当有异常的时候可以用来恢复cpsr，不过在实际应用的过程中用的并不多</li>
+</ul>
+</li>
+</ul>
+<h1 id="汇编语言语法"><a href="#汇编语言语法" class="headerlink" title="汇编语言语法"></a>汇编语言语法</h1><h2 id="快速开始"><a href="#快速开始" class="headerlink" title="快速开始"></a>快速开始</h2><p>接下来通过一个示例来快速的演示一下汇编程序的hello world：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.global _start</span><br><span class="line">_start:</span><br><span class="line">	mov r0, #30</span><br><span class="line">	</span><br><span class="line">	mov r7, #1</span><br><span class="line">	swi 0</span><br></pre></td></tr></table></figure>
+
+<p>上述代码中.global相当于是将当前文件的代码给export出去了，同时也指示了当前代码开始的位置即 _start，也就是传统编程里面的main函数，对于一般的编程来说，这里的label更多的像是一个函数名称，并且对于一个函数来说比较重要的是要return（void的除外，不过也可以return），这里的return在汇编语言层面上要通过中断产生，也就是这里的swi 0（soft ware interrupt 软中断或者内中断），前面我们知道系统调用的时候会检测r7寄存器的值，由于我们在r7中设置了1，通过查找中断向量表我们知道这是要推出程序的执行，并且是正常退出。 <strong>中断向量表是一个枚举的类型，对于不同架构的cpu来说其枚举值必定不同</strong></p>
+<h2 id="数据寻址（address-data）"><a href="#数据寻址（address-data）" class="headerlink" title="数据寻址（address data）"></a>数据寻址（address data）</h2><ul>
+<li>立即寻址：立即寻址这种方式是向寄存器中移入一个常量值如：mov r0, #222</li>
+<li>直接寻址：直接寻址常见的有寄存器之间的数据传递，或者从stack中移入数据到寄存器，如：mov r0, r1、ldr r0,=list，这里的=list是获取list的地址</li>
+<li>间接寻址：在直接寻址中我们在r0中获取到了list的地址，接下来如果我们要获取list地址对应的值就需要ldr r1, [r0]这种方式来讲list的头元素加载到r1中。<ul>
+<li>前加：当我们需要移动list指针的位置的时候，可以在获取下一个数据之前移动指针，这样获取到的值就是指针指向的下一个元素：ldr r2, [r0, #4]</li>
+<li>后加：后加的意思是我们会先获得数据，然后再进行指针的移位操作，这样会导致获取不到最后一个元素:ldr r2, [r0, #4]!、ldr r2, [r0]，#4</li>
+</ul>
+</li>
+</ul>
+<p>下面通过一段代码来进行演示一下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.global _start</span><br><span class="line">_start:</span><br><span class="line">	ldr r0, =list</span><br><span class="line">	</span><br><span class="line">.data</span><br><span class="line">list:</span><br><span class="line">	.word 1,2,3,4,5</span><br></pre></td></tr></table></figure>
+
+<p>上面我们定义了.data段，这代表的是汇编语言程序的数据段，主要用来存放大量的数据，.data在汇编中是关键词，就像.global一样，可以很明显的看到其和label最大的区别就是后面没有“：”，接下来在data段中我们定一个变量list，变量的名称叫做list，然后我们定义了list的类型<code>.word</code>，值得注意的是汇编语言中的数据类型，.word表征的可以是整数也可以是浮点数，同样的数据类型也还有halfword、doubleworld、byte、bit等。
+上面的代码如下，我们可以明显的看到global和data的分界线：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/acode.png" alt>
+在程序的执行过程中我们可以看到寄存器的状态如下：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/adebug.png" alt>
+我们可以看到寄存器中的值，并根据寄存器中的值查看stack对应的内存区域的数据，如下：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/amem.png" alt>
+上面我们就见识到了寄存器、栈内存的状态，此时如果我们想要获得对应的值就需要使用间接寻址获得</p>
+<h2 id="数学运算"><a href="#数学运算" class="headerlink" title="数学运算"></a>数学运算</h2><p>数学运算中包含+ - * /，除法稍微有点复杂，暂不研究，对于 + - *，都需要一个目标寄存器，两个源寄存器，在运算的过程中可能会产生溢出、负值等状态，这种状态就需要一个额外的寄存器CPSR进行存储，不过CPSR状态的操作需要特殊的指令，之所以使用特殊的指令是因为接近于机器的编程对性能的影响很大，能少操作一个寄存器就少操作一个，避免额外的开销。另外CPSR的状态有NZCV，分别代表了N（negtive：负数）、Z（zero 0标记位）、C（carry 进位标记位），V（overflow 溢出）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">.global _start</span><br><span class="line">_start:</span><br><span class="line">	mov r0, #5</span><br><span class="line">	mov r1, #7</span><br><span class="line">	mov r2, #0xffffffff</span><br><span class="line">	// 不会设置cpsr寄存器</span><br><span class="line">	sub r3, r0, r1</span><br><span class="line">	// 设置cpsr寄存器，s可以理解为set即设置</span><br><span class="line">	subs r3, r0, r1</span><br><span class="line">	// 不会设置cpsr寄存器</span><br><span class="line">	add r4, r0, r2</span><br><span class="line">	// ，s可以理解为set即设置</span><br><span class="line">	adds r4, r0,r2</span><br></pre></td></tr></table></figure>
+
+<p>上述寄存器状态图如下：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/memstus.png" alt></p>
+<p>上面我们看到了数学运算的基本操作，如果我们要对cpsr寄存器进行操作的话，是需要使用特殊的指令的，比如我们想要对进位操作进行计算：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.global _start</span><br><span class="line">_start:</span><br><span class="line">	mov r0, #5</span><br><span class="line">	mov r1, #7</span><br><span class="line">	mov r2, #0xffffffff</span><br><span class="line">	adds r3, r0,r2</span><br><span class="line">	adc r4, r0,r1</span><br></pre></td></tr></table></figure>
+
+<p>上面最终计算结果如下：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/adcs.png" alt>
+可以很直观的看到7+5的结果应该是12，对应的16进制就是c，但最终结果r4中显示的是d即13，说明adc讲cpsr中的结果计入了最终运算的结果。</p>
+<h2 id="逻辑运算"><a href="#逻辑运算" class="headerlink" title="逻辑运算"></a>逻辑运算</h2><p>常用的逻辑运算包含了AND、OR、异或等，比较简单，就不再详细说明了</p>
+<h2 id="移位操作"><a href="#移位操作" class="headerlink" title="移位操作"></a>移位操作</h2><p>计算机是二进制的，常见的移位操作相较于十进制来说会比较好理解，对于十进制来说左移操作会在原数的基础上乘以10，右移会在原有数据的基础上除以10。同理对于二进制来说右移是除以2，左移是乘以2。对于其他进制来说亦是如此：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">.global _start</span><br><span class="line">_start:</span><br><span class="line">	mov r0, #15</span><br><span class="line">	// 在原来寄存器的基础上进行移位操作，改变的是原有寄存器的值</span><br><span class="line">	lsl r0, #1</span><br><span class="line">	lsr r0, #1</span><br><span class="line">	mov r1, #15</span><br><span class="line">	// 首先将r1移动到r2中，然后在r2的基础上进行移位操作</span><br><span class="line">	mov r2, r1, lsl #1</span><br><span class="line">	ror r1, #1</span><br></pre></td></tr></table></figure>
+
+<p>对应的寄存器状态如下：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/logic.png" alt>
+对于上面的ror的操作是循环右移，其最低位在经过右移之后会出现在最高位上，通常这种操作用在对数据取hash的操作上，而且，并没有rol的操作，因为对于32位的系统来说，ror n次相当于rol 32-n次</p>
+<h2 id="条件分支"><a href="#条件分支" class="headerlink" title="条件分支"></a>条件分支</h2><p>常见的条件判断指令是cmp，其具体的操作是接受两个参数，然后相减，并将操作的状态信息保存在cpsr中，通过获取cpsr的状态就可以知道最终的结果信息，并且在cmp操作之后通常跟着分支操作，常见的分支有bgt、blt、beq、bne等，其中的b代表的是branch，还有一个特殊的指令bal，代表了无论结果如何都会执行的指令，其中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">.global _start</span><br><span class="line">_start:</span><br><span class="line">	mov r0, #1</span><br><span class="line">	mov r1, #2</span><br><span class="line">	cmp r0, r1</span><br><span class="line">	bgt greater</span><br><span class="line">	// bal always</span><br><span class="line">	mov r3, #1</span><br><span class="line">	</span><br><span class="line">greater:</span><br><span class="line">	mov r2, #3</span><br><span class="line">always:</span><br><span class="line">	mov r2, #4</span><br></pre></td></tr></table></figure>
+
+<p>需要牢记的是，cmp操作之后，会将对应结果存放到cpsr中，因此，接下来的各种跳转操作都会给予最近一次的cpsr中的结果进行判断，如果满足bxx则最终就会陷入分支中去执行，并且最后并不会跳出分支，如上述代码，如果r0大于r1就会跳转到greater分支，并且后续的mov r3的操作也不会再执行了（没有一个返回操作，调用greater的label的操作不是函数调用，不会在函数执行完成之后返回到函数的调用处）。如果最终比较的结果没有任何一个分支满足的话，就会顺序的往下执行，并且如果在后续的执行过程中没有遇到终止的条件的话，会一直执行下面所有的分支，此时并不再是label的调用，就上述代码而言，因为cmp的操作并不满足bgt的结果，因此其首先会跳过bgt的代码，然后顺序执行mov r3、greater、always的操作。注意bal分支只要存在永远是放到代码执行完之后执行。</p>
+<p>除了上述BLT等之外，我们还可以使用MOVLT、ADDLT等指令，这些指令是在LT发生的时候执行特定的操作，类似的还有GT等和原有指令进行组合。这是一种简化代码的方式。</p>
+<h2 id="循环"><a href="#循环" class="headerlink" title="循环"></a>循环</h2><p>在高等计算机编程语言中，我们通常使用的循环类型有for、do -while、while-do类型。下面以do-while类型的循环为例进行相应的求和操作，这里我们预先初始化了list的终止条件，也就是endlist，不过在真正的高等语言中，通常是使用特殊的符号作为终止的标记（毕竟我们无法预知内存中的终止数据究竟是什么），对于下面的循环相较于高等语言来说也是类似的，初始化，进入循环，判断是否终止。这里需要注意的是对于汇编语言中的常量通常是使用类似于宏的定义预先定义好，在家在常量到寄存器的时候要使用ldr的指令，不可以使用mov指令，并且访问数据的时候要用到<code>=</code> ，不可以直接将如数据移入寄存器，具体代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">// 循环求list的和</span><br><span class="line">.global _start</span><br><span class="line">// 初始化list的结束条件</span><br><span class="line">.equ endlist, 0xaaaaaaaa</span><br><span class="line">_start:</span><br><span class="line">	// 初始化变量，类似于高级编程</span><br><span class="line">	ldr r0, =list</span><br><span class="line">	// arm处理器加载常量必须要使用这种方式，这种方式并不是加载其地址，就是把他的值加载到制定的寄存器</span><br><span class="line">	ldr r3, =endlist</span><br><span class="line">	ldr r1, [r0]</span><br><span class="line">	add r2, r2, r1</span><br><span class="line">// 这种方式是do - while的循环方式，因为在这之前并没有cmp的操作</span><br><span class="line">loop:</span><br><span class="line">	ldr r1, [r0,#4]!</span><br><span class="line">	// 这里是比较寄存器中的值是否相等，并不是地址比较</span><br><span class="line">	cmp r1, r3</span><br><span class="line">	beq exit</span><br><span class="line">	add r2, r2, r1</span><br><span class="line">	bal loop</span><br><span class="line">exit:</span><br><span class="line">	mov r3, r2</span><br><span class="line"></span><br><span class="line">.data</span><br><span class="line">list:</span><br><span class="line">	.word 1,2,3,4,5,6,7,8,9,10</span><br></pre></td></tr></table></figure>
+
+<p>上述代码最终的执行结果如下：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/loopreg.png" alt>
+其在内存中的状态图如下：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/loopmem.png" alt></p>
+<h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><p>函数区别于label，label执行完之后不会返回到调用label的地方继续向下执行，函数则会。具体代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">.global _start</span><br><span class="line">_start:</span><br><span class="line">	</span><br><span class="line">	mov r0, #1</span><br><span class="line">	mov r1, #2</span><br><span class="line">	// 使用这种方式会让程序跳转到label处，这种方式并不是函数，也就是在调用了label的代码后如果后续还有代码的话并不会再执行</span><br><span class="line">	//bal addr2</span><br><span class="line">	// branch link 这个指令将会存储label调用的下一个地址到lr寄存器中</span><br><span class="line">	bl addr2</span><br><span class="line">	mov r3, #3</span><br><span class="line">	</span><br><span class="line">addr2:</span><br><span class="line">	add r2, #1</span><br><span class="line">	// branch exit 也就是程序退出的时候将pc指针指向lr寄存器的地址，继续执行函数调用完后的代码</span><br><span class="line">	bx lr</span><br></pre></td></tr></table></figure>
+
+<p>上述代码在执行的过程中最重要的变化就是lr寄存器的变化：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/blr.png" alt>
+在label调用执行到bx lr之后，程序会将lr的地址传递给pc进行函数调用之后的执行。</p>
+<p>上述函数调用是比较简单的，我们在真正的使用过程中可能还涉及到函数调用前一些状态信息的保存，这里状态主要是指寄存器，因为cpu的寄存器数量有限，我们在函数调用的过程中重复使用外层函数的寄存器，但是这样带来的结果就是寄存器被覆写了，因此我们需要在调用前将寄存器中的数据保留，然后调用函数，在执行完毕之后再恢复状态，这里用到了栈，涉及到对应的寄存器就是sp，也即是stack pointer，演示代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">.global _start</span><br><span class="line">_start:</span><br><span class="line">	mov r0, #1</span><br><span class="line">	mov r1, #2</span><br><span class="line">	push &#123;r0, r1&#125;</span><br><span class="line">	bl get_value</span><br><span class="line">	pop &#123;r0, r1&#125;</span><br><span class="line">	b exit</span><br><span class="line">	</span><br><span class="line">get_value:</span><br><span class="line">	mov r0, #2</span><br><span class="line">	mov r1, #3</span><br><span class="line">	add r2, r0, r1</span><br><span class="line">	bx lr</span><br><span class="line">	</span><br><span class="line">exit:</span><br></pre></td></tr></table></figure>
+
+<p>上述代码对应的寄存器及stack状态示意图如下：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/push.png" alt>
+并且如果我们希望得到函数返回值的话，可以进一步的操作是将最终的计算结果push到stack中，并在函数返回的时候pop即可：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">.global _start</span><br><span class="line">_start:</span><br><span class="line">	mov r0, #1</span><br><span class="line">	mov r1, #2</span><br><span class="line">	push &#123;r0, r1&#125;</span><br><span class="line">	bl get_value</span><br><span class="line">	pop &#123;r2,r0, r1&#125;</span><br><span class="line">	b exit</span><br><span class="line">	</span><br><span class="line">get_value:</span><br><span class="line">	mov r0, #2</span><br><span class="line">	mov r1, #3</span><br><span class="line">	add r2, r0, r1</span><br><span class="line">	push &#123;r2&#125;</span><br><span class="line">	bx lr</span><br><span class="line">	</span><br><span class="line">exit:</span><br></pre></td></tr></table></figure>
+
+<h2 id="硬件交互"><a href="#硬件交互" class="headerlink" title="硬件交互"></a>硬件交互</h2><p>在线调试环境的右边我们可以看到和arm交互的硬件，对于交互的硬件只有两种类型，输入、输出，接下来我们将选择switch作为输入，led作为输出（可以看到在线仿真的平台有很多可以交互的外设，不过最简单的就是开关和led了，因此我们也以此为例，其他类型的设备需要依赖于具体设备的参考文档了）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">.equ swth, 0xff200040</span><br><span class="line">.equ led, 0xff200000</span><br><span class="line"></span><br><span class="line">.global _start</span><br><span class="line">_start:</span><br><span class="line">	// 加载开关位置信息</span><br><span class="line">	ldr r0, =swth</span><br><span class="line">	// 将开关对应内存信息加载到r1</span><br><span class="line">	ldr r1, [r0]</span><br><span class="line">	// 加载led的位置信息到r0中</span><br><span class="line">	ldr r0, =led</span><br><span class="line">	// 将r1中的数据写入到r0所指向的地址内存</span><br><span class="line">	str r1, [r0]</span><br></pre></td></tr></table></figure>
+
+<p><img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/led.png" alt></p>
+<h1 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h1><h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>下载内核引导文件<code>https://github.com/dhruvvyas90/qemu-rpi-kernel/blob/master/kernel-qemu-4.4.34-jessie</code>，以及操作系统镜像<code>https://downloads.raspberrypi.org/raspbian/images/raspbian-2017-04-10/</code>，这里为方便使用arm编程，因此使用树莓派的操作系统：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/rpos.png" alt>
+运行以下指令启动虚拟操作系统，并指定对应的运行设备：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-arm -kernel ~/qemu_vms/kernel-qemu-4.4.34-jessie -cpu arm1176 -m 256 -M versatilepb -serial stdio -append &quot;root=/dev/sda2 rootfstype=ext4 rw&quot; -hda ~/qemu_vms/2017-04-10-raspbian-jessie.img -nic user,hostfwd=tcp::5022-:22 -no-reboot</span><br></pre></td></tr></table></figure>
+
+<p><img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/runos.png" alt></p>
+<p>启动树莓派操作系统之后，启动ssh 服务（<code>sudo service ssh start</code>），通过远程连接<code>ssh pi@127.0.0.1 -p 5022</code>连接到机器。</p>
+<p>最后通过汇编代码进行测试：
+<img src="//southrivers.github.io/2022/08/01/arm-汇编语言程序设计/armcode.png" alt></p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>cpu 的核心就是一堆寄存器 加上MCU（计算控制单元，说的直白点就是逻辑门电路，可以针对寄存器进行计算），计算机的核心就是cpu、内存、输入、输出，其中内存用来缓存cpu要用到的数据。</p>
+<p>参考网站：</p>
+<p><a href="https://www.youtube.com/watch?v=gfmRrPjnEw4" target="_blank" rel="noopener">youtube</a></p>
+<p><a href="https://cpulator.01xz.net/" target="_blank" rel="noopener">在线code网址</a></p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>

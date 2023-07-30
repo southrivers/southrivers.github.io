@@ -1,0 +1,224 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>arp小结 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2020-08-12">2020-08-12</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">ARP小结</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>最近在搞一些网络相关的东西，也有了解到其中的一些协议，因此也抽时间学习总结了一把，就先从ARP协议说起吧。</p>
+<h1 id="详解"><a href="#详解" class="headerlink" title="详解"></a>详解</h1><p>ARP协议是用来实现IP到MAC之间的转换的一种机制，是属于网络层的一种协议（需要强调并不是数据链路层的协议），在OSI或者TCP/IP网络模型中，
+我们可以知道设备在同一个局域网中通信的时候使用的是MAC地址，不过通常情况下我们只知道目的主机的IP地址（_毕竟MAC地址很难记，即便是
+记住了，后面如果更换网卡的话，mac地址又会发生改变_）。以ping请求为例，在请求之初，由于原主机不知道目的主机的MAC地址，因此这种情况下
+就需要使用ARP协议来找到相应IP对应的MAC地址，解析出相应的地址之后，就可以封装二层的报文进行请求的发送了。
+接下来我们来看一下ARP在不同的网络拓扑中的一些情况：</p>
+<h2 id="同网段ARP的实现"><a href="#同网段ARP的实现" class="headerlink" title="同网段ARP的实现"></a>同网段ARP的实现</h2><p>如下图所示，同网段内HostA向HostB发送数据报文为例：</p>
+<p><img src="//southrivers.github.io/2020/08/12/ARP小结/local-arp.jpg" alt></p>
+<ul>
+<li>HostA查看自己的ARP表项发现找不到HostB的Ip和MAC的对应关系，于是HostA对外发送ARP报文，请求HostB的MAC地址，该报文中源IP和MAC为
+HostA的IP和MAC，不过目的IP和MAC则分别是目的IP和全0的MAC地址，我们知道全0的MAC地址代表的是广播数据。</li>
+<li>DeviceB在收到HostA的数据报文之后，通过解析发现该报文是广播报文，就会在除了入口之外所有的端口广播该报文</li>
+<li>HostB在收到报文之后，首先会更新自己的ARP表项用于记录HostA的IP和MAC的映射关系，同时向HostA发送ARP应答报文，在该应答报文中源IP和
+源MAC是HostB的IP以及MAC，目的IP和MAC则是HostA的IP和MAC</li>
+<li>DeviceB收到该ARP响应报文之后会将该请求单播给HostA</li>
+<li>HostA接收到ARP响应之后更新自己的ARP表项，接下来如果在有请求从HostA到B的话就会采用单播的方式发送出去了</li>
+</ul>
+<h2 id="不同网段间ARP的实现"><a href="#不同网段间ARP的实现" class="headerlink" title="不同网段间ARP的实现"></a>不同网段间ARP的实现</h2><p>上面我们分析了同网段的ARP协议，如果两台不同网段之间的设备进行通信的时候，发送的一方需要先将请求发送给默认网关，再由默认网关
+将数据报文转发给接收方主机的操作。因此不同的网段之间的ARP请求可以以网关作为分界线划分成多个相同网段之间的ARP的请求，如下图以
+HostA向HostC发送数据为例：</p>
+<p><img src="//southrivers.github.io/2020/08/12/ARP小结/remote-arp.png" alt></p>
+<ul>
+<li>HostA查看自己的ARP表项发现没有到达目的主机HostC的默认网管DeviceA对应接口的IP和MAC地址的映射关系，于是HostA对外发送ARP请求报文
+，这个时候请求的MAC地址是DeviceA的mac地址（并不是HostC的地址）</li>
+<li>DeviceB在收到该报文的时候发现MAC地址是全0，将会在本网络内广播数据
+接下来的过程就是DeviceA响应HostA的ARP请求并更新各自的ARP表项了，具体的过程和上面同网段ARP的实现一致，因此不再赘述了</li>
+</ul>
+<p>在接下来的请求知道了DeviceA的MAC地址之后，数据报文走到DeviceA的时候会根据内部的路由表将请求从interface2接口转发出去，这种情况下
+又变成了同一个局域网的ARP请求和响应了。</p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>上面简要的介绍了一下ARP请求的过程，不过可以看的出来这种模式有一个缺陷，那就是如果网络上存在大量的广播的话会占用极大的贷款以及节点计算
+资源，后面有时间再补齐这些内容吧。</p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>

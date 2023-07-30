@@ -1,0 +1,284 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>数据库-事务 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2019-10-08">2019-10-08</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">数据库-事务</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>数据库相关的知识应该主要就是</p>
+<ul>
+<li>事务</li>
+<li>索引</li>
+<li>锁</li>
+</ul>
+<p>准确的说数据库就是索引、锁，事务不过是锁在数据库上应用的一种表现的特征。</p>
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>数据库事务是一组操作数据的指令的集合，这种操作可以是读取，也可以是更新。事务具备以下特性：</p>
+<ul>
+<li>原子性：事务所包含的指令集要么全部执行，要么全部不执行</li>
+<li>一致性：一致性没有一个严格的数学定义，松散一点的说，就是能够按照用户的预期来执行（这里需要多说以下，数据库的一致性和分布式一致性所说的一致性是不同的，之前看raft或者poxas的时候，经常会搞混淆，分布式一致性可以叫成分布式共识更好一点，不同的
+节点看到的状态是一致的，不会有节点看起来是A，另外一些节点看起来是B状态！）</li>
+<li><strong>隔离性</strong>：隔离是事务之间相互之间不干扰，从一个事务的视角来看，其他的事务要么在当前这个事务之前已经完成，要么在当前这个事务已经完成之后才开始，这样每个事务都感觉不到其他事务的存在</li>
+<li>持久性：事务一旦完成之后，他对数据库的影响是永久性的，即便系统出现故障</li>
+</ul>
+<p>接下来重点说一下<strong>事务隔离级别</strong>及其所带来的问题：</p>
+<h1 id="事务的隔离级别"><a href="#事务的隔离级别" class="headerlink" title="事务的隔离级别"></a>事务的隔离级别</h1><p>隔离界别分为以下几种</p>
+<h2 id="读未提交（read-uncommitted）"><a href="#读未提交（read-uncommitted）" class="headerlink" title="读未提交（read uncommitted）"></a>读未提交（read uncommitted）</h2><p>允许事务T1读取事务T2中没有提交的数据，如果T2执行失败，发生了回滚，那么T1就读取到了错误的数据，对应到具体的问题就是数据的脏读</p>
+<h2 id="读已提交-read-committed"><a href="#读已提交-read-committed" class="headerlink" title="读已提交 (read committed)"></a>读已提交 (read committed)</h2><p>事务T1读取到了事务T2中已经提交的数据，这样会带来的问题是：如果T1连续两次读取到某一条数据，那这两次读取到的结果不一致，会引发的问题就是不可重复读</p>
+<h2 id="可重复读-repeatable-read"><a href="#可重复读-repeatable-read" class="headerlink" title="可重复读 (repeatable read)"></a>可重复读 (repeatable read)</h2><p>事务T1在连续读取某一条记录的间隙不存在另外一个事务T2对该记录的修改（mysql innodb默认的事务隔离级别），无法解决幻读的问题</p>
+<h2 id="序列化-serializable"><a href="#序列化-serializable" class="headerlink" title="序列化 (serializable)"></a>序列化 (serializable)</h2><p>完全串行化，每个事务都会获取表级锁，可以解决所有的问题，带来的问题是事务吞吐量的降低、cpu利用率低下以及较高的响应时延</p>
+<h1 id="隔离级别引发的问题"><a href="#隔离级别引发的问题" class="headerlink" title="隔离级别引发的问题"></a>隔离级别引发的问题</h1><p>接下来我们会通过mysql演示数据库事务隔离级别所带来的问题，mysql事务隔离级别查看及修改方式（我当前安装的是mysql8.0）：
+查看数据库事务隔离级别</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select @@transaction_isolation;</span><br><span class="line">+<span class="comment">-------------------------+</span></span><br><span class="line">| @@transaction_isolation |</span><br><span class="line">+<span class="comment">-------------------------+</span></span><br><span class="line">| REPEATABLE-READ         |</span><br><span class="line">+<span class="comment">-------------------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+
+<p>修改当前会话的事务隔离级别</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SET</span> [<span class="keyword">SESSION</span> | <span class="keyword">GLOBAL</span>] <span class="keyword">TRANSACTION</span> <span class="keyword">ISOLATION</span> <span class="keyword">LEVEL</span> &#123;<span class="keyword">READ</span> UNCOMMITTED | <span class="keyword">READ</span> COMMITTED | REPEATABLE <span class="keyword">READ</span> | <span class="keyword">SERIALIZABLE</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="脏读"><a href="#脏读" class="headerlink" title="脏读"></a>脏读</h2><p>一个事务T1访问到了另外一个事务T2修改了、但是没有提交的数据
+<img src="//southrivers.github.io/2019/10/08/数据库-事务/%E8%84%8F%E8%AF%BB.png" alt></p>
+<h2 id="不可重复读"><a href="#不可重复读" class="headerlink" title="不可重复读"></a>不可重复读</h2><p>一个事务T1多次读取某一个数据，在两次读取数据之间，另外一个事务T2对数据进行了修改并提交，导致T1连续两次读取到的数据发生了变化，对比脏读，
+不可重复读取到的是另一个事务已经提交的数据，而脏读读取到的是另一个事务没有提交的数据
+<img src="//southrivers.github.io/2019/10/08/数据库-事务/%E8%AF%BB%E5%B7%B2%E6%8F%90%E4%BA%A4.png" alt></p>
+<h2 id="可重复读"><a href="#可重复读" class="headerlink" title="可重复读"></a>可重复读</h2><p>mysql innodb默认的事务隔离界别就是可重复读，这个我们可以测试一下：
+<img src="//southrivers.github.io/2019/10/08/数据库-事务/%E5%8F%AF%E9%87%8D%E5%A4%8D%E8%AF%BB.png" alt>
+上面我们在左边开启一个事务，然后插入一条数据，在右边区查看表中的记录，在左边的事务没有提交的情况下，可以看到右边查到的数据为空，
+直到左边的事务commit之后，右边的查询才可以读取到
+<img src="//southrivers.github.io/2019/10/08/数据库-事务/%E5%8F%AF%E9%87%8D%E5%A4%8D%E8%AF%BB-commit.png" alt>
+接下来我们模拟在一个事务连续两次读某个记录操作的过程中，另外一个事务来修改该记录，如下：
+<img src="//southrivers.github.io/2019/10/08/数据库-事务/%E5%8F%AF%E9%87%8D%E5%A4%8D%E8%AF%BB-1.png" alt>
+我们可以看到，左右两边同时开启一个事务之后，右边在update一条记录（未commit）的情况下，左边查看到的结果仍然是旧的数据，
+接下来我们将右边的事务commit之后，再查看
+左边的查询是否是可重复读的，如下
+<img src="//southrivers.github.io/2019/10/08/数据库-事务/%E5%8F%AF%E9%87%8D%E5%A4%8D%E8%AF%BBcommit.png" alt>
+经过上面的测试流程我们可以清楚的看到在可重复读的隔离级别中，一个事务的多次读操作不会受到另外一个事务写的影响，最后我们来测试一下两个事务同时更新某一条记录的情况：
+<img src="//southrivers.github.io/2019/10/08/数据库-事务/%E5%8F%AF%E9%87%8D%E5%A4%8D%E8%AF%BB-update.png" alt>
+这种情况下我们发现其中的一个更新事务会被阻塞直至超时。</p>
+<h2 id="幻读"><a href="#幻读" class="headerlink" title="幻读"></a>幻读</h2><p>幻读也可以称之为虚读，事务T1批量修改表中的数据，在T1还没有提交之前事务T2新增了一行T1需要修改的数据并提交，
+T1在提交的时候发现了一行本来应该修改，但是没有修改的数据。
+<img src="//southrivers.github.io/2019/10/08/数据库-事务/%E5%B9%BB%E8%AF%BB.png" alt>
+对比脏读，幻读和不可重复读都是读取了另外一条提交了的事务的数据，
+幻读强调的是一批数据的修改，不可重复读强调的是一条数据的修改</p>
+<h1 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h1><h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>本节主要介绍了数据库事务相关的知识，需要明确的是事务的隔离级别越高，性能就越差，另外实现事务隔离的机制通常是采用加锁的方式，
+这将会在后续的文章中持续跟进。</p>
+<hr>
+<p>原子性、一致性、持久性  —-   redo log、undo log
+隔离性 —– 锁来体现</p>
+<ul>
+<li><p>读未提交：脏读</p>
+</li>
+<li><p>读已提交：不可重复</p>
+</li>
+<li><p>可重复读：mysql的</p>
+</li>
+<li><p>序列化：</p>
+</li>
+<li><p>幻读：是区间读的一种现象</p>
+</li>
+<li><p>MVCC解决的事快照读的幻读问题，当前读的幻读是通过gap lock或者说next-key lock来解决的</p>
+</li>
+</ul>
+<ul>
+<li>锁的划分</li>
+<li>操作类型<ul>
+<li>读锁/共享</li>
+<li>写锁/排他</li>
+</ul>
+</li>
+<li>资源粒度：行、表锁可以共存<ul>
+<li>表锁</li>
+<li>行锁<ul>
+<li>MDL</li>
+<li>意向锁：意向锁并不是真正意义上的锁，而是一种标记，<strong>用于标记表中存在一些行是正在被加了行锁的，因此意向锁之间都是相互兼容的</strong>，意向锁和正常的表锁之间的兼容性则是只有读兼容，其实这也好理：简单的将意向锁理解成行锁就可以快速判断了。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>锁是原子性的体现</p>
+<p>事务是可见性的体现</p>
+<p>flink on yarn：作业唯独、资源唯独、作业和资源的交互唯独</p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>

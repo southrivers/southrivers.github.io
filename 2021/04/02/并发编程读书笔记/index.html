@@ -1,0 +1,340 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>并发编程读书笔记 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2021-04-02">2021-04-02</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">并发编程读书笔记</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>并发一直以来是面试的重难点，从事java开发也有几年的经验了，但是并发这一块一直都是软肋，有幸同事建议看一下王宝令的极客时间，收获颇丰。我们从并发编程中存在的问题入手，并来一步一步的分析解决这些问题所用到的方法，最后引出并发编程真正的执行者：线程。</p>
+<p>并发编程可以从三个方面来划分：</p>
+<ul>
+<li>分工：宏观上的分工，即如何给线程安排任务</li>
+<li>同步：分配给线程的任务之间有依赖的关系，如何保障线程按照编排的顺序来执行</li>
+<li>互斥：线程在执行任务的时候可能会涉及到多个线程访问共享变量的情况，如何保障线程执行的正确性就需要对共享变量的互斥访问，其中互斥访问又可以分成两种方案<ul>
+<li>有锁互斥</li>
+<li>无锁互斥</li>
+</ul>
+</li>
+</ul>
+<p>整体划分如下： </p>
+<p><img src="//southrivers.github.io/2021/04/02/并发编程读书笔记/zhengti.png" alt></p>
+<p>个人理解，同步的一种特例就是互斥：通过互斥使得线程按照特定的顺序执行。</p>
+<h1 id="详解"><a href="#详解" class="headerlink" title="详解"></a>详解</h1><h2 id="并发问题"><a href="#并发问题" class="headerlink" title="并发问题"></a>并发问题</h2><p>并发编程出现问题的根源在于：</p>
+<ul>
+<li><p>原子性：由于计算机硬件之间运行的速度不匹配，因此计算机在操作系统软件的层面形成了分时的系统，由此而引入的问题是在高级语言层面上看起来是一步执行完的操作，在cpu指令上则拆分了多个操作，一个真正的操作可能是会在切换了多个线程之后才执行完。如下图所示：
+<img src="//southrivers.github.io/2021/04/02/并发编程读书笔记/yuanzi.png" alt></p>
+</li>
+<li><p>可见性：由于计算机硬件之间运行的速度不匹配，除了在操作系统的层面上通过分时充分保障cpu被充分使用外，还引入了cpu对应的缓存来平衡硬件运行速度的差异。线程在执行的时候会先将主存数据加载到cpu对应的缓存，对于具备多核的cpu则会针对主存数据形成多份拷贝，如果不同的线程对数据进行了修改，其修改操作并不是直接修改主存中的数据，而是修改的cpu缓存中的数据，这样对于其他线程来说该修改操作就是不可见的，如下图所示：
+<img src="//southrivers.github.io/2021/04/02/并发编程读书笔记/kejian.png" alt></p>
+</li>
+<li><p>有序性：编译器、处理器为了优化性能，在保证单线程正确执行的前提下，有时候会调整程序的先后顺序，调整的目的无非是为了充分使用缓存，但是这些调整仅仅保障了单线程下执行正确，并无法保障多线程下操作的正确。比较经典的一个例子是双重检测来创建单例：</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public class Singleton &#123;</span><br><span class="line">  static Singleton instance;</span><br><span class="line">  static Singleton getInstance()&#123;</span><br><span class="line">    if (instance == null) &#123;</span><br><span class="line">      synchronized(Singleton.class) &#123;</span><br><span class="line">        if (instance == null)</span><br><span class="line">          instance = new Singleton();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    return instance;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们通常见到的这种单例的写法看起来很完美了，不过很遗憾，这里还是存在一些问题：指令重排带来的问题，假定一个线程进入到<code>instance = new Singleton();</code>这一步了，但是创建对象的操作并非原子操作，因此可能会出现先开辟一块内存，指向instance，此时instance就满足部位null的情况，然而对象却还没有来的及初始化，因此这种情况下我们直接返回的对象是存在问题的对象。</p>
+<p>综上：缓存导致的可见性问题，线程切换带来的原子性问题，编译优化带来的有序性问题，java引入了内存模型来解决这几个问题，内存模型解决了可见性、有序性的问题，而原子性的问题则是由互斥来解决的</p>
+<h3 id="java内存模型（非jvm）"><a href="#java内存模型（非jvm）" class="headerlink" title="java内存模型（非jvm）"></a>java内存模型（非jvm）</h3><p>java内存模型规范了JVM如何提供按需禁用缓存和编译优化的方法，具体点就是volatile、synchronized、final关键字以及happens-before规则。</p>
+<ul>
+<li>volatile：volatile通过禁用缓存解决了可见性的问题，这样volatile的读写都是操作的主存（但是没有解决原子性的问题，也就是当针对volatile执行非原子操作的时候要特别注意），<strong>另外volatile是针对引用的可见性，并不是引用内部字段的可见性，因此对于一般的对象，即使使用了volatile来修饰也没有办法保证其所包含字段的可见性的</strong>。除了解决可见性问题之外，在jdk1.5之后volatile对其做了功能性的增强，具体参见happens-before原则</li>
+<li>final：代表对应的字段是不可变的，对于基本类型来说就是值，普通对象就是引用的值。<em>final通常是用在构造函数中对值进行初始化，在使用final关键字的时候需要注意的就是指针逃逸的情况，虽然我们知道final代表的字段是不变的，不过如果我们在构造函数中将当前对象赋值给全局的静态变量则可能会由于指令重排导致对象还没有来得及真正的初始化就直接暴露出来了</em>。因此严禁在构造函数中将对象的引用暴露出来，这样很可能能会造成指针逃逸，具体代码演示如下：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">final int x;</span><br><span class="line">public FinalFieldExample() &#123; </span><br><span class="line">    x = 3; </span><br><span class="line">    y = 4; </span><br><span class="line">    // 此处就是讲this逸出， </span><br><span class="line">    global.obj = this;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><ul>
+<li>成员变量为final时的初始化<ul>
+<li>定义变量时候赋值</li>
+<li>构造函数中赋值</li>
+<li>构造代码块中赋值</li>
+</ul>
+</li>
+<li>类变量为final时的初始化<ul>
+<li>定义变量的时候赋值</li>
+<li>静态代码块中初始化</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>happens-before规则：通过约束编译器优化的方式实现了前面操作的结果相对于后续的操作是可见的（个人感觉有判断条件的规则才是真正的规则）</p>
+<ul>
+<li>程序顺序性规则：从单线程的角度来看程序前面对某个变量的修改操作一定对后续操作可见</li>
+<li>对一个volatile变量的写操作，happen-before于对这个变量的读操作。这一个规则怎么看都像是禁用缓存的意思，好像是在强调volatile读到的总是最新的值，不过其真实的意思是在强调对volatile变量的操作禁用指令重排，这样前面双重检测的对象如果使用了volatile修饰了，那么就能够保障对象在写入内存的时候一定不会再是还没有来得及初始化的对象</li>
+<li>传递性规则：A happen before B、B happen before C，则 A happen before C</li>
+<li>管程中锁的规则：对一个锁的解锁happen before于后续对这个锁的加锁（java中对应的就是synchronized），java中的加锁是通过编译器帮忙实现的</li>
+<li>线程start规则：线程A启动线程B，则子线程B可以看到父线程A在启动子线程B之前的操作（感觉这个和顺序性有点像，不过顺序性是单线程，这里是多个线程）</li>
+<li>线程join规则：父线程A调用了子线程B的join方法，则子线程的操作happen before于该join方法，父线程会等待子线程执行完。一种通用的模式，经常会看到Thread.currentThread().join()出现在源代码中，这种是让主线程不退出，通过子线程持续对外提供服务的一种方式。</li>
+</ul>
+</li>
+</ul>
+<h3 id="原子性问题解决方案："><a href="#原子性问题解决方案：" class="headerlink" title="原子性问题解决方案："></a>原子性问题解决方案：</h3><p>前面的java内存模型解决了可见性和有序性的问题，不过并没有解决原子性的问题，在java中原子性问题的解决方案是采用管程的模型。管程对应的英文是Monitor，也可以叫做监视器，所谓管程是指管理共享变量以及对共享变量的操作过程，让他们支持并发，对应到java中就是管理类的成员变量以及成员方法，让其成为线程安全的类，这也是在任何语言中解决并发问题的关键。</p>
+<h4 id="管程模型"><a href="#管程模型" class="headerlink" title="管程模型"></a>管程模型</h4><p>如下图所示为管程对应的模型：</p>
+<p><img src="//southrivers.github.io/2021/04/02/并发编程读书笔记/guancheng.png" alt></p>
+<p>被封装的共享变量或者方法对外提供的统一的入口，入口处有一个等待队列，这个队列代表了管程的互斥的作用，其保证每次只有一个线程进入到该入口。管程同时引入了条件变量，每个条件变量对应了一个等待队列（区别于入口等待队列），这个等待队列用于实现管程的同步的作用，当线程在执行的时候发现某个条件不满足，就会进入该条件变量对应的等待队列，这个时候是允许其他的线程进入管程的（因为进入等待队列会释放其持有的锁）。当某个条件满足的时候，我们可以通知该条件变量对应的等待队列中的线程重新进入入口等待队列，发起抢锁的操作，<strong>抢锁失败之后对应的线程会重新进入条件变量的等待队列（这一点很重要）</strong>。</p>
+<h5 id="管程实现范式"><a href="#管程实现范式" class="headerlink" title="管程实现范式"></a>管程实现范式</h5><p>java中选择的管程的模型是MESA，线程B在通知（<strong>是通知</strong>）完线程A条件满足的时候，线程B并不是立即释放锁并退出，而是会继续执行完接下来的操作，这就会引入一个问题，线程A在执行的时候发现条件又不满足了（<strong>或许其他线程又改变了这个条件使得之前满足的条件不再满足了</strong>），这样就引入了java中管程实现的特定的范式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">while(条件不满足) &#123; </span><br><span class="line">    wait();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于管程的实现，在jdk1.5之前提供的默认的管程的实现是synchronized，之后在并发编程包中提供了AQS框架实现的管程，其本质上统统是锁，接下来具体看一下相关的细节。</p>
+<h4 id="synchronized"><a href="#synchronized" class="headerlink" title="synchronized"></a>synchronized</h4><p>synchronized是jdk提供的默认的管程的实现，默认只有一个条件变量，因此也只对应了一个等待队列。前面在介绍happens before的时候已经介绍了管程中锁的规则，加锁happen before于解锁之前，这是可见性和有序性的体现，除此之外其可以保证操作的原子性。synchronized可以用来修饰方法、代码块、对象。synchronized的加锁、解锁的过程自动进行的，javap反编译一下能够看到synchronized修饰的block前后分别会加上<code>monitor enter； monitor exit</code>，另外需要知道的是synchronized修饰静态方法的时候锁定的是当前的类，修饰的是非静态方法的时候，所定的对象是this。<strong>synchronized进行了锁膨胀的优化，有时间可以研究一下</strong></p>
+<p><strong>锁对应的方法之间是具备可见性规则的，因为block的访问涉及到happen before的规则，<em>而对于无锁的方法，有锁的方法对共享变量的操作对其不一定可见</em>，要保障可见则需要对无锁的方法加锁，或者将共享资源禁用缓存，也就是使用volatile进行修饰，不过很遗憾，volatile修饰的变量只可以是基本类型，修饰的是普通对象的话还是有可能无法访问到普通对象的最新的值（当然加锁的话需要是同一把锁才可以）</strong></p>
+<p>锁保障了原子性，并通过happens-before规则解决了可见性、有序性的问题，但是锁的使用也带来了死锁的问题：锁和其对应的资源之间的关系为1:N，其中N &gt;= 1，当锁保护的资源不相关的时候，可以用不同的锁保护不同的资源，这种锁叫做细粒度锁，细粒度锁可以提高并行度，是性能优化的一个重要手段。不过细粒度锁是可能会由于相互等待导致死锁出现，例如当一个业务依赖于两个不同的加锁操作的时候可能就会出现相互等待锁的释放而进入死锁的状态</p>
+<h5 id="产生条件（从资源的角度来看）"><a href="#产生条件（从资源的角度来看）" class="headerlink" title="产生条件（从资源的角度来看）"></a>产生条件（从资源的角度来看）</h5><ul>
+<li>互斥，共享资源X和Y只能被一个线程占用（锁的排他性）</li>
+<li>占有且等待，线程A已经获得共享资源X，在等待共享资源Y的时候，<strong>不释放</strong>共享资源X</li>
+<li>不可抢占，其他线程不能强行抢占已经其他线程占有的资源</li>
+<li>循环等待，线程A等待线程B占有的资源，反之亦然</li>
+</ul>
+<p>只有在上面四个条件都发生的情况下，才会出现死锁；因此只需要破坏其中一个条件就可以避免死锁发生。</p>
+<p>解决方案：</p>
+<ul>
+<li>破坏占用且（循环）等待条件，一次申请所有的资源，如果申请不到，快速失败即可</li>
+<li>破坏不可抢占条件，java语言层面提供的synchronized无法破坏这个条件，Lock可以解决这个问题（TODO 如何解决的）</li>
+<li>破坏循环等待条件，对资源进行排序，获取资源失败就快速失败即可</li>
+</ul>
+<p>破坏占用且等待的条件中一次申请所有的资源，通常采用的模式是忙等带，在并发量很低的情况下，这种做法没有什么问题，一旦并发量上来之后，这种循环等待的方案就不合适了，比较好的方案是采用<strong>等待-通知</strong>的机制，如果线程要求的条件不满足，则线程阻塞自身，进入等待状态，当条件满足的时候，通知等待的线程重新执行即可，这样做的好处是可以避免cpu的空转。（说明：即便上面是等待通知机制，可以将其理解为不是线程中的同步，而是互斥，也就是为了解决互斥带来的死锁问题）</p>
+<p>占用且循环等待实施方案：</p>
+<ul>
+<li>忙等待：最常用的就是原子类中通过cas的操作来更新变量，这种方式的缺点是会消耗大量的cpu的计算资源</li>
+<li>等待-通知：线程首先获取互斥锁，当线程要求的条件不满足的时候，释放互斥锁，进入等待状态（等待状态是释放了锁的状态，阻塞是还没有获取到锁的状态），当要求的
+条件满足的时候，通知等待的线程，重新获取互斥锁即可</li>
+</ul>
+<p>java中内置的synchronized配合wait、notify、notifyAll可以轻松实现等待通知的机制，其为管程的一种实现方式，如下图所示：</p>
+<p><img src="//southrivers.github.io/2021/04/02/并发编程读书笔记/dengdai.png" alt></p>
+<p>当线程进入synchronized保护的临界区的时候，如果线程执行的条件不满足，那么是可以通过调用wait方法释放当前获取到的锁资源而进入等待的状态，在条件满足的时候可以通过notify或者notifyAll来唤醒等待队列中的线程，notify只能保证在唤醒的时刻条件是满足的，并且推荐使用notifyAll来实现线程的通知机制，这样是可以尽量保证线程的公平性的，因为notify是随机挑选一个线程进行唤醒，这很可能会导致有些线程永远不会被通知到。需要明确一点，这里的两个队列分别是阻塞队列和互斥锁的等待队列，被唤醒的线程只会是互斥锁的等待队列，而线程在不满足条件而进入阻塞队列之后，jvm线程调度操作只会从阻塞队列中选择线程。另外既然synchronized是管程的一种实现方式，那么其实现等待通知的机制必然也是上面所提到的范式。</p>
+<p>另外需要强调的是尽量使用notifyAll而不是notify，这是为了防止信号的丢失：假设我们有资源 A、B、C、D，线程 1 申请到了 AB，线程 2 申请到了 CD，此时线程 3 申请 AB，会进入等待队列（AB 分配给线程 1，线程 3 要求的条件不满足），线程 4 申请 CD 也会进入等待队列。我们再假设之后线程 1 归还了资源 AB，如果使用 notify() 来通知等待队列中的线程，有可能被通知的是线程 4，但线程 4 申请的是 CD，所以此时线程 4 还是会继续等待，而真正该唤醒的线程 3 就再也没有机会被唤醒了。</p>
+<p>上面提到了wait的使用，因此顺便提一下wait和sleep的异同：</p>
+<ul>
+<li>不同点<ul>
+<li>wait会释放锁而sleep不会释放锁资源，也正因为如此wait只能在同步方法和代码块中使用，而sleep可以在任何场景中使用</li>
+<li>wait无需捕捉异常，而sleep需要捕捉。</li>
+</ul>
+</li>
+<li>共同点：<ul>
+<li>都会让渡cpu执行时间，等待再次被调度</li>
+</ul>
+</li>
+</ul>
+<h4 id="demo"><a href="#demo" class="headerlink" title="demo"></a>demo</h4><p>接下来通过<strong>等待-通知</strong>的机制来实现一个同步阻塞队列：//TODO</p>
+<h2 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h2><p>上面介绍了并发编程中存在的问题，以及解决这些问题而引入的一些概念、方案，并衍生出新的问题以及新问题的解决方案，接下来我们看一下并发编程的真正的执行者：线程吧。需要说明一下，线程其实包含了两种层次的线程，一种是编程语言级别的线程，一种是操作系统级别的线程</p>
+<h3 id="通用线程生命周期"><a href="#通用线程生命周期" class="headerlink" title="通用线程生命周期"></a>通用线程生命周期</h3><p>通用的线程生命周期包含了：</p>
+<ul>
+<li>初始状态：编程语言级别的线程被创建、未被分配cpu</li>
+<li>可运行状态：操作系统级别的线程被创建，可以分配cpu</li>
+<li>运行状态：有空闲的cpu，并且被分配给可运行状态的线程</li>
+<li>阻塞状态：当线程等待某个事件的时候（管程对应的条件变量），线程就会转换到休眠的状态，同时会释放cpu，等到等待的事件满足，该线程被唤醒之后就会从阻塞状态转变成可运行状态</li>
+<li>终止状态： 线程正常执行完或者执行的过程中异常结束，终止状态的线程将不会再转换成其他的状态</li>
+</ul>
+<p>如下图所示：</p>
+<p><img src="//southrivers.github.io/2021/04/02/并发编程读书笔记/xiancheng.png" alt></p>
+<h3 id="java线程生命周期"><a href="#java线程生命周期" class="headerlink" title="java线程生命周期"></a>java线程生命周期</h3><p>区别于通用线程生命周期，java中线程的生命周期对部分状态进行了合并及拆分，最终如下：</p>
+<ul>
+<li>初始状态：同上，编程语言级别的线程被创建，操作系统级别的线程并没有创建，对应到语言就是new一个thread</li>
+<li>运行状态：运行状态是上面的可运行与运行状态的合并，只要调用线程对象的start方法就可以了</li>
+<li>阻塞状态：线程在使用synchronized修饰的方法的时候，由于互斥的原因，进入入口队列中等待的状态</li>
+<li>等待状态<ul>
+<li>无限等待状态：<ul>
+<li>在synchronized修饰的方法中调用了wait的方法会导致线程进入到无限的等待状态中</li>
+<li>Thread.join方法的调用，主调线程将会等待被调线程执行完之后才可以继续执行，这时候主调线程就会进入无限的等待状态中</li>
+<li>LockSupport.park方法的调用会使得调用这个方法的线程陷入无限的等待状态中，当调用unpark方法之后又可以将线程唤醒</li>
+</ul>
+</li>
+<li>限时等待状态：<ul>
+<li>无限等待状态中的加入时间参数</li>
+<li>调用Thread.sleep方法</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>终止状态：线程正常执行完或者执行过程中抛出异常的时候就会导致线程终止，当我们希望在执行的过程中直接终止线程，可以使用interrupt方法，不推荐使用stop等方法，这些方法会导致线程持有的锁无法释放。</li>
+</ul>
+<p>前面我们提到的线程终止方案的时候有提到interrupt，现就对其简要介绍：
+interrupt会给线程发送一个通知，不过线程在接收到该通知的时候，可以选择处理也可以选择忽略，当线程处于运行状态的时候，线程可以直接通过isInterrupted() 方法来检测是否收到中断的通知，并进行相关的处理处理该通知，不过当线程处于等待状态的时候，不管是等待状态的哪一种状态，都会使得线程抛出异常，并且需要强调的是在抛出异常之后该中断标记位会复位，因此我们如果希望正常的处理这个通知，是需要在捕获异常之后进行重新的置位，通用的模式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Thread th = Thread.currentThread();</span><br><span class="line">while(true) &#123;</span><br><span class="line">  if(th.isInterrupted()) &#123;</span><br><span class="line">    break;</span><br><span class="line">  &#125;</span><br><span class="line">  // 省略业务代码无数</span><br><span class="line">  try &#123;</span><br><span class="line">    Thread.sleep(100);</span><br><span class="line">  &#125;catch (InterruptedException e)&#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>本节主要是介绍了并发编程中的锁、线程相关的知识，接下来将会介绍并发编程常见的工具类</p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>

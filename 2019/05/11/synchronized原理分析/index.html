@@ -1,0 +1,270 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>synchronized原理分析 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2019-05-11">2019-05-11</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">synchronized原理分析</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>前面我们介绍了线程相关的知识，接下来我们看一下java给我们提供的用于解决线程并发带来问题的关键字synchronized，之所以将其单独列出
+而不是和java中各种常见锁一起列出，是因为synchronized相对来说是比较独立的，其底层是jvm给我们提供的原语，而java中的锁则是
+基于AQS框架来实现的，因此本小节针对synchronized单独做一个总结。</p>
+<h1 id="重要信息"><a href="#重要信息" class="headerlink" title="重要信息"></a>重要信息</h1><p>锁的实现在操作系统层面上只有以下几种情况： </p>
+<ul>
+<li>原子操作：只针对简单的数据结构有效 </li>
+<li>关中断：对于多核cpu失效 </li>
+<li>锁总线：锁的颗粒度比较大，对性能影响较大 </li>
+<li>自旋锁：依赖于操作系统特定的指令，将内存（a）和置位（b）的值通过原子指令实现交换，从而实现加锁的过程，当然如果加锁失败就继续通过自旋实现数据的交换 </li>
+<li>信号量：和自旋锁本质是同一种技术，只是加锁失败不再让其继续自旋，而是将其丢到一个队列里面，当持有锁的线程执行完成之后从队列中唤醒。JAVA的AQS就是这种机制</li>
+</ul>
+<h1 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h1><p>在开始讲述synchronized之前，我们先用一个例子引出synchronized的使用，假定有一个共享变量，我们启动两个线程执行变量的++操作，我们知道
+++操作并不是一个原子操作，在线程进入临界区执行操作更新共享变量的时候，如果没有加锁的话应该是有问题的，对应的代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SyncTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">int</span> x = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">while</span> (x &lt; <span class="number">1000</span>) &#123;</span><br><span class="line">                i ++;</span><br><span class="line">                x ++;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">boolean</span> flag = <span class="keyword">true</span>;</span><br><span class="line">        SyncTest syncTest = <span class="keyword">new</span> SyncTest();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; <span class="number">2</span>; ++j) &#123;</span><br><span class="line">            syncTest.<span class="keyword">new</span> MyThread().start();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Thread.currentThread().sleep(<span class="number">1000</span>);</span><br><span class="line">        System.out.println(i);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>多次测试，我们会发现执行的结果不定，当我们对run操作加上synchronized再看一下执行效果就会发现，最终值是一个确定的值(不过
+这里的synchronized应该需要锁住一个共享变量)，具体代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> x = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span> (x &lt; <span class="number">1000</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (MyThread<span class="class">.<span class="keyword">class</span>) </span>&#123;</span><br><span class="line">                i ++;</span><br><span class="line">            &#125;</span><br><span class="line">            x ++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果synchronized仅仅修饰的是run方法，那么得到的最终的结果仍然是不确定的，至于原因嘛：不同的线程进入临界区执行自增操作的时候
+获取到的锁不是同一个锁，所以这种方式并不能够实现真正的互斥操作，这里便涉及到synchronized的使用方式了。</p>
+<h2 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h2><p>synchronized有三种使用方法，每种使用方法都针对了不同的作用域，接下来我们来看一下具体的使用过程</p>
+<h3 id="普通同步方法"><a href="#普通同步方法" class="headerlink" title="普通同步方法"></a>普通同步方法</h3><p>下面三个方法本质上是一样的，对于第一个方法，多个线程在访问的时候会去抢同一把锁，该锁由当前对象持有，也就是new出来的SyncUsed对象，因此
+test与test1本质上是一样的，至于test2，则是将获取锁的对象一般化：既然多个线程争夺同一个SyncUsed对象持有的锁，为什么不能另一个对象的锁呢？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.sync;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SyncUsed</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Object object = <span class="keyword">new</span> Object();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"say hello"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">test1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">            System.out.println(<span class="string">"say hello"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">test2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (object) &#123;</span><br><span class="line">            System.out.println(<span class="string">"say hello"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里可以多考虑一下，如果由A、B、C三个线程如果A线程调用了test方法，B线程在同一时刻调用了test1方法，C线程又在同一时刻
+调用了test2方法，那么这三个线程会形成阻塞么？</p>
+<p><strong>答案是test和test1会相互阻塞，均不会和test2形成阻塞。</strong>至于原因，我们会在讲解synchronized原理的时候讲解。</p>
+<h3 id="静态同步方法"><a href="#静态同步方法" class="headerlink" title="静态同步方法"></a>静态同步方法</h3><p>对于静态同步方法，下面三个方法本质上也是一样的。synchronized修饰的是静态的方法，既然静态的，那肯定是全局的了，
+因此，这里的synchronized获取的是这个类的锁，所以这里的test与test1本质上也还是一样的，
+而test2的话则是更一般化的静态同步方法（使用了一个静态对象：静态的必定是全局的）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.sync;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SyncUsed</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> Object object = <span class="keyword">new</span> Object();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">synchronized</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"say hello"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">test1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (SyncUsed<span class="class">.<span class="keyword">class</span>) </span>&#123;</span><br><span class="line">            System.out.println(<span class="string">"say hello"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">test2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (object) &#123;</span><br><span class="line">            System.out.println(<span class="string">"say hello"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="同步代码块"><a href="#同步代码块" class="headerlink" title="同步代码块"></a>同步代码块</h3><p>同步代码块应该是我们最常用的一种同步机制了，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">test2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">        System.out.println(<span class="string">"say hello"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>相信这一种同步的方式我们也不陌生了，这个在上面普通同步方法中我们也已经见过了，这几种方式的区别仅仅是synchronized修饰的
+作用域的区别。</p>
+<p>上面我们讲述了synchronized的几种使用方式，总结一下其特点就是：当一个线程试图访问被synchronized修饰的方法的时候，首先会获取
+一个锁，当<strong>方法执行完成或者在运行的过程中抛出异常的时候会释放锁。</strong> 接下来我们来分析一下synchronized的原理。</p>
+<h2 id="原理解析"><a href="#原理解析" class="headerlink" title="原理解析"></a>原理解析</h2><p>JAVA对象头长度一般是2个字（数组除外，数组3个字）包含的数据结构是： </p>
+<ul>
+<li>空位、Hash code、分代回收年龄、锁标记（偏向1bit， 锁标记2bit） </li>
+<li>Class metadata：用来指向对象的类的指针，用来确定对象是哪个类的实例。 </li>
+</ul>
+<p>1、线程包含一个monitor record列表，每一个record都记录了线程请求锁的起止时间 
+2、对象都包含了一个monitor锁，这个monitor就是用上面说的对象头的信息来实现的，锁标记的状态可以分为：</p>
+<ul>
+<li>00（轻量级锁）</li>
+<li>1 - 01（偏向锁）</li>
+<li>0 - 01（无锁）</li>
+<li>10（重量级锁） </li>
+</ul>
+<p>偏向锁的出现是为了解决无竞争情况下的同步原语。 monitor使用条件变量+等待队列实现线程间的协作，不过monitor依赖于操作系统的互斥锁，因此需要通过系统调用来操作，开销是比较大的。 monitor可以认为是对象的伴生对象，一旦对象被锁住了，对象头的lockword就会指向monitor的起始地址，同时在monitor中存放了线程的信息，其数据结构大致如下：</p>
+<p><img src="//southrivers.github.io/2019/05/11/synchronized原理分析/monitor.png" alt></p>
+<p>如上，在monitor对象中包含了nest字段用来保存monitor被重入的次数，因此采用monitor机制实现的锁是可以重入的。 </p>
+<p>monitor实现加锁的流程是： 
+1、线程尝试获取对象的monitor来完成对对象的加锁，如果发现对象的锁已经获取了，这个时候会进入entry-set中进行等待 
+2、等到其他的线程释放了monitor，会隐式的触发一个通知，告知等待的线程进行抢monitor，如果等待的线程拿到了就可以继续执行 
+3、不过如果该线程拿到了monitor之后，发现条件还不具备，这个时候就可以调用对象的wait方法释放monitor，同时将该线程丢到wait-set中，此时进入到步骤2</p>
+<p>锁膨胀过程： 
+synchronized的monitor最开始采用的是操作系统的互斥锁来实现，这样每次获取临界区的资源的时候都会进行系统调用来实现加锁的过程，这个过程的开销是比较大的，因此后来对synchronized的加锁机制进行了优化，这就有了后来的锁膨胀机制。
+锁膨胀的过程是用到了对象头的markword，其膨胀的过程是：无锁 -&gt; 偏向锁 -&gt; 轻量级锁 -&gt; 重量级锁。 </p>
+<ul>
+<li>无锁：默认情况下新建一个锁对象还没有线程使用过的时候，此时对象头的标记是001，表示对象是无锁状态 </li>
+<li>偏向锁：此时线程A进来，发现对象无锁就会把对象头的信息进行更改，设置为101，并将A线程ID写入对象头，表示对象偏向A线程 </li>
+<li>轻量级锁：在A持有锁的期间，线程B尝试竞争锁，此时就B就会进入自旋，通过自旋将对象头中的A线程ID置换为B，这个过程是自旋的过程，如果B在竞争A的偏向锁的时候，A已经不活动或者A已经退出同步代码块，这个时候在撤销A的偏向锁的时候就会生成一个B的偏向锁，如果CAS自旋超过一定次数还没有成功后，就会由偏向锁向轻量级锁进行转换 </li>
+<li>重量级锁：在通过自旋来竞争锁而获取不到的时候，此时就会进入到重量级锁，此时对象的mark word也会变成一个monitor对象，从而继续通过entry-set和wait-set来提供锁的机制，此时再获取锁就需要通过操作系统层面上的互斥锁来实现。 </li>
+</ul>
+<p>综上：偏向锁不是锁，而是对象头的一个标记；轻量级锁是自旋机制，也就是获取不到锁的时候通过自旋再次获取；重量级锁是操作系统层面上的互斥锁。 </p>
+<h1 id="参考文章列表"><a href="#参考文章列表" class="headerlink" title="参考文章列表"></a>参考文章列表</h1><p><a href="https://blog.csdn.net/cold___play/article/details/104044508" target="_blank" rel="noopener">https://blog.csdn.net/cold___play/article/details/104044508</a> 
+<a href="https://kongzheng1993.github.io/2020/04/17/kongzheng1993-Java_Monitor/" target="_blank" rel="noopener">https://kongzheng1993.github.io/2020/04/17/kongzheng1993-Java_Monitor/</a> 
+<a href="https://oscimg.oschina.net/oscnet/2bcc8161c52eb100d2c7c4c96c70d3c5823.jpg" target="_blank" rel="noopener">https://oscimg.oschina.net/oscnet/2bcc8161c52eb100d2c7c4c96c70d3c5823.jpg</a> 
+<a href="http://3ms.huawei.com/km/blogs/details/12284271" target="_blank" rel="noopener">http://3ms.huawei.com/km/blogs/details/12284271</a> 
+<a href="https://cmsblogs.cn/?s=synchronized" target="_blank" rel="noopener">https://cmsblogs.cn/?s=synchronized</a> 
+<a href="https://www.jianshu.com/p/05d36bcb08a1" target="_blank" rel="noopener">https://www.jianshu.com/p/05d36bcb08a1</a></p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>

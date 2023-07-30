@@ -1,0 +1,329 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>linux 进程管理和调度 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2020-12-27">2020-12-27</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">linux 进程管理和调度</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>现代操作系统都是可以同时运行多个任务的，这里的任务我们称之为进程，可以划分的更细一点：即有线程（轻量级的进程），在操作系统的层面上
+进程和线程除了在内存空间上的区别之外并未其他区别，他们都是使用task_struct来进行描述的。既然
+同时运行多个进程，那么必然涉及的就是进程的管理、调度以及生命周期，最近查阅了相关的资料，姑且记之。</p>
+<h1 id="详解"><a href="#详解" class="headerlink" title="详解"></a>详解</h1><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>进程是正在运行的程序，需要一些资源来完成自己的任务，其中包含了几个容易混淆的概念：</p>
+<ul>
+<li><p>进程和程序： 程序通常成为text段（在内存管理中有说明，就是进程的一块内存空间），进程除了包含text段外，还需要
+程序计数器、cpu寄存器、堆、栈、数据段等用来存放运行时信息。</p>
+</li>
+<li><p>进程和线程： 在linux下，线程也叫做轻量级进程，也需要一个task_struct来描述，两者的区别是线程没有自己独立的内存空间
+，线程是共享父进程的内存空间的。这里我们提到的<strong>task_struct就是描述进程的结构体</strong>。</p>
+</li>
+</ul>
+<p>如下一张图来展示一下进程的内存空间分布：</p>
+<p><img src="//southrivers.github.io/2020/12/27/linux-进程管理和调度/jcnckj.png" alt></p>
+<p>上面是进程的资源的分布，不过这些资源需要一个结构来进行管理，管理这块内存空间的结构我们称之为<strong>进程控制块-也即是pcb（也可以叫做进程管理器）</strong>，
+pcb对应的数据结构就是上面的task_struct。进程控制块的主要作用如下：</p>
+<ul>
+<li>实现cpu的调度</li>
+<li>在一定的策略下分配资源给进程（这里的资源应该是包含cpu的，上面只是调度）</li>
+<li>实现进程同步和进程间的通讯</li>
+<li>实现避免死锁策略和保护机制</li>
+</ul>
+<h2 id="进程创建和结束"><a href="#进程创建和结束" class="headerlink" title="进程创建和结束"></a>进程创建和结束</h2><h3 id="进程的状态"><a href="#进程的状态" class="headerlink" title="进程的状态"></a>进程的状态</h3><p>上面介绍了进程的一些基本概念，接下来我们来看一下进程的生命周期，在进入正题之前我们先看一下进程的状态（<strong>这里的进程的状态指用户进程的状态，并非内核进程的状态，或者通俗点说就是用户态进程的状态，而非内核态</strong>）。</p>
+<ul>
+<li>task_running：进程出于运行（系统当前的进程）或者准备运行状态（等待系统将cpu分配给它，已经具备了除cpu之外的所有的资源，不会因为其他的资源而陷入等待）</li>
+<li>task_interruptable：等待某个条件如中断、信号、socket、信号量等资源（等待状态）</li>
+<li>task_uninterruptable：<strong>进程处于睡眠状态，信号无法唤醒，只有wakeup才可以唤醒</strong>，这种情况不是太好理解，需要结合上面
+提到的是用户进程而非内核进程来进行理解，用户进程出于睡眠状态，比如读写外设的过程中，进程陷入内核态，用户进程在这个状态的时候就不可以
+被打断，否则可能出现意想不到的问题</li>
+<li>task_stopped： 进程停止，进程收到响应的信号的时候就会进入该状态</li>
+<li>task_traced： 进程执行被调试器停止，调试程序使用ptrace系统调用来监控程序，<strong>没有研究过</strong></li>
+<li>exit_zombie： 俗称的墓碑状态，该进程已经结束，但是父进程还没有调用wait4或者waitpid返回当前进程的信息，此时<strong>进程描述符（task_struct）</strong>仍然存在</li>
+<li>exit_dead：进程的最终状态，父进程调用wait4或者waitpid后，系统正在删除该进程，对应的进程描述符也会被销毁</li>
+</ul>
+<h4 id="状态转换过程中的异常"><a href="#状态转换过程中的异常" class="headerlink" title="状态转换过程中的异常"></a>状态转换过程中的异常</h4><p>接下来说一下进程状态转换的时候会出现的一些异常：</p>
+<ul>
+<li>僵尸进程：当进程在父进程还没有调用wait4或者waitpid的时候就退出了，那么该进程对应的进程描述符就没有办法销毁，
+引发的最终的问题就是内存的泄漏，不过进程描述符本身消耗的内存也不是太大。这种情况下只可以通过重启机器来重制这些进程</li>
+<li>孤儿进程：当某个父进程退出的时候其子进程还在执行，这种情况下子进程会被init进程收养</li>
+</ul>
+<h4 id="进程状态转换示意图"><a href="#进程状态转换示意图" class="headerlink" title="进程状态转换示意图"></a>进程状态转换示意图</h4><p>最后来用一张图来描述一下进程状态转换：</p>
+<p><img src="//southrivers.github.io/2020/12/27/linux-进程管理和调度/jczt.png" alt></p>
+<h3 id="描述进程的结构体"><a href="#描述进程的结构体" class="headerlink" title="描述进程的结构体"></a>描述进程的结构体</h3><p>上面介绍了进程的状态之后，还需要介绍一下进程描述符，毕竟进程的创建就是生成这个进程描述符，每个进程的描述符包含了进程
+状态、地址空间、打开的文件、进程优先级等信息，如下我们看一下结构体：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br></pre></td><td class="code"><pre><span class="line">struct task_struct &#123;</span><br><span class="line">    volatile long state;    /* -1 unrunnable, 0 runnable, &gt;0 stopped */</span><br><span class="line">    void *stack;</span><br><span class="line">    atomic_t usage;</span><br><span class="line">    unsigned int flags; /* per process flags, defined below */</span><br><span class="line">    unsigned int ptrace;</span><br><span class="line"></span><br><span class="line">    int lock_depth;     /* BKL lock depth */</span><br><span class="line"></span><br><span class="line">#ifdef CONFIG_SMP</span><br><span class="line">#ifdef __ARCH_WANT_UNLOCKED_CTXSW</span><br><span class="line">    int oncpu;</span><br><span class="line">#endif</span><br><span class="line">#endif</span><br><span class="line"></span><br><span class="line">    int prio, static_prio, normal_prio;</span><br><span class="line">    unsigned int rt_priority;</span><br><span class="line">    const struct sched_class *sched_class;</span><br><span class="line">    struct sched_entity se;</span><br><span class="line">    struct sched_rt_entity rt;</span><br><span class="line"></span><br><span class="line">#ifdef CONFIG_PREEMPT_NOTIFIERS</span><br><span class="line">    /* list of struct preempt_notifier: */</span><br><span class="line">    struct hlist_head preempt_notifiers;</span><br><span class="line">#endif</span><br><span class="line"></span><br><span class="line">    /*</span><br><span class="line">     * fpu_counter contains the number of consecutive context switches</span><br><span class="line">     * that the FPU is used. If this is over a threshold, the lazy fpu</span><br><span class="line">     * saving becomes unlazy to save the trap. This is an unsigned char</span><br><span class="line">     * so that after 256 times the counter wraps and the behavior turns</span><br><span class="line">     * lazy again; this to deal with bursty apps that only use FPU for</span><br><span class="line">     * a short time</span><br><span class="line">     */</span><br><span class="line">    unsigned char fpu_counter;</span><br><span class="line">#ifdef CONFIG_BLK_DEV_IO_TRACE</span><br><span class="line">    unsigned int btrace_seq;</span><br><span class="line">#endif</span><br><span class="line"></span><br><span class="line">    unsigned int policy;</span><br><span class="line">    cpumask_t cpus_allowed;</span><br><span class="line"></span><br><span class="line">#ifdef CONFIG_TREE_PREEMPT_RCU</span><br><span class="line">    int rcu_read_lock_nesting;</span><br><span class="line">    char rcu_read_unlock_special;</span><br><span class="line">    struct rcu_node *rcu_blocked_node;</span><br><span class="line">    struct list_head rcu_node_entry;</span><br><span class="line">#endif /* #ifdef CONFIG_TREE_PREEMPT_RCU */</span><br><span class="line"></span><br><span class="line">#if defined(CONFIG_SCHEDSTATS) || defined(CONFIG_TASK_DELAY_ACCT)</span><br><span class="line">    struct sched_info sched_info;</span><br><span class="line">#endif</span><br><span class="line"></span><br><span class="line">    struct list_head tasks;</span><br><span class="line">    struct plist_node pushable_tasks;</span><br><span class="line"></span><br><span class="line">    struct mm_struct *mm, *active_mm;</span><br><span class="line"></span><br><span class="line">/* task state */</span><br><span class="line">    int exit_state;</span><br><span class="line">    int exit_code, exit_signal;</span><br><span class="line">    int pdeath_signal;  /*  The signal sent when the parent dies  */</span><br><span class="line">    unsigned int personality;</span><br><span class="line">    unsigned did_exec:1;</span><br><span class="line">    unsigned in_execve:1;   /* Tell the LSMs that the process is doing an</span><br><span class="line">                 * execve */</span><br><span class="line">    unsigned in_iowait:1;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    /* Revert to default priority/policy when forking */</span><br><span class="line">    unsigned sched_reset_on_fork:1;</span><br><span class="line"></span><br><span class="line">    pid_t pid;</span><br><span class="line">    pid_t tgid;</span><br><span class="line"></span><br><span class="line">#ifdef CONFIG_CC_STACKPROTECTOR</span><br><span class="line">    /* Canary value for the -fstack-protector gcc feature */</span><br><span class="line">    unsigned long stack_canary;</span><br><span class="line">#endif</span><br><span class="line"></span><br><span class="line">    /*</span><br><span class="line">     * pointers to (original) parent process, youngest child, younger sibling,</span><br><span class="line">     * older sibling, respectively.  (p-&gt;father can be replaced with</span><br><span class="line">     * p-&gt;real_parent-&gt;pid)</span><br><span class="line">     */</span><br><span class="line">    struct task_struct *real_parent; /* real parent process */</span><br><span class="line">    struct task_struct *parent; /* recipient of SIGCHLD, wait4() reports */</span><br><span class="line">    /*</span><br><span class="line">     * children/sibling forms the list of my natural children</span><br><span class="line">     */</span><br><span class="line">    struct list_head children;  /* list of my children */</span><br><span class="line">    struct list_head sibling;   /* linkage in my parent&apos;s children list */</span><br><span class="line">    struct task_struct *group_leader;   /* threadgroup leader */</span><br><span class="line"></span><br><span class="line">    /*</span><br><span class="line">     * ptraced is the list of tasks this task is using ptrace on.</span><br><span class="line">     * This includes both natural children and PTRACE_ATTACH targets.</span><br><span class="line">     * p-&gt;ptrace_entry is p&apos;s link on the p-&gt;parent-&gt;ptraced list.</span><br><span class="line">     */</span><br><span class="line">    struct list_head ptraced;</span><br><span class="line">    struct list_head ptrace_entry;</span><br><span class="line"></span><br><span class="line">    /*</span><br><span class="line">     * This is the tracer handle for the ptrace BTS extension.</span><br><span class="line">     * This field actually belongs to the ptracer task.</span><br><span class="line">     */</span><br><span class="line">    struct bts_context *bts;</span><br><span class="line"></span><br><span class="line">    /* PID/PID hash table linkage. */</span><br><span class="line">    struct pid_link pids[PIDTYPE_MAX];</span><br><span class="line">    struct list_head thread_group;</span><br><span class="line"></span><br><span class="line">    struct completion *vfork_done;      /* for vfork() */</span><br><span class="line">    int __user *set_child_tid;      /* CLONE_CHILD_SETTID */</span><br><span class="line">    int __user *clear_child_tid;        /* CLONE_CHILD_CLEARTID */</span><br><span class="line"></span><br><span class="line">    cputime_t utime, stime, utimescaled, stimescaled;</span><br><span class="line">    cputime_t gtime;</span><br><span class="line">    cputime_t prev_utime, prev_stime;</span><br><span class="line">    unsigned long nvcsw, nivcsw; /* context switch counts */</span><br><span class="line">    struct timespec start_time;         /* monotonic time */</span><br><span class="line">    struct timespec real_start_time;    /* boot based time */</span><br><span class="line">/* mm fault and swap info: this can arguably be seen as either mm-specific or thread-specific */</span><br><span class="line">    unsigned long min_flt, maj_flt;</span><br><span class="line"></span><br><span class="line">    struct task_cputime cputime_expires;</span><br><span class="line">    struct list_head cpu_timers[3];</span><br><span class="line"></span><br><span class="line">/* process credentials */</span><br><span class="line">    const struct cred *real_cred;   /* objective and real subjective task</span><br><span class="line">                     * credentials (COW) */</span><br><span class="line">    const struct cred *cred;    /* effective (overridable) subjective task</span><br><span class="line">                     * credentials (COW) */</span><br><span class="line">    struct mutex cred_guard_mutex;  /* guard against foreign influences on</span><br><span class="line">                     * credential calculations</span><br><span class="line">                     * (notably. ptrace) */</span><br><span class="line">    struct cred *replacement_session_keyring; /* for KEYCTL_SESSION_TO_PARENT */</span><br><span class="line"></span><br><span class="line">    char comm[TASK_COMM_LEN]; /* executable name excluding path</span><br><span class="line">                     - access with [gs]et_task_comm (which lock</span><br><span class="line">                       it with task_lock())</span><br><span class="line">                     - initialized normally by flush_old_exec */</span><br><span class="line">/* file system info */</span><br><span class="line">    int link_count, total_link_count;</span><br><span class="line">#ifdef CONFIG_SYSVIPC</span><br><span class="line">/* ipc stuff */</span><br><span class="line">    struct sysv_sem sysvsem;</span><br><span class="line">#endif</span><br><span class="line">#ifdef CONFIG_DETECT_HUNG_TASK</span><br><span class="line">/* hung task detection */</span><br><span class="line">    unsigned long last_switch_count;</span><br><span class="line">#endif</span><br><span class="line">/* CPU-specific state of this task */</span><br><span class="line">    struct thread_struct thread;</span><br><span class="line">/* filesystem information */</span><br><span class="line">    struct fs_struct *fs;</span><br><span class="line">/* open file information */</span><br><span class="line">    struct files_struct *files;</span><br><span class="line">/* namespaces */</span><br><span class="line">    struct nsproxy *nsproxy;</span><br><span class="line">/* signal handlers */</span><br><span class="line">    struct signal_struct *signal;</span><br><span class="line">    struct sighand_struct *sighand;</span><br><span class="line"></span><br><span class="line">    sigset_t blocked, real_blocked;</span><br><span class="line">    sigset_t saved_sigmask; /* restored if set_restore_sigmask() was used */</span><br><span class="line">    struct sigpending pending;</span><br><span class="line"></span><br><span class="line">    unsigned long sas_ss_sp;</span><br><span class="line">    size_t sas_ss_size;</span><br><span class="line">    int (*notifier)(void *priv);</span><br><span class="line">    void *notifier_data;</span><br><span class="line">    sigset_t *notifier_mask;</span><br><span class="line">    struct audit_context *audit_context;</span><br><span class="line">#ifdef CONFIG_AUDITSYSCALL</span><br><span class="line">    uid_t loginuid;</span><br><span class="line">    unsigned int sessionid;</span><br><span class="line">#endif</span><br><span class="line">    seccomp_t seccomp;</span><br><span class="line"></span><br><span class="line">/* Thread group tracking */</span><br><span class="line">    u32 parent_exec_id;</span><br><span class="line">    u32 self_exec_id;</span><br><span class="line">/* Protection of (de-)allocation: mm, files, fs, tty, keyrings, mems_allowed,</span><br><span class="line"> * mempolicy */</span><br><span class="line">    spinlock_t alloc_lock;</span><br><span class="line"></span><br><span class="line">#ifdef CONFIG_GENERIC_HARDIRQS</span><br><span class="line">    /* IRQ handler threads */</span><br><span class="line">    struct irqaction *irqaction;</span><br><span class="line">#endif</span><br><span class="line"></span><br><span class="line">    /* Protection of the PI data structures: */</span><br><span class="line">    spinlock_t pi_lock;</span><br><span class="line"></span><br><span class="line">#ifdef CONFIG_RT_MUTEXES</span><br><span class="line">    /* PI waiters blocked on a rt_mutex held by this task */</span><br><span class="line">    struct plist_head pi_waiters;</span><br><span class="line">    /* Deadlock detection and priority inheritance handling */</span><br><span class="line">    struct rt_mutex_waiter *pi_blocked_on;</span><br><span class="line">#endif</span><br><span class="line"></span><br><span class="line">#ifdef CONFIG_DEBUG_MUTEXES</span><br><span class="line">    /* mutex deadlock detection */</span><br><span class="line">    struct mutex_waiter *blocked_on;</span><br><span class="line">#endif</span><br><span class="line">#ifdef CONFIG_TRACE_IRQFLAGS</span><br><span class="line">    unsigned int irq_events;</span><br><span class="line">    int hardirqs_enabled;</span><br><span class="line">    unsigned long hardirq_enable_ip;</span><br><span class="line">    unsigned int hardirq_enable_event;</span><br><span class="line">    unsigned long hardirq_disable_ip;</span><br><span class="line">    unsigned int hardirq_disable_event;</span><br><span class="line">    int softirqs_enabled;</span><br><span class="line">    unsigned long softirq_disable_ip;</span><br><span class="line">    unsigned int softirq_disable_event;</span><br><span class="line">    unsigned long softirq_enable_ip;</span><br><span class="line">    unsigned int softirq_enable_event;</span><br><span class="line">    int hardirq_context;</span><br><span class="line">    int softirq_context;</span><br><span class="line">#endif</span><br><span class="line">#ifdef CONFIG_LOCKDEP</span><br><span class="line"># define MAX_LOCK_DEPTH 48UL</span><br><span class="line">    u64 curr_chain_key;</span><br><span class="line">    int lockdep_depth;</span><br><span class="line">    unsigned int lockdep_recursion;</span><br><span class="line">    struct held_lock held_locks[MAX_LOCK_DEPTH];</span><br><span class="line">    gfp_t lockdep_reclaim_gfp;</span><br><span class="line">#endif</span><br><span class="line"></span><br><span class="line">/* journalling filesystem info */</span><br><span class="line">    void *journal_info;</span><br><span class="line"></span><br><span class="line">/* stacked block device info */</span><br><span class="line">    struct bio *bio_list, **bio_tail;</span><br><span class="line"></span><br><span class="line">/* VM state */</span><br><span class="line">    struct reclaim_state *reclaim_state;</span><br><span class="line"></span><br><span class="line">    struct backing_dev_info *backing_dev_info;</span><br><span class="line"></span><br><span class="line">    struct io_context *io_context;</span><br><span class="line"></span><br><span class="line">    unsigned long ptrace_message;</span><br><span class="line">    siginfo_t *last_siginfo; /* For ptrace use.  */</span><br><span class="line">    struct task_io_accounting ioac;</span><br><span class="line">#if defined(CONFIG_TASK_XACCT)</span><br><span class="line">    u64 acct_rss_mem1;  /* accumulated rss usage */</span><br><span class="line">    u64 acct_vm_mem1;   /* accumulated virtual memory usage */</span><br><span class="line">    cputime_t acct_timexpd; /* stime + utime since last update */</span><br><span class="line">#endif</span><br><span class="line">#ifdef CONFIG_CPUSETS</span><br><span class="line">    nodemask_t mems_allowed;    /* Protected by alloc_lock */</span><br><span class="line">    int cpuset_mem_spread_rotor;</span><br><span class="line">#endif</span><br><span class="line">#ifdef CONFIG_CGROUPS</span><br><span class="line">    /* Control Group info protected by css_set_lock */</span><br><span class="line">    struct css_set *cgroups;</span><br><span class="line">    /* cg_list protected by css_set_lock and tsk-&gt;alloc_lock */</span><br><span class="line">    struct list_head cg_list;</span><br><span class="line">#endif</span><br><span class="line">#ifdef CONFIG_FUTEX</span><br><span class="line">    struct robust_list_head __user *robust_list;</span><br><span class="line">#ifdef CONFIG_COMPAT</span><br><span class="line">    struct compat_robust_list_head __user *compat_robust_list;</span><br><span class="line">#endif</span><br><span class="line">    struct list_head pi_state_list;</span><br><span class="line">    struct futex_pi_state *pi_state_cache;</span><br><span class="line">#endif</span><br><span class="line">#ifdef CONFIG_PERF_EVENTS</span><br><span class="line">    struct perf_event_context *perf_event_ctxp;</span><br><span class="line">    struct mutex perf_event_mutex;</span><br><span class="line">    struct list_head perf_event_list;</span><br><span class="line">#endif</span><br><span class="line">#ifdef CONFIG_NUMA</span><br><span class="line">    struct mempolicy *mempolicy;    /* Protected by alloc_lock */</span><br><span class="line">    short il_next;</span><br><span class="line">#endif</span><br><span class="line">    atomic_t fs_excl;   /* holding fs exclusive resources */</span><br><span class="line">    struct rcu_head rcu;</span><br><span class="line"></span><br><span class="line">    /*</span><br><span class="line">     * cache last used pipe for splice</span><br><span class="line">     */</span><br><span class="line">    struct pipe_inode_info *splice_pipe;</span><br><span class="line">#ifdef  CONFIG_TASK_DELAY_ACCT</span><br><span class="line">    struct task_delay_info *delays;</span><br><span class="line">#endif</span><br><span class="line">#ifdef CONFIG_FAULT_INJECTION</span><br><span class="line">    int make_it_fail;</span><br><span class="line">#endif</span><br><span class="line">    struct prop_local_single dirties;</span><br><span class="line">#ifdef CONFIG_LATENCYTOP</span><br><span class="line">    int latency_record_count;</span><br><span class="line">    struct latency_record latency_record[LT_SAVECOUNT];</span><br><span class="line">#endif</span><br><span class="line">    /*</span><br><span class="line">     * time slack values; these are used to round up poll() and</span><br><span class="line">     * select() etc timeout values. These are in nanoseconds.</span><br><span class="line">     */</span><br><span class="line">    unsigned long timer_slack_ns;</span><br><span class="line">    unsigned long default_timer_slack_ns;</span><br><span class="line"></span><br><span class="line">    struct list_head    *scm_work_list;</span><br><span class="line">#ifdef CONFIG_FUNCTION_GRAPH_TRACER</span><br><span class="line">    /* Index of current stored adress in ret_stack */</span><br><span class="line">    int curr_ret_stack;</span><br><span class="line">    /* Stack of return addresses for return function tracing */</span><br><span class="line">    struct ftrace_ret_stack *ret_stack;</span><br><span class="line">    /* time stamp for last schedule */</span><br><span class="line">    unsigned long long ftrace_timestamp;</span><br><span class="line">    /*</span><br><span class="line">     * Number of functions that haven&apos;t been traced</span><br><span class="line">     * because of depth overrun.</span><br><span class="line">     */</span><br><span class="line">    atomic_t trace_overrun;</span><br><span class="line">    /* Pause for the tracing */</span><br><span class="line">    atomic_t tracing_graph_pause;</span><br><span class="line">#endif</span><br><span class="line">#ifdef CONFIG_TRACING</span><br><span class="line">    /* state flags for use by tracers */</span><br><span class="line">    unsigned long trace;</span><br><span class="line">    /* bitmask of trace recursion */</span><br><span class="line">    unsigned long trace_recursion;</span><br><span class="line">#endif /* CONFIG_TRACING */</span><br><span class="line">    unsigned long stack_start;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>有点长，这也是从其他地方拷贝过来的。里面大致包含了以下几种信息：</p>
+<ul>
+<li>标识符：描述本进程的唯一标识符，用来区别其他进程</li>
+<li>状态：任务状态，推出代码，退出信号等</li>
+<li>优先级：相对于其他进程的优先级</li>
+<li>程序计数器：程序中即将被执行的下一条指令的地址</li>
+<li>内存指针：包括程序代码和进程相关数据的指针，还有和其他进程共享的内存块的指针</li>
+<li>上下文数据：进程执行时处理器的寄存器中的数据</li>
+<li>I/O状态信息：包括显示的I/O请求，分配的进程I/O设备和进程使用的文件列表</li>
+<li>记账信息：可能包括处理器时间总和，使用的时钟总和，时间限制，记帐号等</li>
+</ul>
+<h3 id="进程结构体内存分布"><a href="#进程结构体内存分布" class="headerlink" title="进程结构体内存分布"></a>进程结构体内存分布</h3><p>由于下文会涉及进程调度相关的内容，因此这里强调以下，task_struct中同样包含了进程队列指针，
+所有进程均有各自的PCB。且各个PCB会串在一起，形成一个双向链表。其next_task和prev_task就表示上一个或下一个PCB，即前后指针。进程链表的头和尾都是0号进程。
+对应的指针如<em>next_task，</em>prev_task，当然还有更多的指针，接下来我们用一张图来演示一下这个结构：</p>
+<p><img src="//southrivers.github.io/2020/12/27/linux-进程管理和调度/task_struct.png" alt></p>
+<p>进程对应的结构体如上所示，这种结构体被thread_info所指向，下图描述了thread_info、进程内核栈、task_struct之间的关系：</p>
+<p><img src="//southrivers.github.io/2020/12/27/linux-进程管理和调度/linux_p_stck.png" alt></p>
+<p>这里需要说明一下，内核会给每个进程分配8k的内存，用来存储thread_info结构和内核栈，<strong>内核栈</strong>是由于进程
+在内核态运行的时候需要自己的堆栈来保存一些变量，这个栈不同于用户态进程所用的栈。
+另外thread_info是由于针对不同的平台，我们访问的方式不尽相同，thread_info封装了通用的逻辑来访问task_struct</p>
+<p>上面说明了进程相关的结构体，值得注意的是在上图中其实还包含一个esp指针，该指针是cpu栈的指针，用来存放栈顶单元的地址。这样我们就
+可以将进程在cpu上调度的整体流程给串起来了：esp指针 -&gt; thread_info -&gt; task_struct -&gt; 进程运行时信息（包含调度等）
+，至此就可以通过时钟中断定期去驱动对应的进程执行。</p>
+<h3 id="进程调度队列相关"><a href="#进程调度队列相关" class="headerlink" title="进程调度队列相关"></a>进程调度队列相关</h3><p>进程调度还涉及的一个概念就是队列了，当下的计算机一般都是多cpu、多核，每个cpu都对应了<strong>运行队列、等待队列</strong>：</p>
+<ul>
+<li>运行队列：当调度新的进程在cpu上运行的时候，内核只会从task_running队列上取，内核
+中建立了多个可运行进程链表（也就是说一个cpu对应了多个链表），每种优先级的进程对应了一个链表，根据进程优先级
+划分的话，大概可以分为以下三种：<ul>
+<li>实时进程队列（0-99）</li>
+<li>交互进程</li>
+<li>批处理进程（后台进程）</li>
+</ul>
+</li>
+<li>等待队列： 等待队列在内核中有很多的用处，如中断处理、进程同步、定时任务。</li>
+</ul>
+<p>接下来描述以下进程创建的关系，进程创建子进程的时候会出现父子关系，当一个进程创建多个进程的时候，被创建的进程之间就会
+产生兄弟关系。进程0（内核初始化的时候捏造出来的init_task，名字为swapper）和进程1（通过 kernel_thread创建
+出，最终会调用exec(/sbin/init)）是内核创建的，其中进程1是所有进程的祖先。</p>
+<p>task_struct中包含的real_parent、parent、children、sibling就是用来描述进程中之间的这种关系，需要说明的是real_parent和
+parent大部分情况下都是相同的，只有进程在调试的时候parent会指向调试进程的task_struct。</p>
+<h3 id="进程的创建"><a href="#进程的创建" class="headerlink" title="进程的创建"></a>进程的创建</h3><p>前面铺垫了这么多就是为了引出进程的创建，一般情况下子进程在创建的时候是会复制父进程的所有的资源的，但是拷贝父进程的整个地址空间
+其实是一个非常缓慢的过程，因此在实际的情况中存在一些优化技巧：</p>
+<ul>
+<li>写时复制（copy on write）：父子进程共享读的页面，两者中任一进程尝试写一个物理页面的时候，内核就把这个页的内容拷贝到一个新的物理页，并
+把这个新的页面分配给这个写的进程</li>
+<li>轻量级进程：这种情况允许父子进程共享很多内核数据结构，如页表、打开的文件表等信息</li>
+</ul>
+<p>上面是进程在创建完成之后的一些优化的技巧，不过真正的创建是需要一系列的系统调用完成的，具体过程如下：</p>
+<ul>
+<li>fork： fork其实只是一个统称，作用就是复制父进程的结构，真实的情况包含以下几种：<ul>
+<li>clone：这种情况可以将资源选择性的复制给子进程，而没有复制的数据结构则通过指针的复制让子进程共享，极端情况下会创建出一个<strong>线程</strong>（不复制任何资源
+只通过指针进行共享）</li>
+<li>fork： 父进程的所有资源都复制给子进程，区别上面的clone，fork是没有参数的，毕竟不给选择复制的机会</li>
+<li>vfork： <del>与fork的作用相同，也是不带参数的。不过vfork不会拷贝父进程的页面表</del>，出task_struct和堆栈之外，均通过指针进行遗传，一次vfork出来的是
+线程而非进程，这是不传参数的另一种极端</li>
+</ul>
+</li>
+<li>exec： 这个时候子进程会加载真正的程序并运行</li>
+</ul>
+<p>上面提到的fork的主体是copy_process，执行完copy_process之后，子进程开始运行，copy_process对应的功能如下：</p>
+<ul>
+<li>调用dup_task_struct，<strong>创建一个新的内核栈、新进程的thread_info、task_struct结构体，结构体中的成员变量
+的值和当前进程的相同，此时父子进程的描述符是相同的</strong></li>
+<li>检查子进程是否超过当前用户资源限制</li>
+<li><strong>此时需要将子进程和父进程区别开来，进程描述符成员变量将会被清除，并设置初始值</strong>，此时子进程处于task_uninterruptible，确保子进程
+不会被立即执行（毕竟还有初始化的工作没有完成）</li>
+<li>调用copy_files来更新task_struct中的flags：pf_forknoexec：表示进程还没有调用exec等</li>
+<li>调用get_pid分配一个pid给子进程</li>
+<li>根据clone的标志，copy_progress共享或者复制打开的文件、文件系统信息、信号处理方式、命名空间以及进程地址空间</li>
+<li>接下来将剩余的时间片在父子进程之间进行平分</li>
+<li>最后copy_progress执行完成之后就将子进程的指针返回给调用者，毕竟父子进程之间是存在一个挂载的关系：也即是父进程中存放了一个指向子进程的指针</li>
+</ul>
+<p>上面就是进程创建的详细流程，在copy_progress成功返回之后，wake_up_new_task会将新创建的进程放到当前cpu的运行队列上面，这样子进程
+就可以被调度执行了。在子进程创建完成后父进程可以选择退出、分开运行或者等待子进程运行结束在运行。</p>
+<h2 id="进程调度"><a href="#进程调度" class="headerlink" title="进程调度"></a>进程调度</h2><h3 id="调度时机"><a href="#调度时机" class="headerlink" title="调度时机"></a>调度时机</h3><ul>
+<li>进程状态转换的时候：进程进入sleep、exit等函数进行状态转换，这些函数会主动调用调度程序进行进程调度</li>
+<li>当前进程的时间片用完：进程的时间片是由时钟中断来更新的</li>
+<li>进程从中断、异常、系统调用返回到用户态的时候：进程在返回到用户态的时候都会调用ret_from_sys_call，这个函数会
+主动调用调度程序进行进程的调度，原因是由于状态转换需要花一定的时间，因此，在返回到用户态前可以把内核态该处理的事情处理完</li>
+</ul>
+<p>具体的调度过程就是采用一定的策略从cpu的runqueue中选择一个进程来运行，其中进程调度器会涉及的函数如下：</p>
+<ul>
+<li>scheduler_tick：保持当前进程的time_slice为最新</li>
+<li>try_to_wake_up：唤醒一个睡眠的进程</li>
+<li>recalc_task_prio：更新进程的动态优先级</li>
+<li>schedule：选择一个新的进程来运行</li>
+<li>load_balance：使多处理器系统中的runqueue尽量平衡</li>
+</ul>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>到此大概完成了进程的基本分析，参考文章： <a href="https://www.cnblogs.com/cuckoo-/p/10966158.html" target="_blank" rel="noopener">https://www.cnblogs.com/cuckoo-/p/10966158.html</a></p>
+<!-- 可以好好看一下内核线程和进程有什么关系，进程是否对应了多个内核线程？？？？？ -->
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE HTML>
+<html class="no-js" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--[if lte IE 9]>
+<meta http-equiv="refresh" content="0;url=http://southrivers.github.io/warn.html">
+<![endif]-->
+<meta charset="utf-8">
+<meta http-equiv="X-DNS-Prefetch-Control" content="on">
+<link rel="dns-prefetch" href="http://southrivers.github.io">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="prefetch" href="http://southrivers.github.io">
+<link rel="prefetch" href="//www.google-analytics.com">
+
+
+<link rel="prerender" href="http://southrivers.github.io">
+
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+<meta http-equiv="mobile-agent" content="format=html5; url=http://southrivers.github.io">
+<meta name="author" content="John Doe">
+<link rel="stylesheet" href="/css/JSimple.css">
+
+<link rel="shortcut icon" href="/images/favicon.png">
+
+
+<title>tcp/ip详解 - 离亭燕</title>
+
+<meta name="keywords" content>
+
+<meta name="description " content>
+
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            tex2jax: {
+                inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+                processEscapes: true
+            }
+        });
+    </script>
+
+
+    
+
+    
+
+</head>
+<body>
+<div id="nav">
+    <nav class="nav-menu">
+        <a class="site-name current" href="/" title="夏">夏</a>
+        <a class="site-index current" href="/"><i class="fa fa-home"></i><span>首页</span></a>
+        <a href="/archives" title="归档"><i class="fa fa-archives"></i><span>归档</span></a>
+
+        <!-- custom single page of menus -->
+        
+    </nav>
+</div>
+
+<div class="nav-user">
+    <a class="btn-search" href="#"><i class="fa fa-search"></i></a>
+    <a class="btn-read-mode" href="#"><i class="fa fa-sun-o"></i></a>
+    <a class="btn-sns-qr" href="javascript:"><i class="fa fa-telegram"></i></a>
+</div>
+
+<div id="wrapper" class="clearfix">
+    <div id="body">
+        <div class="main" id="main">
+            <div id="cover">
+    <div class="cover-img"></div>
+    <div class="cover-info">
+        
+        <h1 class="cover-siteName">血刀老祖</h1>
+        <h3 class="cover-siteTitle">码个蛋</h3>
+        <p class="cover-siteDesc">东门黄犬</p>
+        <div class="cover-sns">
+            
+
+        </div>
+    </div>
+</div>
+
+            <div class="page-title">
+    <ul>
+        <li><a href="/">最近</a></li>
+        
+
+        
+        <li class="page-search">
+    <form id="search" class="search-form">
+        <input type="text" readonly="readonly" id="local-search-input-tip" placeholder="读物检索~">
+        <button type="button" disabled="disabled" class="search-form-submit"><i class="fa fa-search"></i></button>
+    </form>
+</li>
+
+    </ul>
+</div>
+<div class="main-inner">
+    <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+        <div class="post-header">
+            <div class="post-author clearfix">
+                <a class="avatar fleft" href="http://southrivers.github.io" target="_blank">
+                    <img width="48" src="/images/favicon.png" alt="avatar">
+                </a>
+                <p><span class="label">author</span>
+                    <a href="http://southrivers.github.io" target="_blank">原站</a>
+                    <span title="last_edited&nbsp;2019-10-08">2019-10-08</span>
+                </p>
+                <p>码个蛋️️</p>
+            </div>
+            <h2 class="post-title">TCP/IP详解</h2>
+
+        </div>
+        <div class="post-content markdown-body">
+            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近服务端总是会出现一些CLOSE_WAIT的问题，因此抽时间了解并整理了TCP相关的知识点，说是详解其实也并不是，
+仅仅把一些关键的东西列出来吧。</p>
+<h1 id="TCP详解"><a href="#TCP详解" class="headerlink" title="TCP详解"></a>TCP详解</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>TCP属于传输层的协议，提供面向连接的、端到端可靠的包传输。</p>
+<!-- ## 数据报结构-->
+
+<h2 id="三次握手"><a href="#三次握手" class="headerlink" title="三次握手"></a>三次握手</h2><p><img src="//southrivers.github.io/2019/10/08/TCP-IP详解/%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B.png" alt></p>
+<ul>
+<li>客户端发送一个SYN（n）包到服务端，同时客户端进入SYN_SENT状态，等待服务端的应答</li>
+<li>服务端收到客户端的SYN包之后，必须确认ACK（n+1），并发出一个SYN（m）的包，此时服务器进入SYN_RECV状态</li>
+<li>客户端收到了服务器的SYN+ACK包之后，向服务发送确认报文ACK（m+1），此时客户端和服务端进入到ESTABLISHED的状态</li>
+</ul>
+<h2 id="四次挥手"><a href="#四次挥手" class="headerlink" title="四次挥手"></a>四次挥手</h2><p><img src="//southrivers.github.io/2019/10/08/TCP-IP详解/%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B.png" alt></p>
+<ul>
+<li>客户端发送释放连接的报文，并停止发送数据，此时客户端进入FIN_WAIT_1，等待服务端的确认</li>
+<li>服务端收到客户端的报文之后，会立即回复客户端收到报文了，同时进入CLOSE_WAIT的状态</li>
+<li>客户端收到服务端确认的报文之后，会立即进入FIN_WAIT_2的状态，由于服务端可能还有没有处理完的数据，因此客户端并不会立即回复客户端（这也是为什么需要4次挥手的原因）</li>
+<li>服务端将最后的数据处理并发送完之后，就会向客户端发送一个FIN包，此时服务端进入LAST_ACK的状态，同时客户端结束FIN_WAIT_2状态进入TIME_WAIT状态</li>
+<li>客户端在收到服务端的报文之后，会立即回一个ACK的报文，用于确定已经收到服务端要求结束的报文，同时进入TIME_WAIT状态</li>
+<li>服务端收到ACK的报文之后会立即终止，客户端在等待2MSL之后也会终止（之所以等待2MSL，是因为断开连接之后可能会收到迟到的报文）</li>
+</ul>
+<h2 id="拥塞避免"><a href="#拥塞避免" class="headerlink" title="拥塞避免"></a>拥塞避免</h2><p>拥塞避免和流量控制是两种不同的语义，流量控制是点对点的，由接收方通过背压机制控制发送方的速率，
+拥塞避免算法是考虑整个网络的承载能力，采用一定的机制防止向网络注入过多的流量。</p>
+<p>TCP拥塞避免算法：</p>
+<ul>
+<li>慢开始：发送方拥塞窗口设置为1，每次收到确认报文之后将拥塞窗口提升为原来的2倍，直到拥塞窗口到达指定
+的阈值，这个时候就进入了拥塞避免的阶段</li>
+<li>拥塞避免：该阶段是在拥塞窗口到达了指定的阈值之后，后续为避免网络拥塞将之前指数级别调整拥塞窗口的方式
+调整为线性调整，每次只增大一个报文长度，这种阶段持续到无法接受到响应报文的出现，就会将阈值调整为当前拥塞
+窗口的一般，并重新开始慢开始的流程</li>
+<li>快重传：接收方在接收到乱序报文之后，连续三次给发送方发送了同一个报文的确认报文，此时发送方不会等到重传
+计时器超时而是直接再次给接收方发送下一个报文</li>
+<li>快恢复：这个过程是对慢开始的一种优化，在慢开始的流程中，确认报文在出现拥塞的时候流量是直接掉0，这里的
+快恢复是流量在出现拥塞的时候将拥塞窗口降为原来的一半（此时阈值也是原来的一半），这样就直接进入了拥塞避免的
+阶段，不再是慢开始阶段。</li>
+</ul>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p><strong>上面的状态可以反过来进行记忆：SYN_SENT 可以极为SENT_SYN，CLOSE_WAIT可以记为WAIT_CLOSE等等，这样会比较方便</strong></p>
+
+            
+                
+
+            
+        </div>
+        <div class="post-tool">
+            <a class="btn-thumbs-up" href="javascript:void(0);" data-cid="52" title="95">
+                <i class="fa fa-thumbs-up" aria-hidden="true"></i> 打赏
+            </a>
+        </div>
+        
+        <div class="post-tags">tags：
+            
+        </div>
+        
+    </article>
+    
+        <p style="text-align: center">本文代表个人观点，内容仅供参考</p>
+    
+    
+    
+
+</div>
+<script src="/js/busuanzi.pure.mini.js"></script>
+
+
+        </div><!-- end #main-->
+    </div><!-- end #body -->
+    <footer class="footer">
+    <div class="footer-inner" style="text-align: center">
+
+    </div>
+</footer>
+<script src="/js/SimpleCore.js"></script>
+
+</div>
+<!-- search pop -->
+<div class="popup search-popup local-search-popup">
+    <div class="local-search-header clearfix">
+        <span class="search-icon">
+            <i class="fa fa-search"></i>
+        </span>
+        <span class="popup-btn-close">
+            <i class="fa fa-times-circle"></i>
+        </span>
+        <div class="local-search-input-wrapper">
+            <input id="local-search-input" spellcheck="false" type="text" autocomplete="off" placeholder="请输入查询关键词">
+        </div>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+<div class="fixed-btn">
+    <a class="btn-gotop" href="javascript:"> <i class="fa fa-angle-up"></i></a>
+</div>
+<script>
+    $(function () {
+        var jsi_config = {
+            buildingTime: '01/20/2018',
+            current: $('.post-tags').length > 0 ? 'post' : 'archive',
+            snsQRCode: '/images/sns-qrcode.png',
+            donateImg: '/images/donate-qr.png',
+            localSearch: { dbPath: '' },
+            readMode: 'day'
+        };
+        
+            jsi_config.localSearch = {
+                dbPath: '/search.xml',
+                trigger: 'auto',
+                topN: '1',
+                unescape: 'false'
+            }
+        
+        SimpleCore.init(jsi_config);
+        
+    });
+</script>
+</body>
+</html>
